@@ -12,6 +12,7 @@ on:
       - "examples/public_rc_fiber_frame_explicit_layers.json"
       - "tests/test_rc_explicit_steel_input.py"
       - "tests/frontend/rc_lifecycle*.py"
+      - "tests/frontend/rc_authoring_http_fixture.py"
       - "tests/frontend/rc_corotational_review_snapshot.py"
       - "tests/frontend/rc-corotational-report-*.spec.ts"
       - "tests/test_rc_corotational_report*.py"
@@ -60,6 +61,7 @@ on:
       - "examples/public_rc_fiber_frame_explicit_layers.json"
       - "tests/test_rc_explicit_steel_input.py"
       - "tests/frontend/rc_lifecycle*.py"
+      - "tests/frontend/rc_authoring_http_fixture.py"
       - "tests/frontend/rc_corotational_review_snapshot.py"
       - "tests/frontend/rc-corotational-report-*.spec.ts"
       - "tests/test_rc_corotational_report*.py"
@@ -137,6 +139,7 @@ jobs:
           tests/test_structure_viewer_module_boundaries.py
           tests/test_verify_quality_gate_contract.py
           tests/frontend/rc_lifecycle_http_fixture.py
+          tests/frontend/rc_authoring_http_fixture.py
           tests/frontend/rc_lifecycle_review_snapshot.py
           tests/frontend/rc_corotational_review_snapshot.py
           src/structural_analysis/execution/rc_corotational_report.py

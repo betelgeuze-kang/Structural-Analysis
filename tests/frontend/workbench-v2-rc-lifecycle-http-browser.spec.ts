@@ -42,10 +42,10 @@ class Driver {
   sequence = 0
   ended = false
   protocolHealthy = true
-  constructor(workspace: string, managed = false) {
+  constructor(workspace: string, managed = false, fixture = 'rc_lifecycle_http_fixture.py') {
     // This separate hosted lane intentionally retains setup-python's PATH.
     // The normal sanitized frontend runner is unchanged and never starts Python.
-    this.child = spawn('python', ['-B', 'tests/frontend/rc_lifecycle_http_fixture.py', 'driver', '--workspace', workspace, ...(managed ? ['--managed'] : [])], {
+    this.child = spawn('python', ['-B', `tests/frontend/${fixture}`, 'driver', '--workspace', workspace, ...(managed ? ['--managed'] : [])], {
       env: { ...process.env, PYTHONPATH: resolve('src'), OPENBLAS_NUM_THREADS: '1' },
       stdio: ['pipe', 'pipe', 'pipe'],
     })
@@ -126,6 +126,106 @@ async function verifiedReview(page: Page, workerUrls: string[]) {
   // context that renders a result. No injected reviewer can satisfy this alone.
   expect(workerUrls.some(url => /\/assets\/rcJobReview\.worker[^/]*\.js(?:\?.*)?$/.test(url))).toBe(true)
 }
+
+test('actual authored designs compare real core outputs and a failed input becomes an explicitly changed new job', async ({ browser }, testInfo) => {
+  test.setTimeout(240000)
+  const workspace = await mkdtemp(join(tmpdir(), 'structural-rc-browser-'))
+  const driver = new Driver(workspace, false, 'rc_authoring_http_fixture.py')
+  const contexts: BrowserContext[] = []
+  const evidence: Record<string, unknown> = { scope: 'bounded actual core software integration; no physical validation', completed: false }
+  try {
+    const ready = await driver.read<{ ready: boolean; requests: Record<string, any>; credentials: Credentials }>(20000)
+    expect(ready.ready).toBe(true)
+    const server = await driver.command<Server>('start_http')
+    const view = await freshPage(browser, ready.credentials, contexts, evidence)
+    await view.page.goto(`${server.origin}/#/workbench-v2`)
+    await view.page.getByText('Submit a new RC input', { exact: true }).click()
+    await view.page.getByLabel('Typed RC request JSON', { exact: true }).fill(JSON.stringify(ready.requests.baseline))
+    const editor = view.page.locator('[data-rc-model-editor]')
+    await expect(editor.locator('[data-rc-preview-node]')).toHaveCount(2)
+    const scenarios = view.page.locator('[data-rc-scenario-comparison]')
+    await scenarios.getByLabel('Scenario name', { exact: true }).fill('Baseline')
+    await scenarios.getByRole('button', { name: 'Capture current design', exact: true }).click()
+    // Change a physical section through the real editor, then explicitly apply
+    // before capture. No HTTP submission occurs during authoring.
+    await editor.getByLabel('case_id', { exact: true }).fill('authoring-wider')
+    await editor.getByText('Sections (1)', { exact: true }).click()
+    await editor.getByLabel('width_m', { exact: true }).fill(String(ready.requests.wider.model.sections[0].width_m))
+    await expect(scenarios.getByRole('button', { name: 'Capture current design', exact: true })).toBeDisabled()
+    await editor.getByRole('button', { name: 'Apply structured model to draft', exact: true }).click()
+    await expect(view.page.getByLabel('Typed RC request JSON', { exact: true })).toHaveValue(JSON.stringify(ready.requests.wider, null, 2))
+    await scenarios.getByLabel('Scenario name', { exact: true }).fill('Wider')
+    await scenarios.getByRole('button', { name: 'Capture current design', exact: true }).click()
+    await scenarios.getByRole('button', { name: 'Run captured designs', exact: true }).click()
+    await expect(scenarios.locator('[data-scenario-id]').nth(0)).toContainText(/job_[a-f0-9]{32}/)
+    const first = await driver.command<any>('execute_one', {}, 90000)
+    expect(first.job.status).toBe('succeeded')
+    await expect(scenarios.locator('[data-scenario-id]').nth(0)).toContainText('succeeded', { timeout: 90000 })
+    await expect(scenarios.locator('[data-scenario-id]').nth(1)).toContainText(/job_[a-f0-9]{32}/)
+    const second = await driver.command<any>('execute_one', {}, 90000)
+    expect(second.job.status).toBe('succeeded')
+    await expect(scenarios.locator('[data-scenario-id]').nth(1)).toContainText('succeeded', { timeout: 90000 })
+    await expect(scenarios.locator('[data-scenario-curve]')).toHaveCount(2)
+    await expect(scenarios.getByRole('table')).toContainText('member_force')
+    expect(view.workerUrls.some(url => /rcJobReview\.worker/.test(url))).toBe(true)
+    const downloaded = view.page.waitForEvent('download')
+    await scenarios.getByRole('button', { name: 'Export scenario JSON', exact: true }).click()
+    const exportPath = join(workspace, 'comparison.json')
+    await (await downloaded).saveAs(exportPath)
+    const exported = JSON.parse(await readFile(exportPath, 'utf8'))
+    expect(exported.scenarios.map((row: any) => row.status)).toEqual(['succeeded', 'succeeded'])
+    expect(exported.scenarios[0].summary.bindings.resultHash).toBe(first.job.result.content_hash)
+    expect(exported.scenarios[1].summary.bindings.resultHash).toBe(second.job.result.content_hash)
+    const left = new Map(exported.scenarios[0].summary.values.map((row: any) => [row.key, row.value]))
+    expect(exported.scenarios[1].summary.values.some((row: any) => row.value !== left.get(row.key))).toBe(true)
+    const screenshot = testInfo.outputPath('actual-design-comparison.png')
+    await scenarios.screenshot({ path: screenshot })
+    await testInfo.attach('actual-design-comparison.png', { path: screenshot, contentType: 'image/png' })
+    await view.page.getByLabel('Typed RC request JSON', { exact: true }).fill(JSON.stringify(ready.requests.failed))
+    await view.page.getByRole('button', { name: 'Submit RC analysis', exact: true }).click()
+    await expect(view.page.locator('[data-rc-project-link]')).toBeVisible()
+    const failed = await driver.command<any>('execute_one', {}, 90000)
+    expect(failed.job.status).toBe('failed')
+    await expect(view.page.locator('[data-job-status="failed"]')).toBeVisible({ timeout: 90000 })
+    const diagnostics = view.page.locator('[data-rc-diagnostics]')
+    await expect(diagnostics.getByRole('table')).toContainText('verification')
+    await diagnostics.getByRole('button', { name: 'Inspect invocation 1', exact: true }).click()
+    await expect(diagnostics.locator('[data-rc-invocation-detail]')).toContainText('Invocation 1')
+    await diagnostics.getByRole('button', { name: 'Copy failed input for a changed run', exact: true }).click()
+    await expect(view.page.getByRole('button', { name: 'Submit RC analysis', exact: true })).toBeDisabled()
+    await view.page.getByLabel('Typed RC request JSON', { exact: true }).fill(JSON.stringify(ready.requests.repaired))
+    await expect(view.page.locator('[data-rc-changed-run]')).toContainText('/execution_config/maximum_api_invocations')
+    await view.page.getByRole('button', { name: 'Submit RC analysis', exact: true }).click()
+    await expect(view.page.locator('[data-rc-changed-run]')).toContainText('New job:')
+    const repaired = await driver.command<any>('execute_one', {}, 90000)
+    expect(repaired.job.status).toBe('succeeded')
+    expect(repaired.job.job_id).not.toBe(failed.job.job_id)
+    await verifiedReview(view.page, view.workerUrls)
+    await view.page.getByText('Submit a new RC input', { exact: true }).click()
+    await expect(view.page.locator('[data-rc-changed-run]')).toContainText('current new job status: succeeded')
+    const retained = await driver.command<any>('inspect_job', { job_id: failed.job.job_id })
+    expect(retained.job.status).toBe('failed')
+    expect(retained.original_request).toEqual(ready.requests.failed)
+    expect(retained.original_request_hash).toBe(failed.job.request.content_hash)
+    evidence.completed = true
+    evidence.jobs = [first.job, second.job, failed.job, repaired.job]
+    evidence.workerProcesses = [first.process, second.process, failed.process, repaired.process]
+    expect((evidence.workerProcesses as any[]).every(process => process.reaped && process.returncode === 0)).toBe(true)
+    evidence.comparison = exported
+    const proof = testInfo.outputPath('authoring-scenario-diagnostics.json')
+    await writeFile(proof, JSON.stringify(evidence, null, 2))
+    await testInfo.attach('authoring-scenario-diagnostics.json', { path: proof, contentType: 'application/json' })
+  } finally {
+    try { for (const context of contexts) await context.close() }
+    finally { await driver.close() }
+    const output = testInfo.outputPath('authoring-driver-output.json')
+    await writeFile(output, JSON.stringify({ stdout: driver.stdout, stderr: driver.stderr, workspace }))
+    await testInfo.attach('authoring-driver-output', { path: output, contentType: 'application/json' })
+    // Keep the disposable test artifacts if any assertion failed.
+    if (evidence.completed) expect(driver.child.exitCode).toBe(0)
+    if (evidence.completed && driver.ended && driver.child.exitCode === 0) await rm(workspace, { recursive: true, force: true })
+  }
+})
 
 for (const { profile, isolated, managed } of [
   ...['cantilever', 'explicit-layers', 'pin-roller', 'pin-roller-layers', 'fixed-guided'].map(profile => ({ profile, isolated: false, managed: false })),

@@ -1,11 +1,14 @@
-import { validateRcJobArtifacts, type RcArtifacts, type RcObject, type RcQuantityReportSource } from './rcJobSchema'
+import { document, validateRcJobArtifacts, type RcArtifacts, type RcObject, type RcQuantityReportSource, type RcJobSummary } from './rcJobSchema'
 import { validateRcQuantityReport } from './rcQuantityReportSchema'
+import { fixedRcScenarioSummary } from './rcScenarioComparison'
+import type { WorkbenchJobView } from './jobSchema'
 
 let artifacts: RcArtifacts = {}
 let history: RcObject[] = []
 let initialized = false
 let quantitySource: RcQuantityReportSource | null = null
 const quantityBytes = new Map<string, Uint8Array>()
+let comparisonSource: { request: RcObject; job: WorkbenchJobView; summary: RcJobSummary } | null = null
 
 self.onmessage = async ({ data }) => {
   const { id, type } = data
@@ -16,6 +19,7 @@ self.onmessage = async ({ data }) => {
       artifacts = { ...data.artifacts, terminal: review.terminalBytes }
       history = review.history
       quantitySource = review.quantitySource
+      comparisonSource = { request: document(data.artifacts.request).value, job: data.job, summary: review.summary }
       initialized = true
       self.postMessage({ id, value: review.summary })
       return
@@ -45,7 +49,10 @@ self.onmessage = async ({ data }) => {
       }
       return
     }
-    if (type === 'epoch') {
+    if (type === 'comparisonSummary') {
+      if (!comparisonSource) throw new Error('rc_review_unavailable')
+      self.postMessage({ id, value: fixedRcScenarioSummary(comparisonSource.request, comparisonSource.job, comparisonSource.summary, history) })
+    } else if (type === 'epoch') {
       if (!Number.isInteger(data.index) || data.index < 0 || data.index >= history.length) throw new Error('rc_review_epoch_invalid')
       self.postMessage({ id, value: history[data.index] })
     } else if (type === 'material') {
@@ -63,7 +70,7 @@ self.onmessage = async ({ data }) => {
       self.postMessage({ id, value: new Blob([bytes], { type: 'application/json' }) })
     } else throw new Error('rc_review_operation_invalid')
   } catch (error) {
-    artifacts = {}; history = []; initialized = false; quantitySource = null; quantityBytes.clear()
+    artifacts = {}; history = []; initialized = false; quantitySource = null; quantityBytes.clear(); comparisonSource = null
     const message = error instanceof Error && /^rc_review_[a-z_]+$/.test(error.message)
       ? error.message : 'rc_review_contract_invalid'
     self.postMessage({ id, error: message })

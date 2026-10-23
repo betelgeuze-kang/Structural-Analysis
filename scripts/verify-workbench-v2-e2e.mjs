@@ -20,6 +20,9 @@ const specs = savedReportMode ? [
 ] : [
   'tests/frontend/workbench-v2-e2e.spec.ts',
   'tests/frontend/workbench-v2-rc-workspace.spec.ts',
+  'tests/frontend/rc-model-editor.spec.ts',
+  'tests/frontend/rc-scenario-comparison.spec.ts',
+  'tests/frontend/rc-job-diagnostics.spec.ts',
   'tests/frontend/workbench-v2-import-health.spec.ts',
   'tests/frontend/workbench-v2-unit-coordinate-guard.spec.ts',
   'tests/frontend/workbench-v2-live-provider-guard.spec.ts',

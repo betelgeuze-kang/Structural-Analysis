@@ -2,6 +2,7 @@ import { sha256Bytes } from './checksum'
 import { document, validateRcRequestProfile } from './rcJobSchema'
 import { parseRcCorotationalReport, type RcCorotationalReport, type RcCorotationalReportExpected } from './rcCorotationalReportSchema'
 import type { RcCorotationalReportSummary } from './rcCorotationalReportReview'
+import { corotationalRcScenarioSummary } from './rcScenarioComparison'
 
 let report: RcCorotationalReport | null = null
 let bytes: Uint8Array | null = null
@@ -49,7 +50,9 @@ self.onmessage = async ({ data }) => {
       } catch (error) { self.postMessage({ id, operationError: safe(error) }) }
       return
     }
-    if (type === 'state') {
+    if (type === 'comparisonSummary') {
+      self.postMessage({ id, value: corotationalRcScenarioSummary(expected.request, expected.job, report) })
+    } else if (type === 'state') {
       if (!Number.isSafeInteger(data.index) || data.index < 0 || data.index >= report.responses.length) throw new Error('rc_corotational_report_state_invalid')
       self.postMessage({ id, value: report.responses[data.index] })
     } else if (type === 'statePage') {

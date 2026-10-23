@@ -1,6 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactElement } from 'react'
 import { JobServicePanel } from './JobServicePanel'
 import { RcQuantityReportPanel } from './RcQuantityReportPanel'
+import { RcModelEditor } from './RcModelEditor'
+import { RcScenarioComparisonPanel } from './RcScenarioComparisonPanel'
+import { RcJobDiagnosticsPanel } from './RcJobDiagnosticsPanel'
+import { rcRequestChanges } from '../model/rcJobDiagnostics'
 import { loadWorkbenchJob, type JobLoadResult } from '../model/jobProvider'
 import { createJobWorkflowTransport, type JobAuthorizationProvider, type RcJobTransport } from '../model/jobTransport'
 import { loadRcJobRequest, refreshRcJob, resumeRcJob, submitRcJob, verifyRcSubmissionBinding, SUBMIT_MAX_BYTES } from '../model/rcWorkflowProvider'
@@ -21,7 +25,7 @@ export function rcWorkflowMessage(error: unknown, operation: 'read' | 'submit' |
   if (/^rc_(?:request|checkpoint|result|evidence|artifacts|corotational_report)_too_large$/.test(message)) return 'This saved result exceeds this workspace’s review size limit.'
   if (message === 'rc_review_budget_invalid') return 'This workspace’s review size limit is invalid. Contact the workspace administrator.'
   const status = /(?:http_|HTTP_|HTTP )([0-9]{3})/.exec(message)?.[1]
-  if (status === '401') return 'Authentication is unavailable. Reopen with the current account.'
+  if (status === '401' || status === '403') return 'Authentication is unavailable. Reopen with the current account.'
   if (status === '404') return 'This saved job or report is unavailable for the current account.'
   if (status === '409') return 'The saved source or submission key conflicts. Refresh the exact job before an explicit retry.'
   if (status === '400' || status === '413') return 'The input was rejected. Keep the draft and check its supported fields and size.'
@@ -33,7 +37,7 @@ export function rcWorkflowMessage(error: unknown, operation: 'read' | 'submit' |
 }
 export function rcWorkflowAuthorizationFailure(error: unknown): boolean {
   const message = error instanceof Error ? error.message : ''
-  return /authorization_|(?:http_|HTTP_)401/.test(message)
+  return /authorization_|(?:http_|HTTP_)(?:401|403)/.test(message)
 }
 export function rcProjectLink(jobId: string, reportId?: string): string {
   const url = new URL(location.pathname, location.origin)
@@ -87,6 +91,8 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
   const [requestedId, setRequestedId] = useState<string>()
   const [draft, setDraft] = useState('')
   const [draftValue, setDraftValue] = useState<Record<string, unknown> | null>(null)
+  const [editorDirty, setEditorDirty] = useState(false)
+  const [changedRun, setChangedRun] = useState<{ jobId: string; requestHash: string; tenantId: string | undefined; input: Record<string, unknown>; childId?: string; submitted?: Record<string, unknown> } | null>(null)
   const intent = useRef<{ bytes: Uint8Array; key: string; text: string } | null>(null)
   const [intentVersion, setIntentVersion] = useState(0)
   const [busy, setBusy] = useState(false)
@@ -113,6 +119,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
   function invalidate(error: unknown, operation: 'read' | 'submit' | 'resume' | 'save' = 'read'): void {
     setMessage(rcWorkflowMessage(error, operation))
     if (rcWorkflowAuthorizationFailure(error)) {
+      setChangedRun(null)
       generation.current++
       controllerRef.current?.abort()
       if (pollTimer.current) clearTimeout(pollTimer.current)
@@ -173,6 +180,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
             if (loaded.rcCorotationalReview) {
               const original = loaded.rcCorotationalReview
               const scoped: RcCorotationalReportReview = { ...original,
+                ...(original.comparisonSummary ? { comparisonSummary: () => guard(() => original.comparisonSummary!()) } : {}),
                 state: index => guard(() => original.state(index)),
                 statePage: (start, count) => guard(() => original.statePage(start, count)),
                 download: () => guard(() => original.download()),
@@ -183,6 +191,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
             if (loaded.rcReview) {
               const original = loaded.rcReview
               const scoped: RcJobReview = { ...original,
+                ...(original.comparisonSummary ? { comparisonSummary: () => guard(() => original.comparisonSummary!()) } : {}),
                 epoch: index => guard(() => original.epoch(index)),
                 material: (member, point, fiber) => guard(() => original.material(member, point, fiber)),
                 download: role => guard(() => original.download(role)),
@@ -244,7 +253,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
     } catch { /* The local draft is never granted stored-input authority. */ }
   }
   async function submit(): Promise<void> {
-    if (!current.transport || busy) return
+    if (!current.transport || busy || editorDirty) return
     const ownGeneration = generation.current
     fileGeneration.current++
     setBusy(true); setMessage('')
@@ -252,11 +261,14 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
       const bytes = new TextEncoder().encode(draft)
       if (!draftValue || bytes.byteLength === 0 || bytes.byteLength > SUBMIT_MAX_BYTES) throw new Error('rc_input_invalid')
       validateRcRequestProfile(draftValue)
+      if (changedRun && !changedRun.childId && changedRun.tenantId === current.transport.tenantId
+        && rcRequestChanges(changedRun.input, draftValue).changes.length === 0) throw new Error('rc_changed_run_requires_edit')
       if (!intent.current || intent.current.text !== draft) intent.current = { bytes, text: draft, key: `rc-ui-${crypto.randomUUID()}` }
       const job = await submitRcJob(current.transport, intent.current.bytes, intent.current.key)
       await verifyRcSubmissionBinding(current.transport, job, intent.current.bytes)
       await current.transport.verifyAuthorizationScope()
       if (generation.current !== ownGeneration) return
+      if (changedRun && !changedRun.childId && changedRun.tenantId === current.transport.tenantId) setChangedRun({ ...changedRun, childId: job.job_id, submitted: structuredClone(draftValue) })
       setRequestedId(job.job_id); setOpenId(job.job_id); setRefreshEpoch(v => v + 1)
     } catch (error) { if (generation.current === ownGeneration) invalidate(error, 'submit') }
     finally { if (generation.current === ownGeneration) setBusy(false) }
@@ -277,13 +289,29 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
     }
     finally { if (generation.current === ownGeneration) setBusy(false) }
   }
+  async function prepareChangedRun(): Promise<void> {
+    if (!current.transport || !current.input || current.load.job?.status !== 'failed' || busy) return
+    const own = generation.current
+    const transport = current.transport, input = current.input, job = current.load.job
+    try {
+      await transport.verifyAuthorizationScope()
+      if (generation.current !== own) return
+      const copied = structuredClone(input)
+      setChangedRun({ jobId: job.job_id, requestHash: job.request.content_hash, tenantId: transport.tenantId, input: copied })
+      replaceDraft(JSON.stringify(copied, null, 2))
+      setMessage('Failed input copied. Edit and apply the draft, review the changes below, then explicitly submit a new job.')
+    } catch (error) { if (generation.current === own) invalidate(error) }
+  }
+  const activeChangedRun = changedRun?.tenantId === current.transport?.tenantId ? changedRun : null
+  const requestDiff = activeChangedRun ? rcRequestChanges(activeChangedRun.input, activeChangedRun.submitted ?? draftValue) : null
   return <section className="wb2-panel" data-rc-workflow="project" aria-labelledby="wb2-rc-workflow-title">
     <h2 id="wb2-rc-workflow-title" className="wb2-panel__title">RC project workflow</h2>
     <p>Open one durable RC job or explicitly submit its complete typed input. Saved analysis and any supported report stay bound to that job.</p>
     <div className="wb2-actions"><label>Saved RC job ID <input aria-label="Saved RC job ID" value={openId} onChange={e => setOpenId(e.target.value)} maxLength={36} /></label>
       <button type="button" className="wb2-btn" disabled={!JOB_ID.test(openId) || busy} onClick={() => { setRequestedId(openId); setRefreshEpoch(v => v + 1) }}>Open saved RC job</button>
-      <button type="button" className="wb2-btn" disabled={busy} onClick={() => { setAuthEpoch(v => v + 1) }}>Refresh account and job</button></div>
-    <details><summary>Submit a new RC input</summary>
+      <button type="button" className="wb2-btn" disabled={busy} onClick={() => { setChangedRun(null); setAuthEpoch(v => v + 1) }}>Refresh account and job</button></div>
+    <details open={!!activeChangedRun && !activeChangedRun.childId}><summary>Submit a new RC input</summary>
+      <RcModelEditor value={draftValue} disabled={busy} onDirtyChange={setEditorDirty} onChange={value => replaceDraft(JSON.stringify(value, null, 2))} />
       <label>Typed RC request JSON <textarea aria-label="Typed RC request JSON" disabled={busy} rows={8} value={draft} onChange={e => replaceDraft(e.target.value)} style={{ display: 'block', width: '100%' }} /></label>
       <label>Choose RC request JSON file <input aria-label="Choose RC request JSON file" disabled={busy} type="file" accept="application/json,.json" onChange={async e => {
         const file = e.target.files?.[0]; if (!file) return
@@ -295,9 +323,19 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
         } catch { if (fileGeneration.current === ownFileGeneration) setMessage('The selected RC input could not be read.') }
       }} /></label>
       {draftValue ? <InputSummary value={draftValue} saved={false} /> : draft ? <p role="status">A complete supported JSON object is required.</p> : null}
-      <button type="button" className="wb2-btn" data-rc-submit-intent={intentVersion} disabled={!current.transport || !draftValue || busy} onClick={() => void submit()}>Submit RC analysis</button>
+      {activeChangedRun && requestDiff ? <section data-rc-changed-run><h3>Changed-run comparison</h3>
+        <p>Original failed job: <a href={rcProjectLink(activeChangedRun.jobId)}>{activeChangedRun.jobId}</a> · request <code>{activeChangedRun.requestHash}</code></p>
+        <p>{activeChangedRun.childId ? <>New job: <a href={rcProjectLink(activeChangedRun.childId)}>{activeChangedRun.childId}</a>. Original status: failed; current new job status: {current.load.job?.job_id === activeChangedRun.childId ? current.load.job.status : 'open the new job to verify'}.</> : 'Review each change before submitting a new job. A failed original has no verified final numerical result, so its numerical delta remains unavailable.'}</p>
+        <div style={{ overflowX: 'auto' }}><table className="wb2-table"><caption>Original input → {activeChangedRun.childId ? 'submitted new input' : 'local draft'}</caption><thead><tr><th>Path</th><th>Before</th><th>After</th></tr></thead><tbody>{requestDiff.changes.map(row => <tr key={row.path}><td><code>{row.path}</code></td><td>{row.before}</td><td>{row.after}</td></tr>)}</tbody></table></div>
+        {requestDiff.truncated ? <p>Change display limited to 200 rows. Review the complete JSON before submission.</p> : null}
+        <button type="button" className="wb2-btn" disabled={busy} onClick={() => setChangedRun(null)}>End changed-run comparison</button>
+      </section> : null}
+      {editorDirty ? <p role="status">Apply or undo the local model edits before submitting or capturing a design.</p> : null}
+      <button type="button" className="wb2-btn" data-rc-submit-intent={intentVersion} disabled={!current.transport || !draftValue || busy || editorDirty || (!!activeChangedRun && !activeChangedRun.childId && requestDiff?.changes.length === 0)} onClick={() => void submit()}>Submit RC analysis</button>
       <p className="wb2-muted">An uncertain submission retry retains the same input and submission key. Change the input to start a different submission.</p>
     </details>
+    <RcScenarioComparisonPanel key={`${collectionUrl}:${authEpoch}`} collectionUrl={collectionUrl} authorize={authorize} draft={editorDirty ? null : draftValue} draftText={draft}
+      onOpenJob={jobId => { setRequestedId(jobId); setOpenId(jobId); setRefreshEpoch(v => v + 1) }} />
     {message ? <p role="alert" data-rc-workflow-error>{message}</p> : null}
     {current.input ? <InputSummary value={current.input} saved /> : null}
     {current.load.job ? <p><a data-rc-project-link href={rcProjectLink(current.load.job.job_id)} target="_blank" rel="noopener">Reopen this RC project</a></p> : null}
@@ -308,6 +346,8 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
     <JobServicePanel key={`${key}:${current.load.job?.job_id}:${current.load.job?.attempt}`} loadStatus={current.load.status} job={current.load.job} errors={current.load.errors} artifactStatus={current.load.artifactStatus}
       engineeringResultIr={current.load.engineeringResultIr} rcReview={current.load.rcReview} rcCorotationalReview={current.load.rcCorotationalReview}
       expectedCorotationalReportId={current.load.job?.job_id === initialJobId || current.load.job?.job_id === configuredJob(collectionUrl, initialJobStatusUrl) ? initialReportId : undefined} />
+    {current.transport && current.load.job && current.input && terminal(current.load.job) ? <RcJobDiagnosticsPanel key={`${key}:${sourceKey(current.load.job)}`} transport={current.transport} job={current.load.job}
+      onAuthorizationFailure={invalidate} onPrepareChangedRun={() => void prepareChangedRun()} /> : null}
     {current.transport && current.load.job && current.load.rcReview && current.load.artifactStatus === 'verified' ?
       <RcQuantityReportPanel key={`${current.transport.tenantId}:${sourceKey(current.load.job)}`} transport={current.transport} job={current.load.job}
         review={current.load.rcReview} initialReportId={current.load.job.job_id === initialJobId || current.load.job.job_id === configuredJob(collectionUrl, initialJobStatusUrl) ? initialReportId : undefined}

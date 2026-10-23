@@ -126,6 +126,70 @@ for (const profile of ['v6', 'v7'] as const) test.describe(`Corotational report 
     expect(submission.headers['idempotency-key']).toMatch(/^rc-ui-/)
   })
 
+  test('compares a captured scenario through the real nodal reviewer worker and exports bound quantities', async ({ page }) => {
+    const workers: string[] = []; page.on('worker', worker => workers.push(worker.url()))
+    const calls = await setup(page, { mode: 'submit' })
+    await page.getByText('Submit a new RC input', { exact: true }).click()
+    await page.getByLabel('Typed RC request JSON', { exact: true }).fill(Buffer.from(snapshot.submitted_request_base64, 'base64').toString('utf8'))
+    const panel = page.locator('[data-rc-scenario-comparison]')
+    await panel.getByRole('button', { name: 'Capture current design', exact: true }).click()
+    expect(calls.filter(call => call.method === 'POST')).toHaveLength(0)
+    await panel.getByRole('button', { name: 'Run captured designs', exact: true }).click()
+    await expect(panel.locator('[data-scenario-id]')).toContainText('succeeded')
+    expect(workers.some(url => url.includes('rcCorotationalReportReview.worker'))).toBe(true)
+    await panel.getByText('Original bindings and recorded work', { exact: true }).click()
+    await expect(panel).toContainText('authenticated_saved_nodal_report')
+    await expect(panel).toContainText('Unavailable in the saved nodal report')
+    await expect(panel).toContainText(snapshot.request.source_revision)
+    await expect(panel).toContainText(snapshot.job.request.content_hash)
+    await expect(panel.getByRole('img', { name: 'Accepted control displacement versus load factor by scenario' })).toBeVisible()
+
+    const downloadEvent = page.waitForEvent('download')
+    await panel.getByRole('button', { name: 'Export scenario JSON', exact: true }).click()
+    const download = await downloadEvent, output = await download.path()
+    const exported = JSON.parse(readFileSync(output!, 'utf8'))
+    expect(exported.scenarios).toHaveLength(1)
+    const selected = exported.scenarios[0], summary = selected.summary
+    expect(selected.status).toBe('succeeded')
+    expect(summary.reviewKind).toBe('authenticated_saved_nodal_report')
+    expect(summary.sourceRevision).toBe(snapshot.request.source_revision)
+    expect(summary.bindings).toEqual({
+      jobId: snapshot.job.job_id, requestHash: snapshot.job.request.content_hash,
+      resultHash: snapshot.job.result.content_hash, evidenceHash: snapshot.job.evidence.content_hash,
+      checkpointHash: snapshot.job.checkpoint?.content_hash ?? null, revision: snapshot.job.revision,
+      terminalEventHash: snapshot.job.terminal_event_hash,
+    })
+    const report = JSON.parse(reportBytes.toString('utf8')), final = report.responses[report.responses.length - 1]
+    expect(summary.targetsM).toEqual(report.declarations.targets_m)
+    expect(summary.targetIndex).toBe(report.declarations.targets_m.length - 1)
+    expect(summary.targetM).toBe(report.declarations.targets_m[summary.targetIndex])
+    expect(summary.curve).toEqual(report.responses.filter((row: any) => row.phase === 'control').map((row: any) => ({
+      state: row.state_index, displacementM: row.control_displacement_m, loadFactor: row.load_factor,
+    })))
+    for (const node of final.nodes) for (let index = 0; index < 3; index++) {
+      const component = ['UX', 'UY', 'RZ'][index]
+      expect(summary.values.find((row: any) => row.kind === 'reaction' && row.entity === node.node_id && row.component === component))
+        .toMatchObject({ unit: index === 2 ? 'N*m' : 'N', value: node.reactions_kn_knm[index] * 1000 })
+      expect(summary.values.find((row: any) => row.kind === 'displacement' && row.entity === node.node_id && row.component === component))
+        .toMatchObject({ unit: index === 2 ? 'rad' : 'm', value: node.displacements_m_rad[index] })
+    }
+    expect(summary.memberForcesAvailable).toBe(false)
+    expect(summary.values.some((row: any) => row.kind === 'member_force')).toBe(false)
+    expect(summary.unknownWork).toBe(report.execution.unknown_execution_work)
+    if (summary.unknownWork) expect(summary.recordedPhaseWallSeconds).toBeNull()
+    expect(exported.baselineJobId).toBe(snapshot.job.job_id)
+    expect(exported.comparisons).toHaveLength(1)
+    expect(exported.comparisons[0]).toMatchObject({ jobId: snapshot.job.job_id, compatible: true })
+    expect(exported.comparisons[0].rows).toHaveLength(summary.values.length)
+    expect(exported.comparisons[0].rows.every((row: any) => row.delta === 0 && row.baseline === row.variant)).toBe(true)
+    const submissions = calls.filter(call => call.method === 'POST')
+    expect(submissions).toHaveLength(1)
+    expect(submissions[0].path).toBe('/v1/jobs')
+    expect(submissions[0].headers['idempotency-key']).toMatch(/^rc-scenario-/)
+    expect(JSON.parse(submissions[0].body!)).toEqual(snapshot.request)
+    expect(calls.some(call => /\/(?:result|evidence|checkpoint)$/.test(call.path))).toBe(false)
+  })
+
   test('polls checkpointed state and resumes failed state only on explicit retry', async ({ page }) => {
     const calls = await setup(page, { mode: 'failed' })
     await expect(page.getByRole('button', { name: 'Resume RC from saved checkpoint', exact: true })).toBeEnabled()

@@ -3,6 +3,7 @@ import type { WorkbenchJobView } from './jobSchema'
 import { JobArtifactError, readBoundedJobBytes, type JobReadTransport } from './jobTransport'
 import type { RcArtifacts, RcJobSummary, RcObject } from './rcJobSchema'
 import type { RcQuantityReportReference, RcQuantityReportReview } from './rcQuantityReportSchema'
+import type { RcScenarioSummary } from './rcScenarioComparison'
 
 export interface RcJobReview {
   summary: RcJobSummary
@@ -10,6 +11,7 @@ export interface RcJobReview {
   material(memberId: string, integrationPoint: number, fiberIndex: number): Promise<RcObject[]>
   materialPage?(memberId: string, integrationPoint: number, fiberIndex: number, start: number, count: number): Promise<RcObject[]>
   download(role: string): Promise<Blob>
+  comparisonSummary?(): Promise<RcScenarioSummary>
   verifyQuantityReport?(bytes: Uint8Array, reference?: RcQuantityReportReference): Promise<RcQuantityReportReview>
   downloadQuantityReport?(reportId: string): Promise<Blob>
   onFailure(listener: (message: string) => void): () => void
@@ -84,6 +86,7 @@ export async function loadRcJobReview(
       epoch: (index) => call('epoch', { index }),
       material: (memberId, integrationPoint, fiberIndex) => call('material', { memberId, integrationPoint, fiberIndex }),
       download: (role) => call('download', { role }),
+      comparisonSummary: () => call('comparisonSummary', {}),
       verifyQuantityReport: (bytes, reference) => {
         // Copy only the bounded companion so its caller can retain the received
         // bytes; never copy or retransmit the original numerical result arrays.
