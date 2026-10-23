@@ -1,0 +1,327 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/rc_job_control_v1.schema.json",
+  "title": "RC checkpoint-boundary control view",
+  "description": "Exact transport shape. Python reducer additionally validates source bindings, capability semantics and event ordering; this schema does not grant numerical or execution authority.",
+  "$ref": "#/$defs/view",
+  "$defs": {
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "control_id",
+        "action",
+        "expected_request_hash",
+        "expected_checkpoint_hash",
+        "expected_control_revision",
+        "expected_attempt"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "rc-job-control-request.v1"
+        },
+        "control_id": {
+          "type": "string",
+          "pattern": "^rc-control-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "action": {
+          "enum": [
+            "pause",
+            "cancel",
+            "resume"
+          ]
+        },
+        "expected_request_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "expected_checkpoint_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expected_control_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "expected_attempt": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "job": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "job_id",
+        "tenant_id",
+        "request_hash",
+        "checkpoint_hash",
+        "attempt",
+        "revision",
+        "status",
+        "terminal_event_hash"
+      ],
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "pattern": "^job_[0-9a-f]{32}$"
+        },
+        "tenant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "checkpoint_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "status": {
+          "enum": [
+            "queued",
+            "running",
+            "checkpointed",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "terminal_event_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "lastCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "control_id",
+        "command_hash",
+        "action",
+        "control_revision",
+        "requested_event_revision",
+        "resolved_event_revision",
+        "disposition",
+        "boundary",
+        "applied_checkpoint_hash",
+        "applied_progress"
+      ],
+      "properties": {
+        "control_id": {
+          "type": "string",
+          "pattern": "^rc-control-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "command_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "action": {
+          "enum": [
+            "pause",
+            "cancel",
+            "resume"
+          ]
+        },
+        "control_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "requested_event_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "resolved_event_revision": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "disposition": {
+          "enum": [
+            "pending",
+            "paused",
+            "cancelled",
+            "resumed",
+            "completed",
+            "failed"
+          ]
+        },
+        "boundary": {
+          "enum": [
+            null,
+            "unleased",
+            "before_analysis",
+            "verified_checkpoint",
+            "verified_final",
+            "lease_expired",
+            "worker_failure"
+          ]
+        },
+        "applied_checkpoint_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "applied_progress": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "completed",
+                "total"
+              ],
+              "properties": {
+                "completed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "total": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "view": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "job",
+        "control_revision",
+        "state",
+        "last_command",
+        "can_pause",
+        "can_cancel",
+        "can_resume_control"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "rc-job-control.v1"
+        },
+        "job": {
+          "$ref": "#/$defs/job"
+        },
+        "control_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "state": {
+          "enum": [
+            "available",
+            "pause_pending",
+            "cancel_pending",
+            "paused",
+            "terminal"
+          ]
+        },
+        "last_command": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/lastCommand"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "can_pause": {
+          "type": "boolean"
+        },
+        "can_cancel": {
+          "type": "boolean"
+        },
+        "can_resume_control": {
+          "type": "boolean"
+        }
+      }
+    },
+    "commandResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "control_id",
+        "command_hash",
+        "accepted_control_revision",
+        "view"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "rc-job-control-command-result.v1"
+        },
+        "control_id": {
+          "type": "string",
+          "pattern": "^rc-control-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "command_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "accepted_control_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "view": {
+          "$ref": "#/$defs/view"
+        }
+      }
+    }
+  }
+}

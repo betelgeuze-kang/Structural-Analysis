@@ -47,7 +47,7 @@ class Driver {
   }
 }
 
-test('RC portal is authored, saved, checkpointed, resumed in a fresh process and reviewed after cold reopen', async ({ browser }, testInfo) => {
+test('RC portal is authored, paused at a checkpoint, saved, resumed in a fresh process and reviewed after cold reopen', async ({ browser }, testInfo) => {
   test.setTimeout(240000)
   const workspace = await mkdtemp(join(tmpdir(), 'structural-rc-browser-'))
   const driver = new Driver(workspace), contexts: BrowserContext[] = []
@@ -84,6 +84,14 @@ test('RC portal is authored, saved, checkpointed, resumed in a fresh process and
     await expect(view.page.locator('[data-rc-project-link]')).toBeVisible()
     const first = await driver.command('first_checkpoint')
     expect(first.job.status).toBe('checkpointed')
+    await expect(view.page.locator('[data-job-status="checkpointed"]')).toBeVisible({ timeout: 30000 })
+    await view.page.getByRole('button', { name: 'Pause job', exact: true }).click()
+    await expect(view.page.locator('[data-rc-job-control-state="paused"]')).toBeVisible()
+    const held = await driver.command('inspect_paused', { job_id: first.job.job_id })
+    expect(held.claim_held).toBe(true)
+    expect(held.state_unchanged).toBe(true)
+    expect(held.control.job.checkpoint_hash).toBe(first.checkpoint_hash)
+    expect(held.control.last_command.disposition).toBe('paused')
     const killed = await driver.command('kill_first')
     expect(killed.returncode).toBe(-9)
     const download = view.page.waitForEvent('download')
@@ -92,7 +100,8 @@ test('RC portal is authored, saved, checkpointed, resumed in a fresh process and
     await (await download).saveAs(projectPath)
     const projectBytes = await readFile(projectPath)
     expect(JSON.parse(projectBytes.toString()).submission.job.jobId).toBe(first.job.job_id)
-    expect(view.posts).toHaveLength(1)
+    expect(view.posts).toHaveLength(2)
+    expect(view.posts.filter(url => url.endsWith('/rc-control'))).toHaveLength(1)
     await view.context.close()
     server = await driver.command('restart_http')
     const reopened = await newView()
@@ -100,7 +109,18 @@ test('RC portal is authored, saved, checkpointed, resumed in a fresh process and
     await expect(reopened.page.locator('[data-job-status="checkpointed"]')).toBeVisible({ timeout: 30000 })
     const inspected = await driver.command('inspect_job', { job_id: first.job.job_id })
     expect(inspected.job.checkpoint.content_hash).toBe(first.checkpoint_hash)
+    expect(inspected.control).toEqual(held.control)
+    expect(inspected.invocations).toEqual(held.invocations)
+    await expect(reopened.page.locator('[data-rc-job-control-state="paused"]')).toBeVisible()
     expect(reopened.posts).toEqual([])
+    await reopened.page.getByRole('button', { name: 'Resume paused job', exact: true }).click()
+    await expect(reopened.page.locator('[data-rc-job-control-state="available"]')).toBeVisible()
+    const resumed = await driver.command('inspect_job', { job_id: first.job.job_id })
+    expect(resumed.job.request).toEqual(inspected.job.request)
+    expect(resumed.job.checkpoint).toEqual(inspected.job.checkpoint)
+    expect(resumed.job.attempt).toBe(inspected.job.attempt)
+    expect(resumed.invocations).toEqual(inspected.invocations)
+    expect(resumed.control.last_command.disposition).toBe('resumed')
     const finished = await driver.command('finish')
     expect(finished.job.status).toBe('succeeded')
     expect(finished.resumed_checkpoint_hash).toBe(first.checkpoint_hash)
@@ -180,14 +200,15 @@ test('RC portal is authored, saved, checkpointed, resumed in a fresh process and
     await expect(details.getByRole('group', { name: 'Section moment–curvature history', exact: true })).toBeVisible()
     await expect(details.getByRole('group', { name: 'Fiber stress–strain history', exact: true })).toBeVisible()
     await testInfo.attach('portal-detail-report', { path: detailPath, contentType: 'application/json' })
-    expect(reopened.posts).toEqual([])
+    expect(reopened.posts).toHaveLength(1)
+    expect(reopened.posts[0]).toMatch(/\/rc-control$/)
     const receipt = await driver.command('verify_reads')
     expect(receipt.http_numerical_calls).toBe(0)
     const screenshot = testInfo.outputPath('actual-portal-result.png')
     await review.screenshot({ path: screenshot })
     await testInfo.attach('actual-portal-result', { path: screenshot, contentType: 'image/png' })
     evidence.completed = true
-    Object.assign(evidence, { first, killed, finished, receipt, authoredSubmissions: view.posts.length, reopenedSubmissions: reopened.posts.length, checkpointHash: first.checkpoint_hash, reportHash: report.report_hash, detailReportHash: detail.report_hash })
+    Object.assign(evidence, { first, held, killed, resumed, finished, receipt, authoredSubmissions: view.posts.filter(url => !url.endsWith('/rc-control')).length, reopenedSubmissions: reopened.posts.filter(url => !url.endsWith('/rc-control')).length, controlRequests: view.posts.concat(reopened.posts).filter(url => url.endsWith('/rc-control')).length, checkpointHash: first.checkpoint_hash, reportHash: report.report_hash, detailReportHash: detail.report_hash })
   } finally {
     try {
       try { for (const context of contexts) await context.close() } finally { await driver.close() }

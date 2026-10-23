@@ -62,6 +62,8 @@ export interface RcJobTransport {
   getCorotationalDetailReport?(jobId: string, binding: RcCorotationalReportBinding): Promise<Response>
   /** Stored observations only; this read never dispatches numerical work. */
   getRcInvocations?(jobId: string, ordinal?: number): Promise<Response>
+  getRcControl?(jobId: string): Promise<Response>
+  postRcControl?(jobId: string, canonicalCommand: string): Promise<Response>
 }
 
 function endpoint(value: string, authorize?: JobAuthorizationProvider): URL {
@@ -267,6 +269,11 @@ export async function createJobWorkflowTransport(
     readTransport,
     getJob: (jobId) => send(jobPath(jobId)),
     getRequest: (jobId) => send(`${jobPath(jobId)}/request`),
+    getRcControl: (jobId) => send(`${jobPath(jobId)}/rc-control`),
+    postRcControl(jobId, canonicalCommand) {
+      if (typeof canonicalCommand !== 'string' || !canonicalCommand.length || new TextEncoder().encode(canonicalCommand).byteLength > 4096) throw new JobArtifactError('rc_control_command_invalid')
+      return send(`${jobPath(jobId)}/rc-control`, canonicalCommand)
+    },
     getRcInvocations(jobId, ordinal) {
       if (ordinal !== undefined && (!Number.isSafeInteger(ordinal) || ordinal < 1 || ordinal > 9999)) throw new JobArtifactError('rc_invocation_ordinal_invalid')
       return send(`${jobPath(jobId)}/rc-invocations${ordinal === undefined ? '' : `/${ordinal}`}`)

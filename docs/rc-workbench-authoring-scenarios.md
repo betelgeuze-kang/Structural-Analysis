@@ -115,6 +115,39 @@ time and CPU time. Missing phase evidence or unknown reservations cannot become
 zero time. Financial cost remains unknown without an explicit price declaration;
 the existing quantity-report workflow remains available for supported jobs.
 
+## Pause, cancel and resume an RC job
+
+Open the selected durable job and use **Pause job**, **Cancel job**, or
+**Resume paused job**. A known job in the captured-design queue can also be opened
+while that queue is waiting. Opening it reads the job; it does not submit it again.
+Controls require a service that supports the RC control endpoint and current
+authorization for that job.
+
+The panel distinguishes a pending request from an applied pause or cancellation.
+A running calculation finishes its current analysis and required verification
+before applying the request at a durable boundary. This is not an immediate stop
+inside a numerical iteration. Pausing a queued job holds it before calculation.
+An applied pause prevents automatic worker pickup; resuming releases that hold
+on the same job with its original input, checkpoint and consumed budget.
+
+If the current chunk finishes the entire job, a pending pause resolves as
+completed. A cancellation accepted before final publication prevents that final
+result from being published and retains the previous verified checkpoint, if
+one exists. Cancellation is terminal. Actual calculation or verification errors
+remain failures; they are not reported as successful pauses. Neither pause nor
+cancel refunds reservations whose outcomes are unknown.
+
+An applied pause also holds the local captured-design queue before it submits
+remaining inputs. Cancellation affects the selected job; the queue can continue
+to the next captured input after the cancelled job becomes terminal.
+
+If a command response is lost, use **Refresh job control** to read the current
+state or **Retry same control request** to repeat the original command identity.
+A conflict requires a fresh inspection and a new explicit decision. Refreshing,
+opening a project, or reopening a saved job never sends a control command.
+The durable service retains control state; the project file retains its job
+reference, not a queued instruction to pause or resume it.
+
 ## Explore verified results
 
 Open a successful job to inspect its saved states. The deformation view uses

@@ -775,6 +775,263 @@ class DurableJobService:
         self._require_tenant(row, tenant_id)
         return self._view(row)
 
+    def _rc_control_snapshot(self, connection, row, *, required=False):
+        """Validate only request identity and event metadata; never hydrate results."""
+        from structural_analysis.execution.rc_job_control import build_rc_control_view
+
+        request = self._request_for_row(row)
+        events = connection.execute(
+            "SELECT * FROM job_events WHERE job_id=? ORDER BY revision",
+            (row["job_id"],),
+        ).fetchall()
+        supported = (
+            request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
+        )
+        if not supported:
+            if required or any(
+                str(event["event_type"]).startswith("rc_control_") for event in events
+            ):
+                _fail(
+                    "rc_control_operation_unsupported",
+                    "/job_id",
+                    "RC control requires an admitted RC direct-control job.",
+                )
+            return None, events
+        previous = None
+        for index, event in enumerate(events):
+            payload = _strict_json_object(
+                str(event["payload_json"]).encode("utf-8"), "/events/payload"
+            )
+            digest, canonical = _event_hash(
+                job_id=str(row["job_id"]),
+                revision=index,
+                event_type=str(event["event_type"]),
+                status=str(event["status"]),
+                occurred_at=str(event["occurred_at"]),
+                payload=payload,
+                previous_event_hash=previous,
+            )
+            if (
+                event["revision"] != index
+                or event["payload_json"] != canonical
+                or event["previous_event_hash"] != previous
+                or event["event_hash"] != digest
+            ):
+                _fail(
+                    "rc_control_integrity_failed",
+                    "/events",
+                    "Control requires an intact event chain.",
+                )
+            previous = digest
+        if (
+            not events
+            or len(events) != row["revision"] + 1
+            or previous != row["terminal_event_hash"]
+            or events[-1]["status"] != row["status"]
+        ):
+            _fail(
+                "rc_control_integrity_failed",
+                "/job",
+                "Control row differs from its event chain.",
+            )
+        metadata = {
+            key: row[key]
+            for key in (
+                "job_id",
+                "tenant_id",
+                "request_hash",
+                "checkpoint_hash",
+                "attempt",
+                "revision",
+                "status",
+                "terminal_event_hash",
+                "progress_completed",
+                "progress_total",
+            )
+        }
+        try:
+            return build_rc_control_view(
+                metadata, [dict(event) for event in events]
+            ), events
+        except (ValueError, TypeError, KeyError) as exc:
+            _fail("rc_control_integrity_failed", "/rc-control", str(exc))
+
+    def get_rc_control(self, job_id, *, tenant_id, authorization_token):
+        """Return authenticated, metadata-only RC control state in one read snapshot."""
+        self._authorize_tenant(tenant_id, authorization_token)
+        _stable(job_id, "/job_id")
+        with self._connect() as connection:
+            connection.execute("BEGIN")
+            row = self._job_row(connection, job_id)
+            self._require_tenant(row, tenant_id)
+            return self._rc_control_snapshot(connection, row, required=True)[0]
+
+    def submit_rc_control(self, job_id, command, *, tenant_id, authorization_token):
+        from structural_analysis.execution.rc_job_control import (
+            build_rc_control_command_result,
+            find_rc_control_command,
+            rc_control_command_hash,
+            validate_rc_control_command,
+        )
+
+        self._authorize_tenant(tenant_id, authorization_token)
+        _stable(job_id, "/job_id")
+        try:
+            command = validate_rc_control_command(command)
+            digest = rc_control_command_hash(command)
+        except (ValueError, TypeError, KeyError) as exc:
+            _fail("rc_control_request_invalid", "/rc-control", str(exc))
+        with self._transaction() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_tenant(row, tenant_id)
+            view, events = self._rc_control_snapshot(connection, row, required=True)
+            receipt = find_rc_control_command(
+                [dict(event) for event in events], command["control_id"]
+            )
+            if receipt is not None:
+                if receipt["command_hash"] != digest:
+                    _fail(
+                        "rc_control_id_conflict",
+                        "/control_id",
+                        "A command ID already binds different bytes.",
+                    )
+                return build_rc_control_command_result(receipt, view)
+            if (
+                command["expected_request_hash"] != row["request_hash"]
+                or command["expected_checkpoint_hash"] != row["checkpoint_hash"]
+                or command["expected_attempt"] != row["attempt"]
+                or command["expected_control_revision"] != view["control_revision"]
+            ):
+                _fail(
+                    "rc_control_source_conflict",
+                    "/rc-control",
+                    "The observed request, checkpoint, attempt or control revision changed.",
+                )
+            action = command["action"]
+            if not view[
+                {
+                    "pause": "can_pause",
+                    "cancel": "can_cancel",
+                    "resume": "can_resume_control",
+                }[action]
+            ]:
+                _fail(
+                    "rc_control_state_conflict",
+                    "/action",
+                    "The requested action is unavailable in this control state.",
+                )
+            revision = view["control_revision"] + 1
+            row = self._transition(
+                connection,
+                row,
+                event_type="rc_control_requested",
+                status=row["status"],
+                occurred_at=self._now()[0],
+                payload={
+                    "schema_version": "rc-job-control-event.v1",
+                    "control_revision": revision,
+                    "command": command,
+                    "command_hash": digest,
+                },
+                updates={},
+            )
+            receipt = {
+                "command": command,
+                "command_hash": digest,
+                "control_revision": revision,
+                "requested_event_revision": row["revision"],
+            }
+            # A running command is pending until its verified publication or the next
+            # analysis boundary. Unleased commands resolve within this transaction.
+            if row["status"] != "running":
+                pending = {
+                    "last_command": {
+                        "control_id": command["control_id"],
+                        "control_revision": revision,
+                        "action": action,
+                        "disposition": "pending",
+                    }
+                }
+                row = self._resolve_rc_control(
+                    connection, row, pending, boundary="unleased"
+                )
+            current = self._rc_control_snapshot(connection, row, required=True)[0]
+            return build_rc_control_command_result(receipt, current)
+
+    @staticmethod
+    def _rc_control_pending(view):
+        return bool(
+            view
+            and view["last_command"]
+            and view["last_command"]["disposition"] == "pending"
+        )
+
+    def _resolve_rc_control(
+        self,
+        connection,
+        row,
+        view,
+        *,
+        boundary,
+        disposition=None,
+        completed_progress=None,
+    ):
+        """Apply an already-validated pending command without re-reading an intermediate chain."""
+        last = view["last_command"]
+        action = last["action"]
+        disposition = (
+            disposition
+            or {"pause": "paused", "cancel": "cancelled", "resume": "resumed"}[action]
+        )
+        next_status = row["status"]
+        updates = {}
+        if disposition == "paused":
+            next_status = (
+                "checkpointed" if row["checkpoint_hash"] is not None else "queued"
+            )
+            updates = _clear_lease()
+        row = self._transition(
+            connection,
+            row,
+            event_type="rc_control_resolved",
+            status=next_status,
+            occurred_at=self._now()[0],
+            payload={
+                "schema_version": "rc-job-control-event.v1",
+                "control_revision": last["control_revision"],
+                "control_id": last["control_id"],
+                "disposition": disposition,
+                "boundary": boundary,
+                "checkpoint_hash": row["checkpoint_hash"],
+                "progress_completed": row["progress_completed"]
+                if completed_progress is None
+                else completed_progress,
+                "progress_total": row["progress_total"],
+                "attempt": row["attempt"],
+            },
+            updates=updates,
+        )
+        if disposition == "cancelled":
+            row = self._transition(
+                connection,
+                row,
+                event_type="cancelled",
+                status="cancelled",
+                occurred_at=self._now()[0],
+                payload={},
+                updates={"error_code": "cancelled_by_tenant", **_clear_lease()},
+            )
+        return row
+
+    def _reject_legacy_rc_control(self, connection, row):
+        view, _events = self._rc_control_snapshot(connection, row)
+        if view and view["state"] in {"paused", "pause_pending", "cancel_pending"}:
+            _fail(
+                "rc_control_route_required",
+                "/rc-control",
+                "An active RC control requires its exact-bound control route.",
+            )
+
     def claim_next(
         self,
         *,
@@ -810,17 +1067,27 @@ class DurableJobService:
                 connection, selected_tenants=selected_tenants, now=now, now_us=now_us
             )
             placeholders = ",".join("?" for _ in selected_tenants)
-            row = connection.execute(
+            candidates = connection.execute(
                 f"""
                 SELECT * FROM jobs
                 WHERE tenant_id IN ({placeholders})
                   AND status IN ('checkpointed', 'queued')
                 ORDER BY CASE status WHEN 'checkpointed' THEN 0 ELSE 1 END,
                          created_at, job_id
-                LIMIT 1
                 """,
                 selected_tenants,
-            ).fetchone()
+            ).fetchall()
+            row = None
+            for candidate in candidates:
+                control, _events = self._rc_control_snapshot(connection, candidate)
+                if control and control["state"] in {
+                    "paused",
+                    "pause_pending",
+                    "cancel_pending",
+                }:
+                    continue
+                row = candidate
+                break
             if row is None:
                 return None
 
@@ -997,86 +1264,213 @@ class DurableJobService:
         )
         return row, self._execution_budget(connection, row)
 
+    def _reserve_execution_attempt_locked(
+        self, connection, row, *, worker_id, lease_token, rc_phase=None
+    ):
+        job_id = str(row["job_id"])
+        row, budget = self._reconcile_execution_reservations(connection, row)
+        now, now_us = self._now()
+        self._require_active_lease(row, worker_id, lease_token, now_us)
+        if budget["remaining_attempts"] == 0:
+            _fail(
+                "execution_attempt_budget_exhausted",
+                "/execution_budget",
+                "The immutable job-wide execution reservation limit is exhausted.",
+            )
+        reserved = budget["reserved_attempts"] + 1
+        authority_payload = {}
+        if self._execution_authority is not None:
+            try:
+                external_ordinal = self._execution_authority.reserve(
+                    self._execution_binding, job_id, str(row["request_hash"])
+                )
+            except ExecutionAuthorityError as exc:
+                _fail("execution_authority_rejected", "/execution_budget", str(exc))
+            if external_ordinal != reserved:
+                _fail(
+                    "execution_authority_reservation_race",
+                    "/execution_budget",
+                    "External spend changed; reconcile before retrying. No work may begin.",
+                )
+            authority_payload = {
+                "authority_id": self._execution_binding.authority_id,
+                "authority_generation": self._execution_binding.generation,
+                "authority_root": self._execution_binding.root,
+            }
+        connection.execute(
+            "UPDATE job_execution_budgets SET reserved_attempts = ? WHERE job_id = ?",
+            (reserved, job_id),
+        )
+        self._transition(
+            connection,
+            row,
+            event_type="execution_attempt_reserved",
+            status="running",
+            occurred_at=now,
+            payload={
+                **authority_payload,
+                **({"rc_phase": rc_phase} if rc_phase is not None else {}),
+                "worker_id": worker_id,
+                "reserved_attempts": reserved,
+                "maximum_attempts": budget["maximum_attempts"],
+                **(
+                    {
+                        "attempt": int(row["attempt"]),
+                        "lease_token_hash": str(row["lease_token_hash"]),
+                    }
+                    if self._request_for_row(row).get("schema_version")
+                    in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
+                    else {}
+                ),
+            },
+            updates={},
+        )
+        return reserved
+
+    def _rc_verification_binding(
+        self, connection, row, *, analysis_ordinal=None, chunk_request_hash=None
+    ):
+        """Prove a unique returned analysis in this lease with no later reservation."""
+        reservations = self._rc_reservations(connection, row)
+        records = self._rc_invocation_rows(connection, row)
+        candidates = []
+        for record in records:
+            metadata = _strict_json_object(
+                str(record["metadata_json"]).encode(), "/rc_invocations/metadata"
+            )
+            reservation = reservations[record["ordinal"]][0]
+            if (
+                metadata["phase"] == "analysis"
+                and metadata["status"] == "returned"
+                and metadata["completed_before"] == row["progress_completed"]
+                and reservation["attempt"] == row["attempt"]
+                and reservation["lease_token_hash"] == row["lease_token_hash"]
+                and record["ordinal"] == max(reservations, default=0)
+            ):
+                candidates.append((record["ordinal"], metadata["chunk_request_hash"]))
+        if len(candidates) != 1:
+            return None
+        ordinal, chunk = candidates[0]
+        if (
+            analysis_ordinal is not None
+            and analysis_ordinal != ordinal
+            or chunk_request_hash is not None
+            and chunk_request_hash != chunk
+        ):
+            return None
+        return {
+            "phase": "verification",
+            "chunk_request_hash": chunk,
+            "analysis_ordinal": ordinal,
+        }
+
     def reserve_execution_attempt(
-        self,
-        job_id: str,
-        *,
-        worker_id: str,
-        authorization_token: str,
-        lease_token: str,
+        self, job_id, *, worker_id, authorization_token, lease_token
     ) -> int:
-        """Commit one global execution reservation before entering the invocation.
-
-        RC reserves one API invocation, which may perform multiple prefix or
-        suffix core solve calls.
-        A crash between reservation and execution consumes the reservation.
-        This conservative upper bound survives lease expiry and failed-job
-        resume; it is not a count of confirmed completed numerical attempts.
-        """
-
+        """Legacy reservation; pending controls cannot be bypassed by an old worker."""
         self._authorize_worker(worker_id, authorization_token)
+        stopped = False
         with self._transaction() as connection:
-            now, now_us = self._now()
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
-            self._require_active_lease(row, worker_id, lease_token, now_us)
-            row, budget = self._reconcile_execution_reservations(connection, row)
-            now, now_us = self._now()
-            self._require_active_lease(row, worker_id, lease_token, now_us)
-            if budget["remaining_attempts"] == 0:
+            self._require_active_lease(row, worker_id, lease_token, self._now()[1])
+            control, _events = self._rc_control_snapshot(connection, row)
+            phase = None
+            if self._rc_control_pending(control):
+                phase = self._rc_verification_binding(connection, row)
+                if phase is None:
+                    self._require_active_lease(
+                        row, worker_id, lease_token, self._now()[1]
+                    )
+                    self._resolve_rc_control(
+                        connection, row, control, boundary="before_analysis"
+                    )
+                    stopped = True
+            if not stopped:
+                reserved = self._reserve_execution_attempt_locked(
+                    connection,
+                    row,
+                    worker_id=worker_id,
+                    lease_token=lease_token,
+                    rc_phase=phase,
+                )
+        if stopped:
+            # Raising inside _transaction would roll the applied hold back.
+            _fail(
+                "rc_control_boundary_stop",
+                "/rc-control",
+                "The pending control committed before another analysis reservation.",
+            )
+        return reserved
+
+    def reserve_rc_execution_attempt(
+        self,
+        job_id,
+        *,
+        worker_id,
+        authorization_token,
+        lease_token,
+        phase,
+        chunk_request_hash,
+        analysis_ordinal=None,
+    ) -> int | JobView:
+        self._authorize_worker(worker_id, authorization_token)
+        phase_binding = {
+            "phase": phase,
+            "chunk_request_hash": chunk_request_hash,
+            "analysis_ordinal": analysis_ordinal,
+        }
+        _validate_rc_phase_binding(phase_binding)
+        with self._transaction() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_worker_row(row, worker_id)
+            self._require_active_lease(row, worker_id, lease_token, self._now()[1])
+            control, _events = self._rc_control_snapshot(connection, row, required=True)
+            if phase == "analysis" and self._rc_control_pending(control):
+                if self._rc_verification_binding(connection, row) is not None:
+                    _fail(
+                        "rc_control_verification_required",
+                        "/rc_phase",
+                        "The returned analysis must receive its mandatory verification before another analysis boundary.",
+                    )
+                self._require_active_lease(row, worker_id, lease_token, self._now()[1])
+                row = self._resolve_rc_control(
+                    connection, row, control, boundary="before_analysis"
+                )
+                return self._view(row)
+            if (
+                phase == "analysis"
+                and self._request_for_row(row).get("schema_version")
+                not in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
+                and self._execution_budget(connection, row)["remaining_attempts"] < 2
+            ):
                 _fail(
                     "execution_attempt_budget_exhausted",
                     "/execution_budget",
-                    "The immutable job-wide execution reservation limit is exhausted.",
+                    "A fixed-chord chunk requires separate analysis and verification reservations.",
                 )
-            reserved = budget["reserved_attempts"] + 1
-            authority_payload = {}
-            if self._execution_authority is not None:
-                try:
-                    external_ordinal = self._execution_authority.reserve(
-                        self._execution_binding, job_id, str(row["request_hash"])
-                    )
-                except ExecutionAuthorityError as exc:
-                    _fail("execution_authority_rejected", "/execution_budget", str(exc))
-                if external_ordinal != reserved:
-                    _fail(
-                        "execution_authority_reservation_race",
-                        "/execution_budget",
-                        "External spend changed; reconcile before retrying. No work may begin.",
-                    )
-                authority_payload = {
-                    "authority_id": self._execution_binding.authority_id,
-                    "authority_generation": self._execution_binding.generation,
-                    "authority_root": self._execution_binding.root,
-                }
-            connection.execute(
-                "UPDATE job_execution_budgets SET reserved_attempts = ? WHERE job_id = ?",
-                (reserved, job_id),
-            )
-            self._transition(
+            if (
+                phase == "verification"
+                and self._rc_verification_binding(
+                    connection,
+                    row,
+                    analysis_ordinal=analysis_ordinal,
+                    chunk_request_hash=chunk_request_hash,
+                )
+                != phase_binding
+            ):
+                _fail(
+                    "rc_control_verification_binding_invalid",
+                    "/rc_phase",
+                    "Verification requires its returned analysis in the same live lease.",
+                )
+            return self._reserve_execution_attempt_locked(
                 connection,
                 row,
-                event_type="execution_attempt_reserved",
-                status="running",
-                occurred_at=now,
-                payload={
-                    **authority_payload,
-                    "worker_id": worker_id,
-                    "reserved_attempts": reserved,
-                    "maximum_attempts": budget["maximum_attempts"],
-                    **(
-                        {
-                            "attempt": int(row["attempt"]),
-                            "lease_token_hash": str(row["lease_token_hash"]),
-                        }
-                        if self._request_for_row(row).get("schema_version")
-                        in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
-                        else {}
-                    ),
-                },
-                updates={},
+                worker_id=worker_id,
+                lease_token=lease_token,
+                rc_phase=phase_binding,
             )
-        return reserved
 
     def worker_result_byte_limit(
         self, job_id: str, *, worker_id: str, authorization_token: str, lease_token: str
@@ -1157,6 +1551,8 @@ class DurableJobService:
                     "/ordinal",
                     "The reservation belongs to a different worker attempt or lease.",
                 )
+            if "rc_phase" in reservation:
+                _match_rc_phase_binding(reservation["rc_phase"], normalized)
             self._rc_invocation_rows(connection, row)
             prior = connection.execute(
                 "SELECT * FROM job_rc_invocation_outcomes WHERE job_id = ? AND ordinal = ?",
@@ -1288,6 +1684,8 @@ class DurableJobService:
                 )
             _stable(payload.get("worker_id"), "/rc_invocations/worker_id")
             _hash(payload.get("lease_token_hash"), "/rc_invocations/lease_token_hash")
+            if "rc_phase" in payload:
+                _validate_rc_phase_binding(payload["rc_phase"])
             reservations[ordinal] = (payload, str(event["event_hash"]))
         return reservations
 
@@ -1350,6 +1748,8 @@ class DurableJobService:
                     "/rc_invocations",
                     "Invocation references disagree with their immutable reservation and record events.",
                 )
+            if "rc_phase" in reservations[ordinal][0]:
+                _match_rc_phase_binding(reservations[ordinal][0]["rc_phase"], metadata)
             _hash(record["outcome_hash"], "/rc_invocations/outcome_hash")
             if (
                 type(record["outcome_size"]) is not int
@@ -1628,6 +2028,7 @@ class DurableJobService:
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
+            control, _events = self._rc_control_snapshot(connection, row)
             total = int(row["progress_total"])
             prior = int(row["progress_completed"])
             if (
@@ -1722,6 +2123,10 @@ class DurableJobService:
                     **_clear_lease(),
                 },
             )
+            if self._rc_control_pending(control):
+                row = self._resolve_rc_control(
+                    connection, row, control, boundary="verified_checkpoint"
+                )
         return self._view(row)
 
     def complete_job(
@@ -1763,6 +2168,7 @@ class DurableJobService:
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
+            control, _events = self._rc_control_snapshot(connection, row)
             request_bytes = self._read_blob(
                 str(row["request_hash"]),
                 int(row["request_size"]),
@@ -1843,6 +2249,15 @@ class DurableJobService:
                         "/evidence/validation_report",
                         "The evidence must retain the exact pure RC job validation report.",
                     )
+            if (
+                self._rc_control_pending(control)
+                and control["last_command"]["action"] == "cancel"
+            ):
+                self._require_active_lease(row, worker_id, lease_token, self._now()[1])
+                row = self._resolve_rc_control(
+                    connection, row, control, boundary="verified_final"
+                )
+                return self._view(row)
             admission = self._admit_blob_payloads(
                 connection, (normalized_result, evidence_bytes)
             )
@@ -1872,6 +2287,15 @@ class DurableJobService:
                 in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
                 else int(row["progress_total"])
             )
+            if self._rc_control_pending(control):
+                row = self._resolve_rc_control(
+                    connection,
+                    row,
+                    control,
+                    boundary="verified_final",
+                    disposition="completed",
+                    completed_progress=completed_progress,
+                )
             row = self._transition(
                 connection,
                 row,
@@ -1922,6 +2346,17 @@ class DurableJobService:
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
+            control, _events = self._rc_control_snapshot(connection, row)
+            self._require_active_lease(row, worker_id, lease_token, self._now()[1])
+            if self._rc_control_pending(control):
+                retriable = False
+                row = self._resolve_rc_control(
+                    connection,
+                    row,
+                    control,
+                    boundary="worker_failure",
+                    disposition="failed",
+                )
             next_status: JobStatus = (
                 "checkpointed"
                 if retriable and row["checkpoint_hash"] is not None
@@ -1963,6 +2398,7 @@ class DurableJobService:
         with self._transaction() as connection:
             row = self._job_row(connection, job_id)
             self._require_tenant(row, tenant_id)
+            self._reject_legacy_rc_control(connection, row)
             if str(row["status"]) != "failed":
                 _fail(
                     "resume_state_invalid",
@@ -2012,6 +2448,7 @@ class DurableJobService:
         with self._transaction() as connection:
             row = self._job_row(connection, job_id)
             self._require_tenant(row, tenant_id)
+            self._reject_legacy_rc_control(connection, row)
             if str(row["status"]) not in {"queued", "checkpointed"}:
                 _fail(
                     "cancel_state_invalid",
@@ -2944,6 +3381,7 @@ class DurableJobService:
                 "/job",
                 "The mutable projection does not match its terminal event.",
             )
+        self._rc_control_snapshot(connection, row)
         return {
             "schema_version": JOB_INTEGRITY_REPORT_SCHEMA_VERSION,
             "status": "pass",
@@ -3361,10 +3799,11 @@ class DurableJobService:
             (*selected_tenants, now_us),
         ).fetchall()
         for row in rows:
+            control, _events = self._rc_control_snapshot(connection, row)
             next_status: JobStatus = (
                 "checkpointed" if row["checkpoint_hash"] is not None else "queued"
             )
-            self._transition(
+            row = self._transition(
                 connection,
                 row,
                 event_type="lease_expired_requeued",
@@ -3376,6 +3815,10 @@ class DurableJobService:
                 },
                 updates={"error_code": "worker_lease_expired", **_clear_lease()},
             )
+            if self._rc_control_pending(control):
+                self._resolve_rc_control(
+                    connection, row, control, boundary="lease_expired"
+                )
 
     def _authorize_tenant(self, tenant_id: str, token: str) -> None:
         _stable(tenant_id, "/tenant_id")
@@ -4177,6 +4620,46 @@ def validate_job_view(view: JobView | Mapping[str, Any]) -> dict[str, Any]:
             "can_resume differs from checkpoint and state-machine truth.",
         )
     return payload
+
+
+class RcControlBoundaryStop(Exception):
+    """Internal worker unwind after an already-committed control boundary."""
+
+    def __init__(self, job: JobView):
+        self.job = job
+        super().__init__("rc_control_boundary_stop")
+
+
+def _validate_rc_phase_binding(value):
+    if (
+        type(value) is not dict
+        or set(value) != {"phase", "chunk_request_hash", "analysis_ordinal"}
+        or type(value["phase"]) is not str
+        or value["phase"] not in {"analysis", "verification"}
+        or (value["phase"] == "analysis" and value["analysis_ordinal"] is not None)
+        or (
+            value["phase"] == "verification"
+            and (
+                type(value["analysis_ordinal"]) is not int
+                or not 1 <= value["analysis_ordinal"] <= 2**53 - 1
+            )
+        )
+    ):
+        _fail(
+            "rc_control_phase_invalid",
+            "/rc_phase",
+            "A phase requires an exact analysis or verification binding.",
+        )
+    _hash(value["chunk_request_hash"], "/rc_phase/chunk_request_hash")
+
+
+def _match_rc_phase_binding(binding, metadata):
+    if any(binding[key] != metadata[key] for key in ("phase", "chunk_request_hash")):
+        _fail(
+            "rc_invocation_reservation_phase_mismatch",
+            "/rc_phase",
+            "Invocation differs from its reserved phase and chunk.",
+        )
 
 
 def _event_hash(

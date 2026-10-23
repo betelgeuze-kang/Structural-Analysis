@@ -258,8 +258,10 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
             if (fresh.request.content_hash !== row.jobRef.requestHash) throw new Error('rc_scenario_request_binding_changed')
             submittedJob = fresh
           }
+          let paused = false
           const job = await runRcScenario(session, row.intent, {
             signal, existingJob: submittedJob,
+            onPaused: () => { paused = true },
             onJob: next => {
               submittedJob = next
               if (active()) patch(id, { job: next, jobRef: { jobId: next.job_id, requestHash: next.request.content_hash }, status: 'waiting' })
@@ -270,8 +272,8 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
             patch(id, { job, status: job.status, message: 'No succeeded numerical result is available. This job is not automatically retried.' }); continue
           }
           if (job.status !== 'succeeded') {
-            patch(id, { job, status: 'waiting', message: 'The bounded polling interval ended. Refresh this stored job to continue monitoring.' })
-            setMessage('The queue paused while a known job remains active. Refresh its stored state before continuing.'); break
+            patch(id, { job, status: 'waiting', message: paused ? 'Pause applied to this stored job. Its original input and job reference are retained.' : 'The bounded polling interval ended. Refresh this stored job to continue monitoring.' })
+            setMessage(paused ? 'The queue is held because this job is paused. Remaining captured designs were not submitted. Resume the job explicitly, then refresh this design before running the remaining designs.' : 'The queue paused while a known job remains active. Refresh its stored state before continuing.'); break
           }
           const sourceTransport = session.readTransport(job.job_id, signal)
           let authorizationDenied: number | null = null
@@ -374,7 +376,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
     <button type="button" disabled={busy || disabled || !scenarios.length || !transport.current} onClick={() => void download()}>Export scenario JSON</button>
     <p role="status">{message}</p>
     <ul>{scenarios.map(row => <li key={row.intent.id} data-scenario-id={row.intent.id}>
-      <strong>{row.intent.name}</strong> — <span>{row.status}</span>{row.jobRef && <> · <code>{row.jobRef.jobId}</code>{onOpenJob && <> <button type="button" disabled={busy || disabled} onClick={() => onOpenJob(row.jobRef!.jobId, row.jobRef!)}>Open job</button></>}</>}
+      <strong>{row.intent.name}</strong> — <span>{row.status}</span>{row.jobRef && <> · <code>{row.jobRef.jobId}</code>{onOpenJob && <> <button type="button" disabled={disabled} onClick={() => onOpenJob(row.jobRef!.jobId, row.jobRef!)}>Open job</button></>}</>}
       {row.message && <p>{row.message}</p>}
       {row.status === 'captured' && <button type="button" disabled={busy || disabled} onClick={() => {
         update(current.current.filter(item => item.intent.id !== row.intent.id))

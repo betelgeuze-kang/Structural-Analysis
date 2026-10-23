@@ -30,6 +30,7 @@ from structural_analysis.execution.job_service import (
     JobClaim,
     JobServiceError,
     JobView,
+    RcControlBoundaryStop,
     build_job_completion_evidence,
 )
 from structural_analysis.execution.rc_fiber_job_contract import (
@@ -392,11 +393,6 @@ def _execute_rc_fiber_direct_control_claim(
                 restart = base64.b64decode(
                     prefix["terminal_checkpoint_artifact_base64"], validate=True
                 )
-            if budget["remaining_attempts"] < 2:
-                raise RCFiberDirectControlWorkerError(
-                    "execution_attempt_budget_exhausted",
-                    "A chunk requires separate analysis and verification reservations.",
-                )
             stop = min(total, completed + chunk_size)
             chunk = replace(config, targets_m=config.targets_m[completed:stop])
             binding = {
@@ -410,7 +406,17 @@ def _execute_rc_fiber_direct_control_claim(
 
             def invoke(phase, call):
                 lease.check()
-                ordinal = service.reserve_execution_attempt(job_id, **credentials)
+                ordinal = service.reserve_rc_execution_attempt(
+                    job_id,
+                    **credentials,
+                    phase=phase,
+                    chunk_request_hash=binding["chunk_request_hash"],
+                    analysis_ordinal=analysis_ordinal
+                    if phase == "verification"
+                    else None,
+                )
+                if isinstance(ordinal, JobView):
+                    raise RcControlBoundaryStop(ordinal)
                 outcome = binding | {
                     "phase": phase,
                     "status": "raised",
@@ -732,6 +738,8 @@ def _execute_rc_fiber_direct_control_claim(
                 progress_total=total,
                 resume_contract_hash=resume_hash,
             )
+    except RcControlBoundaryStop as stop:
+        return stop.job
     except (JobServiceError, RCFiberDirectControlWorkerError) as error:
         fail_if_active(error.code)
         raise

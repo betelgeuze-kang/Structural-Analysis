@@ -3,6 +3,8 @@ import { JobServicePanel } from './JobServicePanel'
 import { RcQuantityReportPanel } from './RcQuantityReportPanel'
 import { RcModelEditor } from './RcModelEditor'
 import { RcScenarioComparisonPanel, type RcScenarioProjectSnapshot } from './RcScenarioComparisonPanel'
+import { RcJobControlPanel } from './RcJobControlPanel'
+import type { RcJobControlCustodyEntry } from '../model/rcJobControl'
 import { RcJobDiagnosticsPanel } from './RcJobDiagnosticsPanel'
 import { rcRequestChanges } from '../model/rcJobDiagnostics'
 import { emptyRcProject, sameRcProject, snapshotRcProject } from '../model/rcProjectSnapshot'
@@ -107,6 +109,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
   const intentScope = useRef<RcProjectScope | null>(null)
   const lastScope = useRef<RcProjectScope | null>(null)
   const selectedRef = useRef<RcProjectJobRef | null>(null)
+  const controlCustody = useRef(new Map<string, RcJobControlCustodyEntry>())
   const initialSelectionAdmitted = useRef(false)
   const [projectBusy, setProjectBusy] = useState(false)
   const [projectMessage, setProjectMessage] = useState('')
@@ -160,6 +163,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
   function clearPrivateProject(): void {
     fileGeneration.current++
     intent.current = null; intentScope.current = null; selectedRef.current = null; lastScope.current = null
+    controlCustody.current.clear()
     retainedScenarios.current = emptyScenarios(); pendingOpenedProject.current = null
     latestProject.current = null; projectDirtyRef.current = false
     setDraft(''); setDraftValue(null); setEditorDirty(false); setIntentVersion(value => value + 1)
@@ -612,6 +616,10 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
         onOpenJob={selectJob} />}
     {message ? <p role="alert" data-rc-workflow-error>{message}</p> : null}
     {current.input ? <InputSummary value={current.input} saved /> : null}
+    {current.transport && current.load.job && current.input && <RcJobControlPanel
+      key={`${current.transport.collectionUrl}:${current.transport.tenantId}:${current.load.job.job_id}:${current.load.job.request.content_hash}`}
+      transport={current.transport} job={current.load.job} custody={controlCustody} disabled={busy || projectBusy}
+      onAuthorizationFailure={invalidate} onRefreshJob={() => setRefreshEpoch(value => value + 1)} />}
     {current.load.job ? <p><a data-rc-project-link href={rcProjectLink(current.load.job.job_id)} target="_blank" rel="noopener">Reopen this RC project</a></p> : null}
     {resumeRefreshRequired && resumeRefreshRequired === openId ? <p data-rc-resume-unconfirmed>The resume outcome is unconfirmed. Open the saved job or refresh the account and job to check its current state before another resume.</p> : null}
     {current.load.job?.status === 'failed' ? <button type="button" className="wb2-btn" data-rc-explicit-retry disabled={!current.transport || busy || projectBusy || resumeRefreshRequired === current.load.job.job_id} onClick={() => void retry()}>
