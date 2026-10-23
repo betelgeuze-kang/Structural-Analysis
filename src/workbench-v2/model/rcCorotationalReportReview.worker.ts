@@ -3,6 +3,7 @@ import { document, validateRcRequestProfile } from './rcJobSchema'
 import { parseRcCorotationalReport, type RcCorotationalReport, type RcCorotationalReportExpected } from './rcCorotationalReportSchema'
 import type { RcCorotationalReportSummary } from './rcCorotationalReportReview'
 import { corotationalRcScenarioSummary } from './rcScenarioComparison'
+import { rcResultGeometry } from './rcResultVisualization'
 
 let report: RcCorotationalReport | null = null
 let bytes: Uint8Array | null = null
@@ -39,6 +40,11 @@ self.onmessage = async ({ data }) => {
       self.postMessage({ id, value: summary }); return
     }
     if (!report || !bytes || !expected || !summary) unavailable()
+    if (type === 'geometry') {
+      try { self.postMessage({ id, value: rcResultGeometry(expected.request) }) }
+      catch { self.postMessage({ id, operationError: 'rc_corotational_report_geometry_invalid' }) }
+      return
+    }
     if (type === 'reopen') {
       try {
         if (!(data.bytes instanceof Uint8Array) || !data.bytes.byteLength || data.bytes.byteLength > maximumBytes) throw new Error('rc_corotational_report_too_large')

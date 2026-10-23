@@ -59,7 +59,7 @@ for (const profile of ['v6', 'v7'] as const) test.describe(`Corotational report 
     await expect(page.locator('[data-rc-corotational-review]')).toHaveAttribute('data-rc-corotational-review', 'report_verified')
   }
 
-  test('opens exact nodal values with distinct target/state/attempt budgets in a dedicated worker', async ({ page }) => {
+  test('opens exact nodal values with distinct target/state/attempt budgets in a dedicated worker', async ({ page }, testInfo) => {
     const workers: string[] = []; page.on('worker', worker => workers.push(worker.url()))
     const calls = await setup(page)
     await ready(page)
@@ -80,8 +80,62 @@ for (const profile of ['v6', 'v7'] as const) test.describe(`Corotational report 
     await expect(page.getByRole('columnheader', { name: 'RZ (rad)', exact: true })).toHaveCSS('text-transform', 'none')
     await expect(page.getByRole('columnheader', { name: 'MZ (kN*m)', exact: true }).first()).toHaveCSS('text-transform', 'none')
     await expect(page.getByRole('columnheader', { name: 'MZ (kN*m)', exact: true })).toHaveCount(2)
-    await page.getByLabel('Accepted state to inspect', { exact: true }).selectOption('0')
+    // Geometry comes from the original request and translations from the
+    // authenticated response. Plot coordinates retain stored order and units.
+    const shape = page.locator('[data-rc-deformed-shape]')
+    await expect(shape).toBeVisible()
+    const checkShape = async (response: any, scale: number) => {
+      await expect(shape.locator('[data-rc-member]')).toHaveCount(snapshot.request.model.elements.length)
+      for (const member of snapshot.request.model.elements) {
+        const element = shape.locator(`[data-rc-member="${member.id}"]`)
+        for (const [index, nodeId] of member.nodes.entries()) {
+          const node = snapshot.request.model.nodes.find((value: any) => value.id === nodeId)
+          const displacement = response.nodes.find((value: any) => value.node_id === nodeId).displacements_m_rad
+          for (const [axis, component] of [['x', 0], ['y', 1]] as const) {
+            const coordinate = node.coordinates[component]
+            await expect(element).toHaveAttribute(`data-rc-${axis}${index + 1}`, String(coordinate))
+            await expect(element).toHaveAttribute(`data-rc-deformed-${axis}${index + 1}`, String(coordinate + scale * displacement[component]))
+          }
+        }
+      }
+    }
+    await checkShape(selected, 1)
+    await page.getByLabel('Deformation scale', { exact: true }).fill('1000')
+    await checkShape(selected, 1000)
+    // The two-member L frame exercises keyboard member selection and the
+    // corresponding table highlights without changing the response itself.
+    const chosenMember = snapshot.request.model.elements[1]
+    const memberButton = shape.getByRole('button', { name: `Select member ${chosenMember.id}`, exact: true })
+    await memberButton.focus(); await memberButton.press('Enter')
+    await expect(page.getByLabel('Result member', { exact: true })).toHaveValue(chosenMember.id)
+    await expect(page.locator('[data-rc-corotational-selected-member]')).toContainText(`Member ${chosenMember.id}`)
+    await expect(page.locator('[data-rc-corotational-table="displacements_m_rad"] tr[data-rc-selected-node="true"] th'))
+      .toHaveText(chosenMember.nodes)
+    const history = page.locator('[data-rc-history-plot="Accepted control history"]')
+    await expect(history.locator('[data-rc-history-point]')).toHaveCount(report.responses.length)
+    expect(await history.locator('[data-rc-history-point]').evaluateAll(elements => elements.map(element => ({
+      state: Number(element.getAttribute('data-rc-history-point')), x: Number(element.getAttribute('data-rc-x')), y: Number(element.getAttribute('data-rc-y')),
+    })))).toEqual(report.responses.map((response: any) => ({ state: response.state_index, x: response.control_displacement_m, y: response.load_factor })))
+    const firstPoint = history.locator('[data-rc-history-point="0"]')
+    await firstPoint.focus(); await firstPoint.press('Enter')
     await expect(page.locator('[data-rc-corotational-selected]')).toContainText('Accepted state 0 · preload')
+    await expect(page.getByLabel('Accepted state to inspect', { exact: true })).toHaveValue('0')
+    await checkShape(report.responses[0], 1000)
+    for (const node of report.responses[0].nodes) await expect(page.locator('[data-rc-corotational-table="displacements_m_rad"] tbody tr')
+      .filter({ has: page.getByRole('rowheader', { name: node.node_id, exact: true }) }).locator('td')).toHaveText(node.displacements_m_rad.map(String))
+    await expect(page.getByRole('button', { name: 'Previous accepted state', exact: true })).toBeDisabled()
+    await page.getByRole('button', { name: 'Next accepted state', exact: true }).click()
+    await expect(page.getByLabel('Accepted state to inspect', { exact: true })).toHaveValue('1')
+    await checkShape(report.responses[1], 1000)
+    await page.getByRole('button', { name: 'Previous accepted state', exact: true }).click()
+    await expect(page.getByLabel('Accepted state to inspect', { exact: true })).toHaveValue('0')
+    await expect(page.locator('[data-rc-corotational-member-unavailable]')).toContainText('unavailable in this saved nodal report')
+    await expect(page.locator('[data-rc-history-plot="Section moment–curvature history"]')).toHaveCount(0)
+    await expect(page.locator('[data-rc-history-plot="Fiber stress–strain history"]')).toHaveCount(0)
+    expect(calls.filter(call => call.method === 'POST')).toEqual([])
+    const explorerScreenshot = testInfo.outputPath(`${profile}-saved-result-explorer.png`)
+    await page.locator('[data-rc-corotational-review]').screenshot({ path: explorerScreenshot })
+    await testInfo.attach(`${profile}-saved-result-explorer.png`, { path: explorerScreenshot, contentType: 'image/png' })
     const reportCall = calls.find(call => call.path.endsWith('/rc-corotational-report'))!
     expect(reportCall.headers.authorization).toBe('Bearer test-token')
     expect(reportCall.headers['x-structural-expected-request-hash']).toBe(snapshot.job.request.content_hash)

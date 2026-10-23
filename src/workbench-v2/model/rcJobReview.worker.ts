@@ -2,6 +2,7 @@ import { document, validateRcJobArtifacts, type RcArtifacts, type RcObject, type
 import { validateRcQuantityReport } from './rcQuantityReportSchema'
 import { fixedRcScenarioSummary } from './rcScenarioComparison'
 import type { WorkbenchJobView } from './jobSchema'
+import { rcMaterialHistoryPage, rcResultGeometry, rcSectionHistoryPage } from './rcResultVisualization'
 
 let artifacts: RcArtifacts = {}
 let history: RcObject[] = []
@@ -25,6 +26,21 @@ self.onmessage = async ({ data }) => {
       return
     }
     if (!initialized) throw new Error('rc_review_unavailable')
+    if (type === 'geometry' || type === 'materialPage' || type === 'sectionPage') {
+      // Optional visualization projections cannot replace or dispose the
+      // original validated numerical review when a selector is unavailable.
+      try {
+        if (!comparisonSource) throw new Error('rc_review_unavailable')
+        const value = type === 'geometry' ? rcResultGeometry(comparisonSource.request)
+          : type === 'materialPage' ? rcMaterialHistoryPage(history, data.memberId, data.integrationPoint, data.fiberIndex, data.start, data.count)
+            : rcSectionHistoryPage(history, data.memberId, data.integrationPoint, data.start, data.count)
+        self.postMessage({ id, value })
+      } catch (error) {
+        const message = error instanceof Error && /^rc_review_[a-z_]+$/.test(error.message) ? error.message : 'rc_review_projection_invalid'
+        self.postMessage({ id, operationError: message })
+      }
+      return
+    }
     if (type === 'quantityReport' || type === 'quantityDownload') {
       // A failed companion is local to this RPC. It cannot dispose or replace
       // the previously validated original source and numerical review.

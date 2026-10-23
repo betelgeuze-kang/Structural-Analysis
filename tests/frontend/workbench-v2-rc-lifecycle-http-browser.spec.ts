@@ -201,6 +201,81 @@ test('actual authored designs compare real core outputs and a failed input becom
     expect(repaired.job.status).toBe('succeeded')
     expect(repaired.job.job_id).not.toBe(failed.job.job_id)
     await verifiedReview(view.page, view.workerUrls)
+    // Inspect the already-produced result. These interactions may only read
+    // retained values; they add no fifth job or numerical execution.
+    const visualizationPosts: string[] = []
+    view.page.on('request', request => { if (request.method() === 'POST') visualizationPosts.push(request.url()) })
+    const fixedReview = view.page.locator('[data-rc-review="verified"]')
+    const originalResultDownload = view.page.waitForEvent('download')
+    await fixedReview.getByRole('button', { name: 'Download RC result', exact: true }).click()
+    const originalResultPath = join(workspace, 'visualized-original-result.json')
+    await (await originalResultDownload).saveAs(originalResultPath)
+    const originalResultBytes = await readFile(originalResultPath)
+    expect(digest(originalResultBytes)).toBe(repaired.job.result.content_hash)
+    const apiResult = JSON.parse(originalResultBytes.toString('utf8')).api_result
+    const resultHistory = apiResult.preload_response ? [apiResult.preload_response, ...apiResult.response_history] : apiResult.response_history
+    const finalResponse = resultHistory[resultHistory.length - 1], shape = fixedReview.locator('[data-rc-deformed-shape]')
+    const checkShape = async (response: any, scale: number) => {
+      await expect(shape.locator('[data-rc-member]')).toHaveCount(ready.requests.repaired.model.elements.length)
+      for (const member of ready.requests.repaired.model.elements) {
+        const element = shape.locator(`[data-rc-member="${member.id}"]`)
+        for (const [index, nodeId] of member.nodes.entries()) {
+          const node = ready.requests.repaired.model.nodes.find((value: any) => value.id === nodeId)
+          const displacement = response.node_displacements.find((value: any) => value.node_id === nodeId)
+          for (const [axis, component, field] of [['x', 0, 'UX_m'], ['y', 1, 'UY_m']] as const) {
+            const coordinate = node.coordinates[component]
+            await expect(element).toHaveAttribute(`data-rc-${axis}${index + 1}`, String(coordinate))
+            await expect(element).toHaveAttribute(`data-rc-deformed-${axis}${index + 1}`, String(coordinate + scale * displacement[field]))
+          }
+        }
+      }
+    }
+    await checkShape(finalResponse, 1)
+    await fixedReview.getByLabel('Deformation scale', { exact: true }).fill('1000')
+    await checkShape(finalResponse, 1000)
+    const memberId = ready.requests.repaired.model.elements[0].id
+    await fixedReview.getByLabel('Result member', { exact: true }).selectOption('')
+    const selectedMember = shape.getByRole('button', { name: `Select member ${memberId}`, exact: true })
+    await selectedMember.focus(); await selectedMember.press('Enter')
+    await expect(fixedReview.getByLabel('Result member', { exact: true })).toHaveValue(memberId)
+    await expect(selectedMember).toHaveAttribute('aria-pressed', 'true')
+    const memberResponse = finalResponse.member_end_forces.find((value: any) => value.member_id === memberId)
+    await expect(fixedReview.locator('[data-rc-table="members"] tbody tr').filter({ has: view.page.getByRole('rowheader', { name: memberId, exact: true }) }).locator('td'))
+      .toHaveText([memberResponse.local_end_i.FX_N, memberResponse.local_end_i.FY_N, memberResponse.local_end_i.MZ_Nm,
+        memberResponse.local_end_j.FX_N, memberResponse.local_end_j.FY_N, memberResponse.local_end_j.MZ_Nm].map(String))
+    const sectionPlot = fixedReview.locator('[data-rc-history-plot="Section moment–curvature history"]')
+    const fiberPlot = fixedReview.locator('[data-rc-history-plot="Fiber stress–strain history"]')
+    await expect(sectionPlot.locator('[data-rc-history-point]')).toHaveCount(resultHistory.length)
+    await expect(fiberPlot.locator('[data-rc-history-point]')).toHaveCount(resultHistory.length)
+    const sectionKey = JSON.parse(await fixedReview.getByLabel('RC section history', { exact: true }).inputValue())
+    const fiberKey = JSON.parse(await fixedReview.getByLabel('RC material point history', { exact: true }).inputValue())
+    const plotted = async (locator: typeof sectionPlot) => locator.locator('[data-rc-history-point]').evaluateAll(elements => elements.map(element => ({
+      state: Number(element.getAttribute('data-rc-history-point')), x: Number(element.getAttribute('data-rc-x')), y: Number(element.getAttribute('data-rc-y')),
+    })))
+    expect(await plotted(sectionPlot)).toEqual(resultHistory.map((response: any, state: number) => {
+      const section = response.section_results.find((value: any) => value.member_id === sectionKey[0] && value.integration_point_index === sectionKey[1])
+      return { state, x: section.curvature_z_per_m, y: section.moment_z_Nm }
+    }))
+    expect(await plotted(fiberPlot)).toEqual(resultHistory.map((response: any, state: number) => {
+      const fiber = response.fiber_results.find((value: any) => value.member_id === fiberKey[0] && value.integration_point_index === fiberKey[1] && value.fiber_index === fiberKey[2])
+      return { state, x: fiber.strain, y: fiber.stress_MPa }
+    }))
+    const firstSectionPoint = sectionPlot.locator('[data-rc-history-point="0"]')
+    await firstSectionPoint.focus(); await firstSectionPoint.press('Enter')
+    await expect(fixedReview.getByLabel('RC target to inspect', { exact: true })).toHaveValue('0')
+    await checkShape(resultHistory[0], 1000)
+    for (const node of resultHistory[0].node_displacements) await expect(fixedReview.locator('[data-rc-table="nodes"] tbody tr')
+      .filter({ has: view.page.getByRole('rowheader', { name: node.node_id, exact: true }) }).locator('td'))
+      .toHaveText([node.UX_m, node.UY_m, node.UZ_m, node.RX_rad, node.RY_rad, node.RZ_rad].map(String))
+    await fixedReview.getByLabel('Fiber stress–strain history stored state', { exact: true }).selectOption(String(resultHistory.length - 1))
+    await expect(fixedReview.getByLabel('RC target to inspect', { exact: true })).toHaveValue(String(resultHistory.length - 1))
+    await checkShape(finalResponse, 1000)
+    expect(visualizationPosts).toEqual([])
+    const explorerScreenshot = testInfo.outputPath('actual-fixed-result-explorer.png')
+    await fixedReview.screenshot({ path: explorerScreenshot })
+    await testInfo.attach('actual-fixed-result-explorer.png', { path: explorerScreenshot, contentType: 'image/png' })
+    evidence.resultExploration = { sourceResultHash: repaired.job.result.content_hash, states: resultHistory.length,
+      geometryScale: 1000, selectedMember: memberId, sectionKey, fiberKey, additionalSubmissions: visualizationPosts.length }
     await view.page.getByText('Submit a new RC input', { exact: true }).click()
     await expect(view.page.locator('[data-rc-changed-run]')).toContainText('current new job status: succeeded')
     const retained = await driver.command<any>('inspect_job', { job_id: failed.job.job_id })

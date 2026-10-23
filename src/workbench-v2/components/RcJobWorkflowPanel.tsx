@@ -193,9 +193,24 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
                 return result
               } catch (error) { if (active()) invalidate(error); throw error }
             }
+            const guardProjection = async <T,>(operation: () => Promise<T>): Promise<T> => {
+              // A bounded display projection may be unavailable while the
+              // original review remains valid. Authorization is still checked
+              // on both sides of the RPC, including its local-error outcome.
+              const outcome = await guard(async (): Promise<{ ok: true; value: T } | { ok: false; error: Error }> => {
+                try { return { ok: true, value: await operation() } }
+                catch (error) {
+                  if (error instanceof Error && /^(?:rc_review_(?:geometry_[a-z_]+|history_[a-z_]+|projection_invalid)|rc_corotational_report_geometry_invalid)$/.test(error.message)) return { ok: false, error }
+                  throw error
+                }
+              })
+              if (!outcome.ok) throw outcome.error
+              return outcome.value
+            }
             if (loaded.rcCorotationalReview) {
               const original = loaded.rcCorotationalReview
               const scoped: RcCorotationalReportReview = { ...original,
+                ...(original.geometry ? { geometry: () => guardProjection(() => original.geometry!()) } : {}),
                 ...(original.comparisonSummary ? { comparisonSummary: () => guard(() => original.comparisonSummary!()) } : {}),
                 state: index => guard(() => original.state(index)),
                 statePage: (start, count) => guard(() => original.statePage(start, count)),
@@ -207,11 +222,13 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
             if (loaded.rcReview) {
               const original = loaded.rcReview
               const scoped: RcJobReview = { ...original,
+                ...(original.geometry ? { geometry: () => guardProjection(() => original.geometry!()) } : {}),
                 ...(original.comparisonSummary ? { comparisonSummary: () => guard(() => original.comparisonSummary!()) } : {}),
                 epoch: index => guard(() => original.epoch(index)),
                 material: (member, point, fiber) => guard(() => original.material(member, point, fiber)),
                 download: role => guard(() => original.download(role)),
-                ...(original.materialPage ? { materialPage: (member: string, point: number, fiber: number, start: number, count: number) => guard(() => original.materialPage!(member, point, fiber, start, count)) } : {}),
+                ...(original.materialPage ? { materialPage: (member: string, point: number, fiber: number, start: number, count: number) => guardProjection(() => original.materialPage!(member, point, fiber, start, count)) } : {}),
+                ...(original.sectionPage ? { sectionPage: (member: string, point: number, start: number, count: number) => guardProjection(() => original.sectionPage!(member, point, start, count)) } : {}),
                 ...(original.verifyQuantityReport ? { verifyQuantityReport: (...args: Parameters<NonNullable<RcJobReview['verifyQuantityReport']>>) => guard(() => original.verifyQuantityReport!(...args)) } : {}),
                 ...(original.downloadQuantityReport ? { downloadQuantityReport: (id: string) => guard(() => original.downloadQuantityReport!(id)) } : {}),
               }

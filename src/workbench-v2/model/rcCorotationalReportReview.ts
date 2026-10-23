@@ -3,6 +3,7 @@ import type { WorkbenchJobView } from './jobSchema'
 import { RC_REVIEW_DEFAULT_RESULT_BYTES, RC_REVIEW_MAX_RESULT_BYTES } from './rcJobReviewBudget'
 import type { RcCorotationalReportControl, RcCorotationalReportResponse } from './rcCorotationalReportSchema'
 import type { RcScenarioSummary } from './rcScenarioComparison'
+import type { RcResultGeometry } from './rcResultVisualization'
 
 export interface RcCorotationalStateChoice {
   state_index: number; phase: 'preload' | 'control'; control_displacement_m: number; load_factor: number; checkpoint_hash: string
@@ -22,6 +23,7 @@ export interface RcCorotationalReportReview {
   statePage(start: number, count: number): Promise<RcCorotationalStateChoice[]>
   download(): Promise<Blob>
   comparisonSummary?(): Promise<RcScenarioSummary>
+  geometry?(): Promise<RcResultGeometry>
   reopen(bytes: Uint8Array): Promise<RcCorotationalReportSummary>
   onFailure(listener: (message: string) => void): () => void
   dispose(): void
@@ -111,6 +113,7 @@ export async function loadRcCorotationalReportReview(
       statePage: (start, count) => authorized(() => call('statePage', { start, count })),
       download: () => authorized(() => call('download')),
       comparisonSummary: () => authorized(() => call('comparisonSummary')),
+      geometry: () => authorized(() => call('geometry')),
       reopen: (fileBytes) => {
         if (!(fileBytes instanceof Uint8Array) || fileBytes.byteLength === 0 || fileBytes.byteLength > limit) return Promise.reject(new JobArtifactError('rc_corotational_report_too_large'))
         if (reopening) return Promise.reject(new JobArtifactError('rc_corotational_report_rpc_busy'))

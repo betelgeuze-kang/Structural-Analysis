@@ -75,6 +75,39 @@ time and CPU time. Missing phase evidence or unknown reservations cannot become
 zero time. Financial cost remains unknown without an explicit price declaration;
 the existing quantity-report workflow remains available for supported jobs.
 
+## Explore verified results
+
+Open a successful job to inspect its saved states. The deformation view uses
+geometry from the verified original request and translations from the selected
+stored result, independently of the current input draft. Global X/Y coordinates
+are in metres. The original and displaced member chords share one physical
+aspect ratio; the displayed deformation multiplier is explicit and survives
+state changes. Straight chords join the displaced endpoints. They do not
+interpolate beam curvature or use rotations to invent an interior shape.
+
+Select a member in the view with a mouse or keyboard, or use its selection
+control. For ordinary RC results, the member, section and fiber tables follow
+that selection. Local i/j end-force values retain their stored signs and units:
+FX/FY in N and MZ in N*m. These are endpoint forces, not a continuous internal
+force diagram. Select an integration point for its moment–curvature history and
+a fiber for its stress–strain history. Curvature is in 1/m, moment in N*m,
+strain is dimensionless and stress is in MPa.
+
+History plots join stored samples in their original sequence, including
+preload and reversals; no sorting, smoothing, fitting or zero shift is applied.
+Select a plotted point to inspect its corresponding stored state. Section and
+material histories are shown in pages of 20 samples. Full response arrays stay
+in the reviewer worker; only the requested bounded page reaches the interface.
+Page boundaries are not stitched into a fabricated continuous history.
+
+Saved corotational reports provide a displaced chord view, selected member
+endpoint highlights in the nodal tables, and a control-displacement/load-factor
+plot for the current accepted-state page. Preload and accepted subdivisions
+remain separate from authored targets. Member forces, section moment–curvature
+and fiber stress–strain remain explicitly unavailable in this nodal-only format.
+Changing a selection, page or visual scale does not submit or resume an analysis.
+Original artifact downloads remain unchanged.
+
 ## Diagnose and change a failed run
 
 Terminal jobs expose stored invocation metadata through existing read-only API
