@@ -1,4 +1,5 @@
 import exampleModel from '../../../examples/public_rc_fiber_frame_explicit_layers.json'
+import portalExample from '../../../examples/public_rc_portal_frame_corotational_request.json'
 import { isRcCorotationalRequest, validateRcRequestProfile, type RcObject } from './rcJobSchema'
 import { longitudinalSteelArea } from './rcSteelLayers'
 import { parseNativeJsonStrict } from './nativeFrameProvider'
@@ -11,7 +12,7 @@ export interface RcEditorResolution { value: RcObject | null; issues: RcEditorIs
 export interface RcEditorPreview {
   nodes: Array<{ id: string; x: number; y: number; support: string[] }>
   members: Array<{ id: string; from: string; to: string }>
-  loads: Array<{ node: string; fx: number; fy: number }>
+  loads: Array<{ node: string; fx: number; fy: number; phase: 'reference' | 'fixed' }>
 }
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value))
 const record = (v: unknown): v is RcObject => !!v && typeof v === 'object' && !Array.isArray(v)
@@ -48,6 +49,11 @@ export function createRcEditorExample(sourceRevision: string): RcObject {
   }
 }
 
+/** Clone the shared bounded portal request; authoring never submits or solves it. */
+export function createRcPortalEditorExample(sourceRevision: string): RcObject {
+  return { ...clone(portalExample), source_revision: sourceRevision }
+}
+
 /** Field paths only address fixed schema keys and bounded array indices, never authored object keys. */
 export function rcEditorSections(request: RcObject): RcEditorSection[] {
   const field = (path: string, label: string, kind: RcEditorField['kind'] = 'text'): RcEditorField => {
@@ -79,6 +85,7 @@ export function rcEditorSections(request: RcObject): RcEditorSection[] {
   })
   const config = request.config
   if (record(config)) {
+    const portal = isRcCorotationalRequest(request) && config.experimental_portal_frame === true
     const controls = isRcCorotationalRequest(request)
       ? Object.prototype.hasOwnProperty.call(config, 'control_observation')
         ? [f('/config', 'control_observation', 'json')]
@@ -86,8 +93,14 @@ export function rcEditorSections(request: RcObject): RcEditorSection[] {
       : [f('/config', 'control_global_dof', 'number')]
     sections.push({ label: 'Control', rows: [{ path: '/config', label: 'Control and targets', fields: [
       ...controls, f('/config', 'targets_m', 'list', 'Targets (m, comma separated)'),
-      ...(isRcCorotationalRequest(request) ? [f('/config', 'fixed_nodal_loads', 'json')] : []),
+      ...(isRcCorotationalRequest(request) && !portal ? [f('/config', 'fixed_nodal_loads', 'json')] : []),
     ] }] })
+    if (portal && Array.isArray(config.fixed_nodal_loads)) sections.push({ label: 'Gravity preload', rows: config.fixed_nodal_loads.slice(0, 2).map((_: unknown, i: number) => {
+      const path = `/config/fixed_nodal_loads/${i}`
+      return { path, label: `Roof gravity load ${i + 1}`, fields: [
+        field(`${path}/0`, 'Roof node'), field(`${path}/1`, 'Component'), field(`${path}/2`, 'Gravity FY (kN)', 'number'),
+      ] }
+    }) })
   }
   return sections
 }
@@ -96,6 +109,7 @@ export function rcEditorSections(request: RcObject): RcEditorSection[] {
 export function validateRcEditorRequest(request: RcObject): RcEditorIssue[] {
   const issues: RcEditorIssue[] = [], issue = (path: string, message: string) => issues.push({ path, message })
   try { validateRcRequestProfile(request) } catch (error) { issue('/', error instanceof Error ? error.message : 'Request profile is invalid.') }
+  const portal = isRcCorotationalRequest(request) && request.config?.experimental_portal_frame === true
   const m = request.model
   if (!record(m)) return [...issues, { path: '/model', message: 'A canonical model is required.' }]
   for (const [key, min, max] of [['nodes', 2, 16], ['elements', 1, 15], ['materials', 2, 32], ['sections', 1, 16], ['loads', 1, 48], ['supports', 1, 2]] as const) {
@@ -130,7 +144,8 @@ export function validateRcEditorRequest(request: RcObject): RcEditorIssue[] {
   })) issue('/model/nodes', 'Coordinate extent must be finite.')
   members.forEach((e, i) => {
     const p = `/model/elements/${i}`
-    if (e.type !== 'stateful_rc_fiber_frame2d') issue(`${p}/type`, 'Only stateful_rc_fiber_frame2d is supported.')
+    const elementType = portal ? 'stateful_corotational_rc_fiber_frame2d' : 'stateful_rc_fiber_frame2d'
+    if (e.type !== elementType) issue(`${p}/type`, `This profile requires ${elementType}.`)
     if (!Array.isArray(e.nodes) || e.nodes.length !== 2 || e.nodes[0] === e.nodes[1] || !e.nodes.every((n: unknown) => nodeIds.has(String(n)))) issue(`${p}/nodes`, 'Reference two distinct declared nodes.')
     else {
       if (adjacent.get(e.nodes[0])?.has(e.nodes[1])) issue(`${p}/nodes`, 'Duplicate member connectivity is unsupported.')
@@ -158,7 +173,7 @@ export function validateRcEditorRequest(request: RcObject): RcEditorIssue[] {
   })
   sections.forEach((s, i) => {
     const p = `/model/sections/${i}`
-    if (!['rectangular_rc_fiber_section', 'rectangular_rc_explicit_steel_layers'].includes(s.type)) issue(`${p}/type`, 'Only rectangular RC sections are supported.')
+    if (!(portal ? ['rectangular_rc_fiber_section'] : ['rectangular_rc_fiber_section', 'rectangular_rc_explicit_steel_layers']).includes(s.type)) issue(`${p}/type`, portal ? 'The portal profile requires rectangular sections with top and bottom bars.' : 'Only rectangular RC sections are supported.')
     for (const key of ['width_m', 'depth_m']) if (!finite(s[key]) || s[key] <= 0) issue(`${p}/${key}`, 'A positive section dimension is required.')
     if (!Number.isInteger(s.concrete_layer_count) || s.concrete_layer_count < 2 || s.concrete_layer_count > 32) issue(`${p}/concrete_layer_count`, 'Concrete layer count must be an integer from 2 to 32.')
     if (!materialKind(s.concrete_material, 'asymmetric_concrete_damage')) issue(`${p}/concrete_material`, 'Reference a declared concrete material.')
@@ -178,7 +193,7 @@ export function validateRcEditorRequest(request: RcObject): RcEditorIssue[] {
   const pin = request.schema_version === 'structural-analysis-job-request.v4' || c?.experimental_pin_roller_beam === true
   const guide = request.schema_version === 'structural-analysis-job-request.v5' || c?.experimental_fixed_guided_axial === true
   const restraint = (support: RcObject) => Array.isArray(support.dofs) ? [...support.dofs].sort().join(',') : ''
-  if (!pin && !guide && (rows(m.supports).length !== 1 || !endpoints.some(n => n.id === rows(m.supports)[0]?.node) || restraint(rows(m.supports)[0] ?? {}) !== 'RZ,UX,UY')) issue('/model/supports', 'The cantilever endpoint must restrain exactly UX, UY and RZ.')
+  if (!pin && !guide && !portal && (rows(m.supports).length !== 1 || !endpoints.some(n => n.id === rows(m.supports)[0]?.node) || restraint(rows(m.supports)[0] ?? {}) !== 'RZ,UX,UY')) issue('/model/supports', 'The cantilever endpoint must restrain exactly UX, UY and RZ.')
   if (pin && (rows(m.supports).length !== 2 || !rows(m.supports).some(s => restraint(s) === 'UX,UY') || !rows(m.supports).some(s => restraint(s) === 'UY'))) issue('/model/supports', 'Pin/roller requires one UX/UY pin and one UY roller at distinct nodes.')
   if (pin && (nodes.some(n => n.coordinates?.[1] !== nodes[0]?.coordinates?.[1]) || new Set(nodes.map(n => n.coordinates?.[0])).size !== nodes.length)) issue('/model/nodes', 'The pin/roller profile requires distinct horizontal stations.')
   if (pin || guide) {
@@ -236,7 +251,13 @@ export function rcEditorPreview(request: RcObject): RcEditorPreview | null {
   if ([0, 1].some(axis => !Number.isFinite(Math.max(...nodes.map(n => n.coordinates[axis])) - Math.min(...nodes.map(n => n.coordinates[axis]))))) return null
   return { nodes: nodes.map(n => ({ id: n.id, x: n.coordinates[0], y: n.coordinates[1], support: rows(m.supports).filter(s => s.node === n.id).flatMap(s => Array.isArray(s.dofs) ? s.dofs.filter((d: unknown) => typeof d === 'string') : []) })),
     members: rows(m.elements).filter(e => Array.isArray(e.nodes) && e.nodes.length === 2 && e.nodes.every((n: unknown) => ids.has(String(n)))).map(e => ({ id: String(e.id), from: e.nodes[0], to: e.nodes[1] })),
-    loads: rows(m.loads).filter(l => ids.has(l.node) && finite(l.components?.FX) && finite(l.components?.FY)).map(l => ({ node: l.node, fx: l.components.FX, fy: l.components.FY })),
+    loads: [
+      ...rows(m.loads).filter(l => ids.has(l.node) && finite(l.components?.FX) && finite(l.components?.FY))
+        .map(l => ({ node: l.node, fx: l.components.FX, fy: l.components.FY, phase: 'reference' as const })),
+      ...(Array.isArray(request.config?.fixed_nodal_loads) ? request.config.fixed_nodal_loads.slice(0, 48) : [])
+        .filter((load: unknown) => Array.isArray(load) && load.length === 3 && ids.has(load[0]) && ['FX', 'FY'].includes(load[1]) && finite(load[2]))
+        .map((load: [string, string, number]) => ({ node: load[0], fx: load[1] === 'FX' ? load[2] : 0, fy: load[1] === 'FY' ? load[2] : 0, phase: 'fixed' as const })),
+    ],
   }
 }
 

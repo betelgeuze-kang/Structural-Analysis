@@ -20,6 +20,7 @@ from structural_analysis.api.rc_corotational_control import (
 )
 from structural_analysis.api.rc_corotational_control_model import (
     compile_rc_corotational_control_model,
+    validate_rc_portal_control_selection,
 )
 from structural_analysis.api.strict_json import strict_json_object_bytes
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_displacement_control import (
@@ -187,6 +188,7 @@ class RCCorotationalJobControlConfig:
     experimental_pin_roller_beam: bool
     experimental_fixed_guided_axial: bool
     control_observation: tuple[tuple[str, str, float], ...] | None = None
+    experimental_portal_frame: bool = False
 
     def observation_dict(self):
         if self.control_observation is None:
@@ -214,6 +216,8 @@ class RCCorotationalJobControlConfig:
         }
         if self.control_observation is not None:
             result["control_observation"] = self.observation_dict()
+        if self.experimental_portal_frame:
+            result["experimental_portal_frame"] = True
         return result
 
 
@@ -305,7 +309,14 @@ def validate_rc_corotational_job_request(
         if selected_observation
         else _CONFIG_KEYS
     )
+    portal = (
+        type(value["config"]) is dict and "experimental_portal_frame" in value["config"]
+    )
+    if portal:
+        keys = keys | {"experimental_portal_frame"}
     config = _object(value["config"], keys, "config")
+    if portal and config["experimental_portal_frame"] is not True:
+        raise ValueError("experimental_portal_frame must be true when present")
     node, component = config.get("control_node_id"), config.get("control_component")
     observation_rows = None
     if selected_observation:
@@ -366,8 +377,14 @@ def validate_rc_corotational_job_request(
         if type(config[flag]) is not bool:
             raise ValueError(f"{flag} must be an explicit boolean")
     if (
-        config["experimental_pin_roller_beam"]
-        and config["experimental_fixed_guided_axial"]
+        sum(
+            (
+                config["experimental_pin_roller_beam"],
+                config["experimental_fixed_guided_axial"],
+                portal,
+            )
+        )
+        > 1
     ):
         raise ValueError("support profiles are mutually exclusive")
     control = RCCorotationalJobControlConfig(
@@ -386,6 +403,7 @@ def validate_rc_corotational_job_request(
         ),
         experimental_pin_roller_beam=config["experimental_pin_roller_beam"],
         experimental_fixed_guided_axial=config["experimental_fixed_guided_axial"],
+        experimental_portal_frame=portal,
     )
     isolated = (
         value["schema_version"] == ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
@@ -427,7 +445,9 @@ def validate_rc_corotational_job_request(
         fixed_nodal_loads=control.fixed_nodal_loads,
         experimental_pin_roller_beam=control.experimental_pin_roller_beam,
         experimental_fixed_guided_axial=control.experimental_fixed_guided_axial,
+        experimental_portal_frame=control.experimental_portal_frame,
     )
+    validate_rc_portal_control_selection(compiled, node, component, observation_rows)
     if control.control_observation is not None:
         compile_rc_control_observation(compiled, control.observation_dict())
     else:

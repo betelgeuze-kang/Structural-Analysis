@@ -9,7 +9,9 @@ existing host configuration. They do not start a worker or change solver authori
 Open **Submit a new RC input** and import the complete request JSON, or explicitly
 select the repository cantilever example and supply a caller-declared source
 revision. The structured editor handles supported serial cantilever, pin/roller
-and fixed/guided requests; it is not an arbitrary frame model compiler.
+and fixed/guided requests, plus the explicitly selected
+[one-storey, one-bay RC portal](rc-one-bay-portal-workflow.md).
+It is not an arbitrary frame model compiler.
 
 Edit nodes, members, material parameters, sections, explicit longitudinal steel
 layers, restraints, nodal loads and control targets. The preview shows the same

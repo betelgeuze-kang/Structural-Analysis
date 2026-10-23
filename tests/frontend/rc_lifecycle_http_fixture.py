@@ -31,6 +31,7 @@ from unittest.mock import patch
 from wsgiref.simple_server import WSGIRequestHandler, make_server
 
 from structural_analysis.api import rc_fiber_frame_direct_control as rc_api
+from structural_analysis.api import rc_corotational_control as corotational_api
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
 )
@@ -243,6 +244,11 @@ def forbid_numerical_calls(workspace):
             (rc_api, "validate_bounded_rc_fiber_direct_control_artifacts"),
             (paths, "_execute_raw"),
             (newton, "newton_raphson_vector"),
+            (corotational_api, "analyze_rc_corotational_control"),
+            (corotational_api, "validate_rc_corotational_control_artifacts"),
+            (corotational_api, "solve_stateful_corotational_fiber_frame2d_load_step"),
+            (corotational_api, "run_corotational_control_subdivision"),
+            (corotational_api, "_source_identity"),
         ):
             stack.enter_context(patch.object(module, name, forbidden))
         yield

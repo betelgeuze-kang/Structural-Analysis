@@ -106,13 +106,18 @@ class FixtureContracts(unittest.TestCase):
                 fixture.rc_api.validate_bounded_rc_fiber_direct_control_artifacts,
                 fixture.paths._execute_raw,
                 fixture.newton.newton_raphson_vector,
+                fixture.corotational_api.analyze_rc_corotational_control,
+                fixture.corotational_api.validate_rc_corotational_control_artifacts,
+                fixture.corotational_api.solve_stateful_corotational_fiber_frame2d_load_step,
+                fixture.corotational_api.run_corotational_control_subdivision,
+                fixture.corotational_api._source_identity,
             ):
                 with self.assertRaisesRegex(AssertionError, "zero numerical calls"):
                     function()
         rows = (
             (self.workspace / "http-numerical-attempts.jsonl").read_text().splitlines()
         )
-        self.assertEqual(len(rows), 4)
+        self.assertEqual(len(rows), 9)
 
     def test_actual_worker_death_restore_and_report_inspection_without_sockets(self):
         supervisor = fixture.Supervisor(self.workspace)

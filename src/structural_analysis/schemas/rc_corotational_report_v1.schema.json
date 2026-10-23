@@ -777,6 +777,9 @@
             "experimental_fixed_guided_axial": {
               "type": "boolean"
             },
+            "experimental_portal_frame": {
+              "const": true
+            },
             "control_observation": {
               "type": "object",
               "additionalProperties": false,

@@ -1,8 +1,11 @@
 import { expect, test } from '@playwright/test'
+import { readFile } from 'node:fs/promises'
+import portalRequest from '../../examples/public_rc_portal_frame_corotational_request.json'
 import {
-  changeRcEditorRows, createRcEditorExample, rcEditorPreview, rcEditorSections,
+  changeRcEditorRows, createRcEditorExample, createRcPortalEditorExample, rcEditorPreview, rcEditorSections,
   resolveRcEditorDraft, validateRcEditorRequest,
 } from '../../src/workbench-v2/model/rcModelEditor'
+import { validateRcRequestProfile } from '../../src/workbench-v2/model/rcJobSchema'
 
 const revision = 'a'.repeat(40)
 const request = () => createRcEditorExample(revision)
@@ -131,6 +134,146 @@ test('untrusted material keys never become editable object paths, and oversized 
   value.model.nodes = Array.from({ length: 1000 }, (_, i) => ({ id: `N${i}`, coordinates: [i, 0, 0] }))
   expect(rcEditorSections(value).find(s => s.label === 'Nodes')!.rows.length).toBeLessThanOrEqual(48)
   expect(validateRcEditorRequest(value).some(i => i.path === '/model/nodes')).toBe(true)
+})
+
+test('portal example clones the shared request and requires its explicit native profile', () => {
+  const value = createRcPortalEditorExample(revision)
+  expect(value).toEqual({ ...portalRequest, source_revision: revision })
+  expect(value.config.experimental_portal_frame).toBe(true)
+  expect(validateRcEditorRequest(value)).toEqual([])
+  expect(() => validateRcRequestProfile(value)).not.toThrow()
+  const snapshot = JSON.stringify(portalRequest)
+  value.model.nodes[0].coordinates[0] = -1
+  expect(JSON.stringify(portalRequest)).toBe(snapshot)
+  expect(validateRcEditorRequest(createRcPortalEditorExample('')).length).toBeGreaterThan(0)
+  const noOptIn = createRcPortalEditorExample(revision)
+  delete noOptIn.config.experimental_portal_frame
+  expect(() => validateRcRequestProfile(noOptIn)).toThrow('portal_opt_in_required')
+  const legacy = request(); legacy.config.experimental_portal_frame = true
+  expect(() => validateRcRequestProfile(legacy)).toThrow()
+})
+
+test('portal dimension, section, reinforcement and gravity edits preserve the shared run settings', () => {
+  const original = createRcPortalEditorExample(revision)
+  const edited = resolveRcEditorDraft(original, {
+    '/model/nodes/1/coordinates/0': '5', '/model/nodes/3/coordinates/0': '5',
+    '/model/nodes/2/coordinates/1': '3.5', '/model/nodes/3/coordinates/1': '3.5',
+    '/model/sections/0/width_m': '0.5', '/model/sections/0/top_bar_count': '5',
+    '/config/fixed_nodal_loads/0/2': '-2', '/config/fixed_nodal_loads/1/2': '-3',
+  })
+  expect(edited.issues).toEqual([])
+  expect(edited.value!.config.fixed_nodal_loads).toEqual([['N3', 'FY', -2], ['N4', 'FY', -3]])
+  expect(edited.value!.model.sections[0]).toMatchObject({ width_m: 0.5, top_bar_count: 5 })
+  for (const key of ['config', 'preload_config', 'targets_m', 'maximum_attempt_count', 'maximum_subdivision_depth']) expect(edited.value!.config[key]).toEqual(original.config[key])
+  expect(edited.value!.execution_config).toEqual(original.execution_config)
+  expect(original.model.nodes[1].coordinates[0]).toBe(4)
+  const preview = rcEditorPreview(edited.value!)!
+  expect(preview.nodes.map(node => [node.x, node.y])).toEqual([[0, 0], [5, 0], [0, 3.5], [5, 3.5]])
+  expect(preview.members).toHaveLength(3)
+  expect(preview.loads.filter(load => load.phase === 'fixed')).toEqual([
+    { node: 'N3', fx: 0, fy: -2, phase: 'fixed' }, { node: 'N4', fx: 0, fy: -3, phase: 'fixed' },
+  ])
+  expect(preview.loads.filter(load => load.phase === 'reference')).toEqual([{ node: 'N4', fx: 1, fy: 0, phase: 'reference' }])
+})
+
+test('portal admission refuses other topologies, support roles, loads and control observations', () => {
+  const changes: Array<[string, (value: any) => void]> = [
+    ['false opt-in', value => { value.config.experimental_portal_frame = false }],
+    ['numeric opt-in', value => { value.config.experimental_portal_frame = 1 }],
+    ['conflicting pin', value => { value.config.experimental_pin_roller_beam = true }],
+    ['conflicting guide', value => { value.config.experimental_fixed_guided_axial = true }],
+    ['fifth node', value => { value.model.nodes.push({ id: 'N5', coordinates: [2, 3, 0] }) }],
+    ['missing member', value => { value.model.elements.pop() }],
+    ['extra diagonal', value => { value.model.elements.push({ ...value.model.elements[0], id: 'diagonal', nodes: ['N1', 'N4'] }) }],
+    ['diagonal replacement', value => { value.model.elements[0].nodes = ['N1', 'N4'] }],
+    ['duplicate member', value => { value.model.elements[1].nodes = [...value.model.elements[0].nodes] }],
+    ['nonrectangular', value => { value.model.nodes[3].coordinates[0] += 0.1 }],
+    ['duplicate corner', value => { value.model.nodes[3].coordinates = [...value.model.nodes[2].coordinates] }],
+    ['overflowing width', value => { value.model.nodes[0].coordinates[0] = value.model.nodes[2].coordinates[0] = -1e308; value.model.nodes[1].coordinates[0] = value.model.nodes[3].coordinates[0] = 1e308 }],
+    ['out-of-plane node', value => { value.model.nodes[3].coordinates[2] = 0.1 }],
+    ['legacy element', value => { value.model.elements[0].type = 'stateful_rc_fiber_frame2d' }],
+    ['unsupported member release', value => { value.model.elements[0].end_releases = ['RZ'] }],
+    ['roller base', value => { value.model.supports[1].dofs = ['UY'] }],
+    ['roof support', value => { value.model.supports[1].node = 'N4' }],
+    ['duplicate base', value => { value.model.supports[1].node = 'N1' }],
+    ['vertical control', value => { value.config.control_component = 'UY' }],
+    ['fixed control', value => { value.config.control_node_id = 'N1' }],
+    ['weighted observation', value => { delete value.config.control_node_id; delete value.config.control_component; value.config.control_observation = { schema_version: 'linear-physical-displacement-observation.v1', terms: [{ node_id: 'N4', component: 'UX', coefficient: 1 }] } }],
+    ['missing gravity', value => { value.config.fixed_nodal_loads.pop() }],
+    ['upward gravity', value => { value.config.fixed_nodal_loads[0][2] = 1 }],
+    ['zero gravity', value => { value.config.fixed_nodal_loads[0][2] = 0 }],
+    ['horizontal preload', value => { value.config.fixed_nodal_loads[0][1] = 'FX' }],
+    ['base preload', value => { value.config.fixed_nodal_loads[0][0] = 'N1' }],
+    ['duplicate roof preload', value => { value.config.fixed_nodal_loads[1][0] = 'N3' }],
+    ['vertical reference', value => { value.model.loads[0].components.FY = -1 }],
+    ['base reference', value => { value.model.loads[0].node = 'N1' }],
+    ['zero reference', value => { value.model.loads[0].components.FX = 0 }],
+    ['unsupported section', value => { value.model.sections[0].type = 'rectangular_rc_explicit_steel_layers' }],
+  ]
+  for (const [label, mutate] of changes) {
+    const value = createRcPortalEditorExample(revision); mutate(value)
+    expect(() => validateRcRequestProfile(value), label).toThrow(/^rc_review_/)
+    expect(validateRcEditorRequest(value).length, label).toBeGreaterThan(0)
+  }
+})
+
+test('portal profile keeps native identities through row reordering and supports isolated v7 policy', () => {
+  const value = createRcPortalEditorExample(revision)
+  value.model.nodes.reverse(); value.model.elements.reverse(); value.model.supports.reverse()
+  expect(validateRcEditorRequest(value)).toEqual([])
+  value.schema_version = 'structural-analysis-job-request.v7'
+  value.execution_config.phase_execution_policy = {
+    schema_version: 'bounded-rc-corotational-phase-execution-policy.v1', analysis_timeout_ms: 60000, verification_timeout_ms: 60000, termination_grace_ms: 500,
+  }
+  expect(() => validateRcRequestProfile(value)).not.toThrow()
+  value.execution_config.phase_execution_policy.analysis_timeout_ms = 0
+  expect(() => validateRcRequestProfile(value)).toThrow('phase_policy_invalid')
+})
+
+test('browser authors a portal locally and reopens its project without posting an analysis', async ({ page }) => {
+  const posts: string[] = []
+  page.on('request', outgoing => { if (outgoing.method() === 'POST') posts.push(outgoing.url()) })
+  await page.addInitScript(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcJobCollectionUrl: '/v1/jobs' } })
+  await page.goto(`${process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'}/#/workbench-v2`)
+  await page.getByText('Submit a new RC input', { exact: true }).click()
+  await page.getByText('Start from the RC portal example', { exact: true }).click()
+  await page.getByLabel('Caller-declared source revision for portal example', { exact: true }).fill(revision)
+  await page.getByRole('button', { name: 'Load portal example locally', exact: true }).click()
+  const apply = page.getByRole('button', { name: 'Apply structured model to draft', exact: true })
+  await expect(page.locator('[data-rc-portal-profile]')).toBeVisible()
+  await expect(page.locator('[data-rc-preview-node]')).toHaveCount(4)
+  await expect(page.locator('[data-rc-preview-member]')).toHaveCount(3)
+  await expect(page.locator('[data-rc-preview-load-phase="fixed"]')).toHaveCount(2)
+  await expect(page.locator('[data-rc-preview-load-phase="reference"]')).toHaveCount(1)
+  await page.locator('[data-rc-editor-field="/model/nodes/2/coordinates/1"]').fill('3.5')
+  await expect(apply).toBeDisabled()
+  await page.locator('[data-rc-editor-field="/model/nodes/3/coordinates/1"]').fill('3.5')
+  await expect(apply).toBeEnabled()
+  await page.getByText('Gravity preload (2)', { exact: true }).click()
+  const gravity = page.locator('[data-rc-editor-field="/config/fixed_nodal_loads/0/2"]')
+  await gravity.fill('1')
+  await expect(apply).toBeDisabled()
+  await gravity.fill('-2')
+  await apply.click()
+  const draft = JSON.parse(await page.getByLabel('Typed RC request JSON', { exact: true }).inputValue())
+  expect(draft.model.nodes[2].coordinates).toEqual([0, 3.5, 0])
+  expect(draft.config.fixed_nodal_loads[0]).toEqual(['N3', 'FY', -2])
+  expect(draft.config.experimental_portal_frame).toBe(true)
+  await page.getByRole('button', { name: 'Capture current design', exact: true }).click()
+  const pending = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Save RC project', exact: true }).click()
+  const download = await pending, saved = await readFile((await download.path())!, 'utf8')
+  expect(JSON.parse(JSON.parse(saved).scenarios[0].intent.serialized)).toEqual(draft)
+  await page.reload()
+  const open = page.getByLabel('Open RC project file', { exact: true })
+  await expect(open).toBeEnabled()
+  await open.setInputFiles({ name: 'portal-project.json', mimeType: 'application/json', buffer: Buffer.from(saved) })
+  await expect(page.locator('[data-rc-project-file-message]')).toContainText('Project opened')
+  await page.getByText('Submit a new RC input', { exact: true }).click()
+  await expect(page.locator('[data-rc-portal-profile]')).toBeVisible()
+  expect(JSON.parse(await page.getByLabel('Typed RC request JSON', { exact: true }).inputValue())).toEqual(draft)
+  await expect(page.locator('[data-scenario-id]')).toHaveCount(1)
+  expect(posts).toEqual([])
 })
 
 test('browser keeps invalid text local, updates preview from parsed draft and applies without submitting a job', async ({ page }) => {

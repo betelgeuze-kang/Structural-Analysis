@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useState, type ReactElement } from 'react'
 import {
-  changeRcEditorRows, createRcEditorExample, rcEditorPreview, rcEditorSections,
+  changeRcEditorRows, createRcEditorExample, createRcPortalEditorExample, rcEditorPreview, rcEditorSections,
   resolveRcEditorDraft, type RcEditorPreview,
 } from '../model/rcModelEditor'
 
@@ -14,8 +14,9 @@ export interface RcModelEditorProps {
 function ModelPreview({ model }: { model: RcEditorPreview }): ReactElement {
   const xs = model.nodes.map(n => n.x), ys = model.nodes.map(n => n.y)
   const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys)
-  const span = Math.max(maxX - minX, maxY - minY)
-  const scale = span > 0 && Number.isFinite(span) ? 380 / span : 1
+  const width = maxX - minX, height = maxY - minY
+  const fit = Math.min(width > 0 ? 380 / width : Infinity, height > 0 ? 150 / height : Infinity)
+  const scale = Number.isFinite(fit) && fit > 0 ? fit : 1
   const point = (id: string) => {
     const n = model.nodes.find(row => row.id === id)!
     return { x: 250 + (n.x - minX - (maxX - minX) / 2) * scale,
@@ -45,14 +46,16 @@ function ModelPreview({ model }: { model: RcEditorPreview }): ReactElement {
       {model.loads.filter(l => l.fx !== 0 || l.fy !== 0).map((load, i) => {
         const p = point(load.node), length = Math.hypot(load.fx, load.fy)
         const dx = load.fx / length * 30, dy = -load.fy / length * 30
-        return <g key={i} aria-label={`${load.node} FX ${load.fx} kN FY ${load.fy} kN`}>
-          <line x1={p.x - dx} y1={p.y - dy} x2={p.x} y2={p.y} stroke="currentColor" strokeWidth="2" />
-          <circle cx={p.x - dx} cy={p.y - dy} r="2" fill="currentColor" />
+        const color = load.phase === 'fixed' ? '#e9a23b' : '#56a8e9'
+        return <g key={i} data-rc-preview-load-phase={load.phase} aria-label={`${load.phase === 'fixed' ? 'Fixed preload' : 'Reference load'} ${load.node} FX ${load.fx} kN FY ${load.fy} kN`}>
+          <title>{load.phase === 'fixed' ? 'Fixed preload' : 'Reference load'}: {load.node}, FX {load.fx} kN, FY {load.fy} kN</title>
+          <line x1={p.x - dx} y1={p.y - dy} x2={p.x} y2={p.y} stroke={color} strokeWidth="2" />
+          <circle cx={p.x - dx} cy={p.y - dy} r="2" fill={color} />
         </g>
       })}
       <text x="10" y="240" fill="currentColor" fontSize="11">XY · coordinates in m · undeformed geometry</text>
     </svg>
-    <figcaption>Draft geometry and authored supports/loads. This preview does not run or validate structural behavior.</figcaption>
+    <figcaption>Draft geometry and authored supports/loads. Blue: proportional reference loads. Orange: fixed preload applied before control targets. This preview does not run or validate structural behavior.</figcaption>
   </figure>
 }
 
@@ -62,6 +65,7 @@ export function RcModelEditor({ value, onChange, onDirtyChange, disabled = false
   const [base, setBase] = useState(value)
   const [edits, setEdits] = useState<Record<string, string>>({})
   const [exampleRevision, setExampleRevision] = useState('')
+  const [portalRevision, setPortalRevision] = useState('')
   const [message, setMessage] = useState('')
   const [dirty, setDirty] = useState(false)
   useEffect(() => { setBase(value); setEdits({}); setDirty(false); setMessage('') }, [value])
@@ -83,7 +87,7 @@ export function RcModelEditor({ value, onChange, onDirtyChange, disabled = false
   }
   return <section data-rc-model-editor aria-label="Structured RC model editor">
     <h3>Structured RC model editor</h3>
-    <p>Edit a bounded serial cantilever, pin/roller beam or fixed/guided request. Units are m, kN and MPa as labeled. The original profile, solver settings, execution budget and source declaration are retained. The core service performs final input admission.</p>
+    <p>Edit a supported cantilever, pin/roller beam, fixed/guided request or one-storey, one-bay RC portal. Units are m, kN and MPa as labeled. The original profile, solver settings, execution budget and source declaration are retained. The core service performs final input admission.</p>
     <details>
       <summary>Start from the repository RC cantilever example</summary>
       <p>This explicitly selected software example copies <code>examples/public_rc_fiber_frame_explicit_layers.json</code> and the bounded two-target browser request settings. It is not a validated specimen or a source attestation. Review and replace its physical inputs before use.</p>
@@ -94,9 +98,20 @@ export function RcModelEditor({ value, onChange, onDirtyChange, disabled = false
         setMessage('Repository example loaded locally. Review every input, then Apply to update the submission draft.')
       }}>Load repository example locally</button>
     </details>
+    <details>
+      <summary>Start from the RC portal example</summary>
+      <p>The shared portal example has two fixed bases, two columns and one beam. Fixed downward roof loads are applied before horizontal displacement targets. Edit the rectangle's node coordinates, sections, reinforcement and loads, then Apply. This software example carries no specimen or design qualification.</p>
+      <label htmlFor={`${prefix}-portal-source`}>Caller-declared source revision for portal example</label>
+      <input id={`${prefix}-portal-source`} value={portalRevision} onChange={event => setPortalRevision(event.target.value)} disabled={disabled} placeholder="40 hexadecimal characters" />
+      <button type="button" disabled={disabled || !/^[a-f0-9]{40}$/.test(portalRevision)} onClick={() => {
+        setBase(createRcPortalEditorExample(portalRevision)); setEdits({}); setDirty(true)
+        setMessage('Portal example loaded locally. Review its gravity preload, lateral targets and model, then Apply. No job has been submitted.')
+      }}>Load portal example locally</button>
+    </details>
     {!base && <p>Import an RC request below, or explicitly load the repository example to begin editing.</p>}
     {base && <>
       <p>Profile: <code>{String(base.schema_version)}</code> · local changes: {dirty ? 'not applied' : 'none'}</p>
+      {(base.config as Record<string, unknown> | undefined)?.experimental_portal_frame === true && <p data-rc-portal-profile>RC portal: four rectangular corner nodes, two fixed bases, two columns and one beam. Adjust both right-hand X coordinates for span and both roof Y coordinates for height. Gravity FY remains negative at both roof nodes; reference loads are horizontal FX.</p>}
       {resolution?.value && Number.isInteger(resolution.value.config?.control_global_dof) && <p>Indexed control currently selects{' '}
         <strong>{String(resolution.value.model?.nodes?.[Math.floor(resolution.value.config.control_global_dof / 3)]?.id ?? 'unavailable')}</strong>{' '}
         {['UX', 'UY', 'RZ'][resolution.value.config.control_global_dof % 3] ?? 'unavailable'}. Copied nodes are appended so existing indexed controls retain their node.</p>}

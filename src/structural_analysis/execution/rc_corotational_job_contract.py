@@ -450,6 +450,7 @@ def _expected_api_request(typed, before, restart_hash, source_identity):
             fixed_nodal_loads=cfg.fixed_nodal_loads,
             experimental_pin_roller_beam=cfg.experimental_pin_roller_beam,
             experimental_fixed_guided_axial=cfg.experimental_fixed_guided_axial,
+            experimental_portal_frame=cfg.experimental_portal_frame,
         )
         observation = compile_rc_control_observation(compiled, cfg.observation_dict())
         request["control_observation"] = observation.to_dict()
@@ -468,6 +469,7 @@ def _native(raw, typed, api_request):
         fixed_nodal_loads=typed.config.fixed_nodal_loads,
         experimental_pin_roller_beam=typed.config.experimental_pin_roller_beam,
         experimental_fixed_guided_axial=typed.config.experimental_fixed_guided_axial,
+        experimental_portal_frame=typed.config.experimental_portal_frame,
     )
     context = hashlib.sha256(
         _api_bytes(
