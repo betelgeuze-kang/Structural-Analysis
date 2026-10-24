@@ -20,6 +20,7 @@ export interface JobReadTransport {
   get(role?: string, accept?: string): Promise<Response>
   withSignal?(signal: AbortSignal): JobReadTransport
   getCorotationalReport?(binding: RcCorotationalReportBinding): Promise<Response>
+  getCorotationalDetailReport?(binding: RcCorotationalReportBinding): Promise<Response>
 }
 
 const JSON_CONTENT_TYPE = /^application\/(?:json|[a-z0-9.+-]+\+json)\b/i
@@ -58,8 +59,11 @@ export interface RcJobTransport {
   listQuantityReports(jobId: string, page?: RcReportPage): Promise<Response>
   getQuantityReport(jobId: string, reportId: string): Promise<Response>
   getCorotationalReport(jobId: string, binding: RcCorotationalReportBinding): Promise<Response>
+  getCorotationalDetailReport?(jobId: string, binding: RcCorotationalReportBinding): Promise<Response>
   /** Stored observations only; this read never dispatches numerical work. */
   getRcInvocations?(jobId: string, ordinal?: number): Promise<Response>
+  getRcControl?(jobId: string): Promise<Response>
+  postRcControl?(jobId: string, canonicalCommand: string): Promise<Response>
 }
 
 function endpoint(value: string, authorize?: JobAuthorizationProvider): URL {
@@ -181,6 +185,18 @@ export async function createJobReadTransport(
       }
       return response
     },
+    async getCorotationalDetailReport(binding) {
+      await verify(readSignal)
+      const outgoing = new Headers(headers)
+      outgoing.set('Accept', 'application/json')
+      Object.entries(corotationalReportHeaders(binding)).forEach(([key, value]) => outgoing.set(key, value))
+      const response = await request(`${url.href}/rc-corotational-detail-report`, outgoing, readSignal)
+      try { await verify(readSignal) } catch (error) {
+        try { await response.body?.cancel() } catch { /* Preserve scope failure. */ }
+        throw error
+      }
+      return response
+    },
     async get(role, accept = 'application/json') {
       if (role !== undefined && !ROLE.test(role)) {
         throw new JobArtifactError('job_artifact_role_invalid')
@@ -239,6 +255,7 @@ export async function createJobWorkflowTransport(
       verifyAuthorizationScope: () => verify(readSignal),
       withSignal: (next) => readTransport(jobId, linkedSignal(readSignal, next)),
       getCorotationalReport: (binding) => send(`${path}/rc-corotational-report`, undefined, corotationalReportHeaders(binding), readSignal),
+      getCorotationalDetailReport: (binding) => send(`${path}/rc-corotational-detail-report`, undefined, corotationalReportHeaders(binding), readSignal),
       get(role, accept = 'application/json') {
         if (role !== undefined && !ROLE.test(role)) throw new JobArtifactError('job_artifact_role_invalid')
         return send(`${path}${role === undefined ? '' : `/${role}`}`, undefined, undefined, readSignal, accept)
@@ -252,11 +269,17 @@ export async function createJobWorkflowTransport(
     readTransport,
     getJob: (jobId) => send(jobPath(jobId)),
     getRequest: (jobId) => send(`${jobPath(jobId)}/request`),
+    getRcControl: (jobId) => send(`${jobPath(jobId)}/rc-control`),
+    postRcControl(jobId, canonicalCommand) {
+      if (typeof canonicalCommand !== 'string' || !canonicalCommand.length || new TextEncoder().encode(canonicalCommand).byteLength > 4096) throw new JobArtifactError('rc_control_command_invalid')
+      return send(`${jobPath(jobId)}/rc-control`, canonicalCommand)
+    },
     getRcInvocations(jobId, ordinal) {
       if (ordinal !== undefined && (!Number.isSafeInteger(ordinal) || ordinal < 1 || ordinal > 9999)) throw new JobArtifactError('rc_invocation_ordinal_invalid')
       return send(`${jobPath(jobId)}/rc-invocations${ordinal === undefined ? '' : `/${ordinal}`}`)
     },
     getCorotationalReport: (jobId, binding) => send(`${jobPath(jobId)}/rc-corotational-report`, undefined, corotationalReportHeaders(binding)),
+    getCorotationalDetailReport: (jobId, binding) => send(`${jobPath(jobId)}/rc-corotational-detail-report`, undefined, corotationalReportHeaders(binding)),
     submit(bytes, key) {
       if (!(bytes instanceof Uint8Array) || !bytes.byteLength || bytes.byteLength > SUBMIT_MAX_BYTES) throw new JobArtifactError('job_submit_too_large')
       if (typeof key !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/.test(key)) throw new JobArtifactError('job_idempotency_key_invalid')

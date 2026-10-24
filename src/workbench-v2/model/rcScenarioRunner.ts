@@ -4,6 +4,7 @@ import { SUBMIT_MAX_BYTES, type RcJobTransport } from './jobTransport'
 import { refreshRcJob, submitRcJob, verifyRcSubmissionBinding } from './rcWorkflowProvider'
 import type { RcScenarioIntent } from './rcScenarioComparison'
 import { parseNativeJsonStrict } from './nativeFrameProvider'
+import { loadRcJobControl } from './rcJobControl'
 
 export function captureRcScenario(draft: RcObject, name: string, id = crypto.randomUUID(), authoredText?: string): RcScenarioIntent {
   validateRcRequestProfile(draft)
@@ -28,6 +29,7 @@ export class RcScenarioUnconfirmedError extends Error { constructor() { super('r
 export interface RcScenarioRunOptions {
   signal: AbortSignal; existingJob?: WorkbenchJobView; onJob: (job: WorkbenchJobView) => void
   maximumPolls?: number; pollIntervalMs?: number
+  onPaused?(): void
 }
 function wait(ms: number, signal: AbortSignal): Promise<void> {
   signal.throwIfAborted()
@@ -58,11 +60,21 @@ export async function runRcScenario(transport: RcJobTransport, intent: RcScenari
     options.onJob(job)
   }
   await verifyRcSubmissionBinding(transport, job, bytes)
+  async function paused(): Promise<boolean> {
+    if (['succeeded', 'failed', 'cancelled'].includes(job!.status)) return false
+    const control = await loadRcJobControl(transport, job!)
+    options.signal.throwIfAborted()
+    if (control?.state !== 'paused') return false
+    options.onPaused?.()
+    return true
+  }
+  if (await paused()) return job
   for (let count = 0; count < maximum && !['succeeded', 'failed', 'cancelled'].includes(job.status); count++) {
     await wait(interval, options.signal)
     const next = await refreshRcJob(transport, job.job_id)
     if (next.request.content_hash !== job.request.content_hash) throw new Error('rc_scenario_request_binding_changed')
     job = next; options.onJob(job)
+    if (await paused()) return job
   }
   await transport.verifyAuthorizationScope()
   options.signal.throwIfAborted()

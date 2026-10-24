@@ -4,6 +4,8 @@ import { RC_REVIEW_DEFAULT_RESULT_BYTES, RC_REVIEW_MAX_RESULT_BYTES } from './rc
 import type { RcCorotationalReportControl, RcCorotationalReportResponse } from './rcCorotationalReportSchema'
 import type { RcScenarioSummary } from './rcScenarioComparison'
 import type { RcResultGeometry } from './rcResultVisualization'
+import type { RcCorotationalDetailSummary, RcCorotationalDetailMemberView, RcCorotationalDetailSectionView,
+  RcCorotationalDetailFiber, RcCorotationalSectionHistory, RcCorotationalFiberHistory } from './rcCorotationalDetailReport'
 
 export interface RcCorotationalStateChoice {
   state_index: number; phase: 'preload' | 'control'; control_displacement_m: number; load_factor: number; checkpoint_hash: string
@@ -24,6 +26,13 @@ export interface RcCorotationalReportReview {
   download(): Promise<Blob>
   comparisonSummary?(): Promise<RcScenarioSummary>
   geometry?(): Promise<RcResultGeometry>
+  openDetails?(): Promise<RcCorotationalDetailSummary>
+  detailMember?(state: number, member: string): Promise<RcCorotationalDetailMemberView>
+  detailSection?(state: number, member: string, point: number): Promise<RcCorotationalDetailSectionView>
+  detailFiber?(state: number, member: string, point: number, fiber: number): Promise<RcCorotationalDetailFiber>
+  detailSectionPage?(member: string, point: number, start: number, count: number): Promise<RcCorotationalSectionHistory[]>
+  detailFiberPage?(member: string, point: number, fiber: number, start: number, count: number): Promise<RcCorotationalFiberHistory[]>
+  detailDownload?(): Promise<Blob>
   reopen(bytes: Uint8Array): Promise<RcCorotationalReportSummary>
   onFailure(listener: (message: string) => void): () => void
   dispose(): void
@@ -83,7 +92,8 @@ export async function loadRcCorotationalReportReview(
   }
   function call<T>(type: string, payload: object = {}, transfer: Transferable[] = []): Promise<T> {
     if (failure) return Promise.reject(new JobArtifactError(failure))
-    if (pending.size >= 16) return Promise.reject(new JobArtifactError('rc_corotational_report_rpc_limit'))
+    if (pending.size >= 16) return Promise.reject(new JobArtifactError(type === 'openDetails' || type.startsWith('detail')
+      ? 'rc_corotational_report_detail_rpc_limit' : 'rc_corotational_report_rpc_limit'))
     const id = ++sequence
     return new Promise<T>((resolve, reject) => {
       pending.set(id, { type, resolve, reject, timer: setTimeout(() => stop('rc_corotational_report_worker_timeout'), 60000) })
@@ -107,6 +117,42 @@ export async function loadRcCorotationalReportReview(
         throw error
       }
     }
+    let detailSummary: RcCorotationalDetailSummary | null = null, openingDetails: Promise<RcCorotationalDetailSummary> | null = null
+    const openDetails = (): Promise<RcCorotationalDetailSummary> => authorized(async () => {
+      if (detailSummary) return detailSummary
+      if (openingDetails) return openingDetails
+      openingDetails = (async () => {
+        try {
+          if (!transport.getCorotationalDetailReport) throw new JobArtifactError('rc_corotational_report_detail_unavailable')
+          const response = await transport.getCorotationalDetailReport({ requestHash: job.request.content_hash, resultHash: job.result!.content_hash, evidenceHash: job.evidence!.content_hash })
+          if (response.status === 401 || response.status === 403) {
+            try { await response.body?.cancel() } catch { /* Preserve authorization failure. */ }
+            throw new JobArtifactError('job_authorization_unavailable')
+          }
+          if (!response.ok) {
+            try { await response.body?.cancel() } catch { /* Preserve source failure. */ }
+            throw new JobArtifactError('rc_corotational_report_detail_unavailable')
+          }
+          const contentHash = response.headers.get('x-structural-report-sha256'), reportId = response.headers.get('x-structural-report-id')
+          if (!contentHash || !/^sha256:[0-9a-f]{64}$/.test(contentHash) || reportId !== `rcd_${contentHash.slice(7)}`) {
+            try { await response.body?.cancel() } catch { /* Preserve header failure. */ }
+            throw new JobArtifactError('rc_corotational_report_detail_headers_invalid')
+          }
+          const detailBytes = await readBoundedJobBytes(response, limit, 'rc_corotational_report_detail')
+          signal?.throwIfAborted()
+          const value = await call<RcCorotationalDetailSummary>('openDetails', { bytes: detailBytes, contentHash, reportId }, [detailBytes.buffer])
+          await transport.verifyAuthorizationScope?.()
+          signal?.throwIfAborted()
+          detailSummary = value
+          return value
+        } catch (error) {
+          if (error instanceof Error && (/authorization_|AbortError/.test(error.message + error.name)
+            || /^rc_corotational_report_detail_[a-z_]+$/.test(error.message))) throw error
+          throw new JobArtifactError('rc_corotational_report_detail_unavailable')
+        }
+      })().finally(() => { openingDetails = null })
+      return openingDetails
+    })
     return {
       summary, maximumBytes: limit,
       state: (index) => authorized(() => call('state', { index })),
@@ -114,6 +160,13 @@ export async function loadRcCorotationalReportReview(
       download: () => authorized(() => call('download')),
       comparisonSummary: () => authorized(() => call('comparisonSummary')),
       geometry: () => authorized(() => call('geometry')),
+      openDetails,
+      detailMember: (state, member) => authorized(() => call('detailMember', { state, member })),
+      detailSection: (state, member, point) => authorized(() => call('detailSection', { state, member, point })),
+      detailFiber: (state, member, point, fiber) => authorized(() => call('detailFiber', { state, member, point, fiber })),
+      detailSectionPage: (member, point, start, count) => authorized(() => call('detailSectionPage', { member, point, start, count })),
+      detailFiberPage: (member, point, fiber, start, count) => authorized(() => call('detailFiberPage', { member, point, fiber, start, count })),
+      detailDownload: () => authorized(() => call('detailDownload')),
       reopen: (fileBytes) => {
         if (!(fileBytes instanceof Uint8Array) || fileBytes.byteLength === 0 || fileBytes.byteLength > limit) return Promise.reject(new JobArtifactError('rc_corotational_report_too_large'))
         if (reopening) return Promise.reject(new JobArtifactError('rc_corotational_report_rpc_busy'))

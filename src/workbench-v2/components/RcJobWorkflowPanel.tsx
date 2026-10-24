@@ -3,8 +3,12 @@ import { JobServicePanel } from './JobServicePanel'
 import { RcQuantityReportPanel } from './RcQuantityReportPanel'
 import { RcModelEditor } from './RcModelEditor'
 import { RcScenarioComparisonPanel, type RcScenarioProjectSnapshot } from './RcScenarioComparisonPanel'
+import { RcJobControlPanel } from './RcJobControlPanel'
+import type { RcJobControlCustodyEntry } from '../model/rcJobControl'
 import { RcJobDiagnosticsPanel } from './RcJobDiagnosticsPanel'
 import { rcRequestChanges } from '../model/rcJobDiagnostics'
+import { emptyRcProject, sameRcProject, snapshotRcProject } from '../model/rcProjectSnapshot'
+import { registerUnsavedProjectGuard } from '../model/unsavedProjectGuard'
 import { loadWorkbenchJob, type JobLoadResult } from '../model/jobProvider'
 import { createJobWorkflowTransport, type JobAuthorizationProvider, type RcJobTransport } from '../model/jobTransport'
 import { loadRcJobRequest, refreshRcJob, resumeRcJob, submitRcJob, verifyRcSubmissionBinding, SUBMIT_MAX_BYTES } from '../model/rcWorkflowProvider'
@@ -21,6 +25,7 @@ const terminal = (job: WorkbenchJobView) => ['succeeded', 'failed', 'cancelled']
 const empty = (): JobLoadResult => ({ status: 'unconfigured', job: null, errors: [] })
 const projectScope = (transport: RcJobTransport): RcProjectScope => ({ collectionUrl: transport.collectionUrl, tenantId: transport.tenantId ?? null })
 const sameScope = (a: RcProjectScope | null, b: RcProjectScope): boolean => a?.collectionUrl === b.collectionUrl && a.tenantId === b.tenantId
+const emptyScenarios = (): RcScenarioProjectSnapshot => ({ scenarios: [], baselineId: null, variantId: null, busy: false, scope: null, restoreRevision: null })
 
 export function rcWorkflowMessage(error: unknown, operation: 'read' | 'submit' | 'resume' | 'save' = 'read'): string {
   const message = error instanceof Error ? error.message : ''
@@ -90,6 +95,9 @@ export function RcJobWorkflowPanel(props: RcJobWorkflowPanelProps): ReactElement
 
 function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId, initialReportId, authorize, rcReviewResultMaxBytes }: RcJobWorkflowPanelProps): ReactElement {
   const [authEpoch, setAuthEpoch] = useState(0)
+  const [securityEpoch, setSecurityEpoch] = useState(0)
+  const [authorizationLost, setAuthorizationLost] = useState(false)
+  const authorizationLostRef = useRef(false)
   const [openId, setOpenId] = useState('')
   const [requestedId, setRequestedId] = useState<string>()
   const [draft, setDraft] = useState('')
@@ -101,12 +109,35 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
   const intentScope = useRef<RcProjectScope | null>(null)
   const lastScope = useRef<RcProjectScope | null>(null)
   const selectedRef = useRef<RcProjectJobRef | null>(null)
+  const controlCustody = useRef(new Map<string, RcJobControlCustodyEntry>())
+  const initialSelectionAdmitted = useRef(false)
   const [projectBusy, setProjectBusy] = useState(false)
   const [projectMessage, setProjectMessage] = useState('')
   const [projectRestore, setProjectRestore] = useState<{ revision: number; scope: RcProjectScope; scenarios: RcProjectFile['scenarios']; baselineId: string | null; variantId: string | null }>()
   const projectRestoreRevision = useRef(0)
-  const [scenarioState, setScenarioState] = useState<RcScenarioProjectSnapshot>({ scenarios: [], baselineId: null, variantId: null, busy: false, scope: null, restoreRevision: null })
-  const onProjectChange = useCallback((state: typeof scenarioState) => setScenarioState(state), [])
+  const [scenarioState, setScenarioState] = useState<RcScenarioProjectSnapshot>(emptyScenarios)
+  const retainedScenarios = useRef<RcScenarioProjectSnapshot>(emptyScenarios())
+  const pendingOpenedProject = useRef<{ revision: number; project: RcProjectFile } | null>(null)
+  const [projectBaseline, setProjectBaseline] = useState<RcProjectFile | null>(null)
+  const projectRestoreRef = useRef(projectRestore); projectRestoreRef.current = projectRestore
+  const latestProject = useRef<RcProjectFile | null>(null), projectDirtyRef = useRef(false)
+  const authorizationFailureHandler = useRef<(nextScope?: RcProjectScope) => void>(() => {})
+  const onScenarioAuthorizationFailure = useCallback((nextScope?: RcProjectScope) => authorizationFailureHandler.current(nextScope), [])
+  const onProjectChange = useCallback((state: RcScenarioProjectSnapshot) => {
+    if (authorizationLostRef.current) return
+    setScenarioState(state)
+    const expected = projectRestoreRef.current
+    if (state.scope && (!lastScope.current || sameScope(lastScope.current, state.scope))
+      && (!expected || state.restoreRevision === expected.revision)) {
+      retainedScenarios.current = state
+      const opened = pendingOpenedProject.current
+      if (opened && state.restoreRevision === opened.revision && sameScope(state.scope, opened.project.scope)) {
+        pendingOpenedProject.current = null
+        setProjectBaseline(opened.project)
+      }
+    }
+  }, [])
+  useEffect(() => registerUnsavedProjectGuard(() => projectDirtyRef.current), [])
   const [intentVersion, setIntentVersion] = useState(0)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
@@ -129,13 +160,34 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
   const key = JSON.stringify([collectionUrl, initialJobStatusUrl, initialJobId, initialReportId, requestedId, authEpoch, refreshEpoch])
   const current = session.key === key ? session : { key, transport: null, load: empty(), input: null }
 
+  function clearPrivateProject(): void {
+    fileGeneration.current++
+    intent.current = null; intentScope.current = null; selectedRef.current = null; lastScope.current = null
+    controlCustody.current.clear()
+    retainedScenarios.current = emptyScenarios(); pendingOpenedProject.current = null
+    latestProject.current = null; projectDirtyRef.current = false
+    setDraft(''); setDraftValue(null); setEditorDirty(false); setIntentVersion(value => value + 1)
+    setOpenId(''); setRequestedId(''); setChangedRun(null); setChangedReferences(null)
+    setProjectRestore(undefined); projectRestoreRef.current = undefined
+    setScenarioState(emptyScenarios()); setProjectBaseline(null); setProjectBusy(false); setProjectMessage('')
+    setResumeRefreshRequired(null); resumeRefreshJob.current = null
+    setSecurityEpoch(value => value + 1)
+  }
+  authorizationFailureHandler.current = nextScope => {
+    if (!nextScope) { invalidate(new Error('job_authorization_unavailable')); return }
+    // The child observed a confirmed transition from its own retained scope.
+    // Clear that custody even if the parent has already admitted the new scope.
+    generation.current++; controllerRef.current?.abort(); disposeReviews()
+    if (pollTimer.current) clearTimeout(pollTimer.current)
+    clearPrivateProject(); lastScope.current = nextScope
+    setBusy(false); setAuthEpoch(value => value + 1)
+  }
+
   function invalidate(error: unknown, operation: 'read' | 'submit' | 'resume' | 'save' = 'read'): void {
     setMessage(rcWorkflowMessage(error, operation))
     if (rcWorkflowAuthorizationFailure(error)) {
-      setChangedRun(null)
-      setChangedReferences(null)
-      intent.current = null; intentScope.current = null; selectedRef.current = null
-      setProjectRestore(undefined); setProjectBusy(false)
+      if (!authorizationLostRef.current) clearPrivateProject()
+      authorizationLostRef.current = true; setAuthorizationLost(true)
       generation.current++
       controllerRef.current?.abort()
       if (pollTimer.current) clearTimeout(pollTimer.current)
@@ -145,6 +197,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
     }
   }
   useEffect(() => {
+    if (authorizationLost) return
     const controller = new AbortController(), ownGeneration = ++generation.current
     beginRcPhaseSession(controller.signal, ownGeneration)
     traceRcPhase(controller.signal, 'effect.setup')
@@ -201,7 +254,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
               const outcome = await guard(async (): Promise<{ ok: true; value: T } | { ok: false; error: Error }> => {
                 try { return { ok: true, value: await operation() } }
                 catch (error) {
-                  if (error instanceof Error && /^(?:rc_review_(?:geometry_[a-z_]+|history_[a-z_]+|projection_invalid)|rc_corotational_report_geometry_invalid)$/.test(error.message)) return { ok: false, error }
+                  if (error instanceof Error && /^(?:rc_review_(?:geometry_[a-z_]+|history_[a-z_]+|projection_invalid)|rc_corotational_report_(?:geometry_invalid|detail_[a-z_]+))$/.test(error.message)) return { ok: false, error }
                   throw error
                 }
               })
@@ -213,6 +266,13 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
               const scoped: RcCorotationalReportReview = { ...original,
                 ...(original.geometry ? { geometry: () => guardProjection(() => original.geometry!()) } : {}),
                 ...(original.comparisonSummary ? { comparisonSummary: () => guard(() => original.comparisonSummary!()) } : {}),
+                ...(original.openDetails ? { openDetails: () => guardProjection(() => original.openDetails!()) } : {}),
+                ...(original.detailMember ? { detailMember: (...args: Parameters<NonNullable<RcCorotationalReportReview['detailMember']>>) => guardProjection(() => original.detailMember!(...args)) } : {}),
+                ...(original.detailSection ? { detailSection: (...args: Parameters<NonNullable<RcCorotationalReportReview['detailSection']>>) => guardProjection(() => original.detailSection!(...args)) } : {}),
+                ...(original.detailFiber ? { detailFiber: (...args: Parameters<NonNullable<RcCorotationalReportReview['detailFiber']>>) => guardProjection(() => original.detailFiber!(...args)) } : {}),
+                ...(original.detailSectionPage ? { detailSectionPage: (...args: Parameters<NonNullable<RcCorotationalReportReview['detailSectionPage']>>) => guardProjection(() => original.detailSectionPage!(...args)) } : {}),
+                ...(original.detailFiberPage ? { detailFiberPage: (...args: Parameters<NonNullable<RcCorotationalReportReview['detailFiberPage']>>) => guardProjection(() => original.detailFiberPage!(...args)) } : {}),
+                ...(original.detailDownload ? { detailDownload: () => guardProjection(() => original.detailDownload!()) } : {}),
                 state: index => guard(() => original.state(index)),
                 statePage: (start, count) => guard(() => original.statePage(start, count)),
                 download: () => guard(() => original.download()),
@@ -249,6 +309,14 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
         await transport.verifyAuthorizationScope()
         if (!active()) { loaded.rcReview?.dispose(); loaded.rcCorotationalReview?.dispose(); return }
         selectedRef.current = rcProjectJobRef(job)
+        if (requestedId === undefined && !initialSelectionAdmitted.current) {
+          initialSelectionAdmitted.current = true
+          const initialRef = { ...selectedRef.current }, initialScope = projectScope(transport)
+          setProjectBaseline(previous => previous ?? snapshotRcProject({
+            schema: 'rc-workbench-project.v1', scope: initialScope, draft: '', submission: null,
+            selectedJob: initialRef, changedRun: null, scenarios: [], baselineId: null, variantId: null,
+          }))
+        }
         traceRcPhase(controller.signal, loaded.status === 'ready' ? 'ui.ready.queue' : 'ui.other.queue')
         setSession(old => ({ ...old, key, transport, load: loaded }))
         if (resumeRefreshJob.current === jobId) {
@@ -267,19 +335,17 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
     }
     createJobWorkflowTransport(collectionUrl, controller.signal, authorize).then(value => {
       if (!active()) return
-      if (lastScope.current && !sameScope(lastScope.current, projectScope(value))) {
-        intent.current = null; intentScope.current = null; selectedRef.current = null
-        setChangedRun(null); setChangedReferences(null); setProjectRestore(undefined)
-      }
+      const scopeChanged = lastScope.current && !sameScope(lastScope.current, projectScope(value))
+      if (scopeChanged) clearPrivateProject()
       lastScope.current = projectScope(value)
       transport = value
       traceRcPhase(controller.signal, 'transport.ready')
-      setSession({ key, transport: value, load: savedId ? { status: 'loading', job: null, errors: [] } : empty(), input: null })
+      setSession({ key, transport: value, load: savedId && !scopeChanged ? { status: 'loading', job: null, errors: [] } : empty(), input: null })
       if (invalidSavedId && !requestedId) setMessage('The saved RC job identifier is invalid. Open an exact job explicitly.')
-      if (savedId) { setOpenId(savedId); void poll(savedId) }
-    }).catch(error => { if (active()) setMessage(rcWorkflowMessage(error)) })
+      if (savedId && !scopeChanged) { setOpenId(savedId); void poll(savedId) }
+    }).catch(error => { if (active()) invalidate(error) })
     return () => { traceRcPhase(controller.signal, 'effect.cleanup'); generation.current++; controller.abort(); fileGeneration.current++; if (pollTimer.current) clearTimeout(pollTimer.current); disposeReviews() }
-  }, [key, collectionUrl, authorize, rcReviewResultMaxBytes])
+  }, [key, collectionUrl, authorize, rcReviewResultMaxBytes, authorizationLost])
   useLayoutEffect(() => {
     if (current.transport && current.load.status === 'ready') traceRcPhase(current.transport, 'ui.ready.commit')
   }, [key, current.transport, current.load.status, current.load.job?.job_id, current.load.job?.attempt])
@@ -312,6 +378,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
       if (!intent.current || intent.current.text !== draft) {
         intent.current = { bytes, text: draft, key: `rc-ui-${crypto.randomUUID()}`, job: null }
         intentScope.current = projectScope(current.transport)
+        projectDirtyRef.current = true; setIntentVersion(value => value + 1)
       }
       const submittedIntent = intent.current
       // Restored known jobs are read even when unavailable. Their identifiers
@@ -321,7 +388,11 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
         : await submitRcJob(current.transport, submittedIntent.bytes, submittedIntent.key)
       if (generation.current !== ownGeneration) return
       if (submittedIntent.job && submittedIntent.job.requestHash !== job.request.content_hash) throw new Error('rc_project_job_binding_changed')
-      submittedIntent.job = rcProjectJobRef(job)
+      const acceptedRef = rcProjectJobRef(job)
+      if (submittedIntent.job?.jobId !== acceptedRef.jobId || submittedIntent.job.requestHash !== acceptedRef.requestHash) {
+        submittedIntent.job = acceptedRef
+        projectDirtyRef.current = true; setIntentVersion(value => value + 1)
+      }
       await verifyRcSubmissionBinding(current.transport, job, submittedIntent.bytes)
       await current.transport.verifyAuthorizationScope()
       if (generation.current !== ownGeneration) return
@@ -366,6 +437,20 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
     } catch (error) { if (generation.current === own) invalidate(error) }
     finally { if (generation.current === own) setBusy(false) }
   }
+  const retained = pendingOpenedProject.current?.project ?? retainedScenarios.current
+  const custody = 'schema' in retained ? { scenarios: retained.scenarios, baselineId: retained.baselineId, variantId: retained.variantId, scope: retained.scope } : retained
+  const authoredScope = current.transport ? projectScope(current.transport) : custody.scope ?? lastScope.current
+    ?? { collectionUrl, tenantId: null }
+  const authoringProject: RcProjectFile = {
+    schema: 'rc-workbench-project.v1', scope: authoredScope, draft,
+    submission: intent.current ? { serialized: intent.current.text, idempotencyKey: intent.current.key, job: intent.current.job } : null,
+    selectedJob: selectedRef.current, changedRun: changedReferences,
+    scenarios: custody.scenarios, baselineId: custody.baselineId, variantId: custody.variantId,
+  }
+  latestProject.current = authoringProject
+  const projectDirty = !authorizationLost && (editorDirty || (projectBaseline ? !sameRcProject(authoringProject, projectBaseline) : !emptyRcProject(authoringProject)))
+  projectDirtyRef.current = projectDirty
+
   const projectDisabled = busy || projectBusy || editorDirty || scenarioState.busy || !current.transport
     || !sameScope(scenarioState.scope, projectScope(current.transport))
     || (!!projectRestore && scenarioState.restoreRevision !== projectRestore.revision)
@@ -377,34 +462,36 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
   async function saveProject(): Promise<void> {
     if (projectDisabled || !current.transport) return
     const transport = current.transport, own = generation.current
+    const exportedProject = snapshotRcProject(latestProject.current!)
     fileGeneration.current++
     setProjectBusy(true); setProjectMessage('')
+    let started = false, url: string | null = null, anchor: HTMLAnchorElement | null = null
     try {
       await transport.verifyAuthorizationScope()
       if (own !== generation.current) return
       const scope = projectScope(transport)
       if (!sameScope(scenarioState.scope, scope) || (intent.current && !sameScope(intentScope.current, scope))) throw new Error('job_authorization_scope_changed')
-      const project: RcProjectFile = {
-        schema: 'rc-workbench-project.v1', scope, draft,
-        submission: intent.current ? { serialized: intent.current.text, idempotencyKey: intent.current.key, job: intent.current.job } : null,
-        selectedJob: selectedRef.current,
-        changedRun: changedReferences,
-        scenarios: scenarioState.scenarios, baselineId: scenarioState.baselineId, variantId: scenarioState.variantId,
-      }
-      const payload = serializeRcProjectFile(project)
+      if (!sameScope(exportedProject.scope, scope)) throw new Error('job_authorization_scope_changed')
+      const payload = serializeRcProjectFile(exportedProject)
       await transport.verifyAuthorizationScope()
       if (own !== generation.current) return
-      const url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }))
-      const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'rc-workbench-project.json'
-      document.body.append(anchor); anchor.click(); anchor.remove()
-      setTimeout(() => URL.revokeObjectURL(url), 0)
-      setProjectMessage('Project saved. Open this file to restore the draft, design submissions and job links. Results are verified again when opened.')
+      url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }))
+      anchor = document.createElement('a'); anchor.href = url; anchor.download = 'rc-workbench-project.json'
+      document.body.append(anchor); anchor.click(); started = true
+      await transport.verifyAuthorizationScope()
+      if (own !== generation.current) return
+      setProjectBaseline(exportedProject)
+      setProjectMessage('Project download initiated. Check that the file finished downloading. Changes are tracked from this export; stored results are verified again when opened.')
     } catch (error) {
       if (own === generation.current) {
-        setProjectMessage('The project could not be saved. Keep this workspace open and check its account and input size.')
+        setProjectMessage(started ? 'The download started, but the export could not be confirmed for the current account. Changes remain unexported.' : 'The project could not be exported. Keep this workspace open and check its account and input size.')
         if (rcWorkflowAuthorizationFailure(error)) invalidate(error)
       }
-    } finally { if (own === generation.current) setProjectBusy(false) }
+    } finally {
+      anchor?.remove()
+      if (url) { const completedUrl = url; setTimeout(() => URL.revokeObjectURL(completedUrl), 0) }
+      if (own === generation.current) setProjectBusy(false)
+    }
   }
   async function openProject(file: File): Promise<void> {
     if (projectDisabled || !current.transport) return
@@ -417,6 +504,14 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
       const text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(await file.arrayBuffer())
       if (!active()) return
       const project = parseRcProjectFile(text, projectScope(transport))
+      await transport.verifyAuthorizationScope()
+      if (!active()) return
+      if (projectDirtyRef.current && !window.confirm('This RC project has changes since its last export or open. Replace it with the selected file and discard the local changes?')) {
+        setProjectMessage('Project opening cancelled. The current project and its local changes are retained.')
+        return
+      }
+      await transport.verifyAuthorizationScope()
+      if (!active()) return
       let restoredChange: typeof changedRun = null
       let relationUnavailable = false
       // File-provided relations carry identifiers only. Read their requests
@@ -447,8 +542,10 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
       setChangedRun(restoredChange); setChangedReferences(project.changedRun); setEditorDirty(false)
       setRequestedId(project.selectedJob?.jobId ?? ''); setOpenId(project.selectedJob?.jobId ?? '')
       setResumeRefreshRequired(null); resumeRefreshJob.current = null
-      setProjectRestore({ revision: ++projectRestoreRevision.current, scope: project.scope,
-        scenarios: project.scenarios, baselineId: project.baselineId, variantId: project.variantId })
+      const revision = ++projectRestoreRevision.current
+      pendingOpenedProject.current = { revision, project: snapshotRcProject(project) }
+      const restore = { revision, scope: project.scope, scenarios: project.scenarios, baselineId: project.baselineId, variantId: project.variantId }
+      projectRestoreRef.current = restore; setProjectRestore(restore)
       setRefreshEpoch(value => value + 1)
       setProjectMessage('Project opened. No analysis was submitted. Refresh saved designs to verify their results, or explicitly run captured designs. Submission retries retain their original input and key.'
         + (relationUnavailable ? ' The original/changed job links were retained, but their inputs are unavailable for comparison.' : ''))
@@ -466,6 +563,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
     <p>Open one durable RC job or explicitly submit its complete typed input. Saved analysis and any supported report stay bound to that job.</p>
     <section data-rc-project-file aria-label="RC project file">
       <h3>Save and reopen your work</h3>
+      <p data-rc-project-dirty={String(projectDirty)}>{projectDirty ? 'Changes since the last project export or open. Export the project to keep them.' : 'No changes since the last project export or open.'} Download initiation does not confirm that a file was saved to disk.</p>
       <p>Save the applied input draft, captured designs and job links in a project file. Opening a file replaces this workspace's local project and checks its account and service. Saved results are read and verified again; opening never submits an analysis.</p>
       <button type="button" disabled={projectDisabled} onClick={() => void saveProject()}>Save RC project</button>{' '}
       <label>Open RC project file <input aria-label="Open RC project file" type="file" accept="application/json,.json" disabled={projectDisabled} onChange={event => {
@@ -485,12 +583,13 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
         if (busy || projectBusy) return
         // Preserve the admitted restore identity across same-scope refreshes.
         // The child finishes pending restores and skips already-applied ones.
+        authorizationLostRef.current = false; setAuthorizationLost(false)
         setChangedRun(null); setAuthEpoch(v => v + 1)
       }}>Refresh account and job</button></div>
     <details open={!!activeChangedRun && !activeChangedRun.childId}><summary>Submit a new RC input</summary>
-      <RcModelEditor value={draftValue} disabled={busy || projectBusy} onDirtyChange={setEditorDirty} onChange={value => replaceDraft(JSON.stringify(value, null, 2))} />
-      <label>Typed RC request JSON <textarea aria-label="Typed RC request JSON" disabled={busy || projectBusy} rows={8} value={draft} onChange={e => replaceDraft(e.target.value)} style={{ display: 'block', width: '100%' }} /></label>
-      <label>Choose RC request JSON file <input aria-label="Choose RC request JSON file" disabled={busy || projectBusy} type="file" accept="application/json,.json" onChange={async e => {
+      <RcModelEditor key={securityEpoch} value={draftValue} disabled={busy || projectBusy || authorizationLost} onDirtyChange={setEditorDirty} onChange={value => replaceDraft(JSON.stringify(value, null, 2))} />
+      <label>Typed RC request JSON <textarea aria-label="Typed RC request JSON" disabled={busy || projectBusy || authorizationLost} rows={8} value={draft} onChange={e => replaceDraft(e.target.value)} style={{ display: 'block', width: '100%' }} /></label>
+      <label>Choose RC request JSON file <input aria-label="Choose RC request JSON file" disabled={busy || projectBusy || authorizationLost} type="file" accept="application/json,.json" onChange={async e => {
         const file = e.target.files?.[0]; if (!file) return
         const ownFileGeneration = ++fileGeneration.current
         if (file.size > SUBMIT_MAX_BYTES) { setMessage('The RC input exceeds the supported request size.'); return }
@@ -511,11 +610,16 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
       <button type="button" className="wb2-btn" data-rc-submit-intent={intentVersion} disabled={!current.transport || !draftValue || busy || projectBusy || editorDirty || (!!activeChangedRun && !activeChangedRun.childId && requestDiff?.changes.length === 0)} onClick={() => void submit()}>Submit RC analysis</button>
       <p className="wb2-muted">An uncertain submission retry retains the same input and submission key. Change the input to start a different submission.</p>
     </details>
-    <RcScenarioComparisonPanel key={collectionUrl} collectionUrl={collectionUrl} authorize={authorize} authorizationRevision={authEpoch} draft={editorDirty ? null : draftValue} draftText={draft}
-      disabled={projectBusy} projectRestore={projectRestore} onProjectChange={onProjectChange}
-      onOpenJob={selectJob} />
+    {authorizationLost ? <section data-rc-scenario-comparison><p>Authorization changed or became unavailable. Private project data was cleared. Refresh the account, then explicitly reopen your project file.</p></section>
+      : <RcScenarioComparisonPanel key={`${collectionUrl}:${securityEpoch}`} collectionUrl={collectionUrl} authorize={authorize} authorizationRevision={authEpoch} draft={editorDirty ? null : draftValue} draftText={draft}
+        disabled={projectBusy} projectRestore={projectRestore} onProjectChange={onProjectChange} onAuthorizationFailure={onScenarioAuthorizationFailure}
+        onOpenJob={selectJob} />}
     {message ? <p role="alert" data-rc-workflow-error>{message}</p> : null}
     {current.input ? <InputSummary value={current.input} saved /> : null}
+    {current.transport && current.load.job && current.input && <RcJobControlPanel
+      key={`${current.transport.collectionUrl}:${current.transport.tenantId}:${current.load.job.job_id}:${current.load.job.request.content_hash}`}
+      transport={current.transport} job={current.load.job} custody={controlCustody} disabled={busy || projectBusy}
+      onAuthorizationFailure={invalidate} onRefreshJob={() => setRefreshEpoch(value => value + 1)} />}
     {current.load.job ? <p><a data-rc-project-link href={rcProjectLink(current.load.job.job_id)} target="_blank" rel="noopener">Reopen this RC project</a></p> : null}
     {resumeRefreshRequired && resumeRefreshRequired === openId ? <p data-rc-resume-unconfirmed>The resume outcome is unconfirmed. Open the saved job or refresh the account and job to check its current state before another resume.</p> : null}
     {current.load.job?.status === 'failed' ? <button type="button" className="wb2-btn" data-rc-explicit-retry disabled={!current.transport || busy || projectBusy || resumeRefreshRequired === current.load.job.job_id} onClick={() => void retry()}>

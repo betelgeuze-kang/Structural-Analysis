@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactElement } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type ReactElement } from 'react'
 import { createJobWorkflowTransport, type JobAuthorizationProvider, type RcJobTransport } from '../model/jobTransport'
 import { loadWorkbenchJob } from '../model/jobProvider'
 import type { WorkbenchJobView } from '../model/jobSchema'
@@ -7,6 +7,7 @@ import {
   rcScenarioAuthorizationFailure, rcScenarioRecordedWallSeconds, type RcScenarioIntent, type RcScenarioSummary,
 } from '../model/rcScenarioComparison'
 import { captureRcScenario, RcScenarioUnconfirmedError, runRcScenario } from '../model/rcScenarioRunner'
+import { compareRcScenarioInputs } from '../model/rcScenarioInputComparison'
 import { loadRcJobDiagnostics } from '../model/rcJobDiagnostics'
 import { refreshRcJob } from '../model/rcWorkflowProvider'
 import type { RcProjectScenario, RcProjectScope, RcProjectJobRef } from '../model/rcProjectFile'
@@ -29,6 +30,7 @@ export interface RcScenarioComparisonPanelProps {
   onOpenJob?(jobId: string, reference?: RcProjectJobRef): void
   projectRestore?: { revision: number; scope: RcProjectScope; scenarios: RcProjectScenario[]; baselineId: string | null; variantId: string | null }
   onProjectChange?(state: RcScenarioProjectSnapshot): void
+  onAuthorizationFailure?(nextScope?: RcProjectScope): void
 }
 const COLORS = ['#3a83dc', '#df8f36', '#43a879', '#ba6dbc']
 function number(value: number | null): string { return value === null ? 'Unknown' : value.toExponential(6) }
@@ -56,10 +58,55 @@ function Curve({ rows }: { rows: Scenario[] }): ReactElement | null {
   </figure>
 }
 
+function CapturedInputComparison({ rows }: { rows: Scenario[] }): ReactElement {
+  const prefix = useId()
+  const [baselineId, setBaselineId] = useState(''), [variantId, setVariantId] = useState('')
+  const baseline = rows.find(row => row.intent.id === baselineId) ?? rows[0]
+  const variant = rows.find(row => row.intent.id === variantId) ?? rows[1]
+  const comparison = useMemo(() => compareRcScenarioInputs(baseline?.intent.serialized, variant?.intent.serialized), [baseline?.intent.serialized, variant?.intent.serialized])
+  return <section data-rc-scenario-input-comparison aria-label="Captured design input comparison">
+    <h4>Compare captured inputs</h4>
+    <p>Compare the original captured requests in any job status. Current draft edits do not change these inputs. These selections are separate from the saved numerical-result comparison.</p>
+    <label htmlFor={`${prefix}-input-baseline`}>Input baseline design</label>{' '}
+    <select id={`${prefix}-input-baseline`} style={{ maxWidth: '100%' }} value={baseline?.intent.id ?? ''} onChange={event => setBaselineId(event.target.value)}>
+      <option value="" disabled>Select a captured input</option>
+      {rows.map(row => <option key={row.intent.id} value={row.intent.id}>{row.intent.name} ({row.status})</option>)}
+    </select>{' '}
+    <label htmlFor={`${prefix}-input-variant`}>Input compared design</label>{' '}
+    <select id={`${prefix}-input-variant`} style={{ maxWidth: '100%' }} value={variant?.intent.id ?? ''} onChange={event => setVariantId(event.target.value)}>
+      <option value="" disabled>Select a captured input</option>
+      {rows.map(row => <option key={row.intent.id} value={row.intent.id}>{row.intent.name} ({row.status})</option>)}
+    </select>
+    <div aria-live="polite">
+      <p data-rc-input-identity>{comparison.message}</p>
+      {comparison.status === 'available' && <>
+        <p data-rc-input-compatibility>{comparison.compatibility === 'compatible'
+          ? 'Input comparison scope matches: source, profile, control, target order, loading, units, topology and supports. Geometry, sections and materials may differ. This does not establish a successful or verified numerical comparison.'
+          : comparison.compatibility === 'incompatible' ? 'Numerical comparison scope differs in the following declarations:'
+            : 'Numerical comparison compatibility is unavailable because decoded numbers cannot establish exact input equivalence.'}</p>
+        {comparison.reasons.length > 0 && <ul>{comparison.reasons.map(reason => <li key={reason.key} data-rc-input-mismatch={reason.key}>{reason.label}</li>)}</ul>}
+        {comparison.precisionLimited && <p data-rc-input-precision>Some original numeric values cannot be safely represented or distinguished in this preview. Review the original numeric tokens below; numerical compatibility remains unconfirmed.</p>}
+        {comparison.truncated && <p data-rc-input-truncated>Only the first {comparison.changes.length} changed paths are shown. Additional differences are omitted; this is not a complete input difference list.</p>}
+        {comparison.changes.length > 0 && <div className="wb2-table-wrap"><table>
+          <caption>Captured request differences · original JSON values · array indices retain authored order</caption>
+          <thead><tr><th>Path</th><th>Baseline input</th><th>Compared input</th><th>Difference</th></tr></thead>
+          <tbody>{comparison.changes.map(change => <tr key={change.path} data-rc-input-change={change.path}>
+            <td><code>{change.path}</code></td>
+            <td><code>{change.before}</code>{change.beforeClipped && <span> … [value clipped at 240 characters]</span>}</td>
+            <td><code>{change.after}</code>{change.afterClipped && <span> … [value clipped at 240 characters]</span>}</td>
+            <td>{change.kind === 'numeric_token' ? 'Original numeric token' : 'Value or presence'}</td>
+          </tr>)}</tbody>
+        </table></div>}
+      </>}
+    </div>
+    <p>This is a local input review. It performs no job submission, structural calculation or performance estimate.</p>
+  </section>
+}
+
 /** Separate from benchmark readiness comparison: these are explicitly submitted
  * designs and bounded quantities from their original verified review session.
  */
-export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizationRevision = 0, draft, draftText, disabled = false, onOpenJob, projectRestore, onProjectChange }: RcScenarioComparisonPanelProps): ReactElement {
+export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizationRevision = 0, draft, draftText, disabled = false, onOpenJob, projectRestore, onProjectChange, onAuthorizationFailure }: RcScenarioComparisonPanelProps): ReactElement {
   const [scenarios, setScenarios] = useState<Scenario[]>([])
   const current = useRef<Scenario[]>([])
   const [name, setName] = useState('Design 1')
@@ -74,6 +121,12 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
   const pendingCustody = useRef<{ rows: Scenario[]; selections: { baselineId: string; variantId: string }; scope: RcProjectScope | null; revision: number | null } | null>(null)
   const preserveRestoredSelection = useRef(false)
   projectCallback.current = onProjectChange
+  const authorizationFailureCallback = useRef(onAuthorizationFailure)
+  authorizationFailureCallback.current = onAuthorizationFailure
+  const authorizationFailed = (nextScope?: RcProjectScope) => {
+    pendingCustody.current = null; previousScope.current = null
+    authorizationFailureCallback.current?.(nextScope)
+  }
   const transport = useRef<RcJobTransport | null>(null)
   const scope = useRef<AbortController | null>(null)
   const generation = useRef(0), running = useRef(false)
@@ -95,13 +148,18 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
     function invalidate(): void {
       if (!active()) return
       controller.abort(); transport.current = null; generation.current++; running.current = false
-      pendingCustody.current = null
+      authorizationFailed()
       update([]); setBaselineId(''); setVariantId(''); setBusy(false); setSessionScope(null)
       setMessage('Authorization changed or became unavailable. Reopen this workspace to start a new session.')
     }
     void createJobWorkflowTransport(collectionUrl, controller.signal, authorize).then(value => {
       if (active()) {
         const nextScope = { collectionUrl: value.collectionUrl, tenantId: value.tenantId ?? null }
+        if (retained.scope && (retained.scope.collectionUrl !== nextScope.collectionUrl || retained.scope.tenantId !== nextScope.tenantId) && authorizationFailureCallback.current) {
+          controller.abort(); transport.current = null
+          authorizationFailed(nextScope)
+          return
+        }
         pendingCustody.current = null
         transport.current = value; previousScope.current = nextScope; setSessionScope(nextScope)
         if (retained.scope?.collectionUrl === nextScope.collectionUrl && retained.scope.tenantId === nextScope.tenantId) {
@@ -114,7 +172,10 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
           setMessage('Authorization refreshed. Designs are retained; refresh saved jobs to verify their results again.')
         } else setMessage('Capture up to four designs, then explicitly run them in sequence.')
       }
-    }).catch(() => { if (active()) setMessage('Scenario service is unavailable for this session.') })
+    }).catch(error => { if (active()) {
+      if (rcScenarioAuthorizationFailure(error)) { controller.abort(); authorizationFailed() }
+      setMessage('Scenario service is unavailable for this session.')
+    } })
     // Revoke visible retained summaries as well as future network access when
     // the host changes tenants while the queue is idle.
     const timer = setInterval(() => {
@@ -159,6 +220,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
     }).catch(error => {
       if (!active()) return
       if (rcScenarioAuthorizationFailure(error)) {
+        authorizationFailed()
         controller.abort(); generation.current++; transport.current = null; running.current = false
         update([]); setBaselineId(''); setVariantId(''); setBusy(false); setSessionScope(null)
       }
@@ -196,8 +258,10 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
             if (fresh.request.content_hash !== row.jobRef.requestHash) throw new Error('rc_scenario_request_binding_changed')
             submittedJob = fresh
           }
+          let paused = false
           const job = await runRcScenario(session, row.intent, {
             signal, existingJob: submittedJob,
+            onPaused: () => { paused = true },
             onJob: next => {
               submittedJob = next
               if (active()) patch(id, { job: next, jobRef: { jobId: next.job_id, requestHash: next.request.content_hash }, status: 'waiting' })
@@ -208,8 +272,8 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
             patch(id, { job, status: job.status, message: 'No succeeded numerical result is available. This job is not automatically retried.' }); continue
           }
           if (job.status !== 'succeeded') {
-            patch(id, { job, status: 'waiting', message: 'The bounded polling interval ended. Refresh this stored job to continue monitoring.' })
-            setMessage('The queue paused while a known job remains active. Refresh its stored state before continuing.'); break
+            patch(id, { job, status: 'waiting', message: paused ? 'Pause applied to this stored job. Its original input and job reference are retained.' : 'The bounded polling interval ended. Refresh this stored job to continue monitoring.' })
+            setMessage(paused ? 'The queue is held because this job is paused. Remaining captured designs were not submitted. Resume the job explicitly, then refresh this design before running the remaining designs.' : 'The queue paused while a known job remains active. Refresh its stored state before continuing.'); break
           }
           const sourceTransport = session.readTransport(job.job_id, signal)
           let authorizationDenied: number | null = null
@@ -257,6 +321,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
           if (!active()) return
           const safe = rcScenarioSafeMessage(error)
           if (rcScenarioAuthorizationFailure(error)) {
+            authorizationFailed()
             scope.current?.abort(); generation.current++; transport.current = null; running.current = false; setBusy(false)
             update([]); setBaselineId(''); setVariantId(''); setSessionScope(null); setMessage(safe); break
           }
@@ -289,7 +354,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
       setTimeout(() => URL.revokeObjectURL(url), 0)
     } catch (error) {
       if (epoch === generation.current) {
-        if (rcScenarioAuthorizationFailure(error)) { scope.current?.abort(); generation.current++; transport.current = null; update([]); setBaselineId(''); setVariantId(''); setSessionScope(null) }
+        if (rcScenarioAuthorizationFailure(error)) { authorizationFailed(); scope.current?.abort(); generation.current++; transport.current = null; update([]); setBaselineId(''); setVariantId(''); setSessionScope(null) }
         setMessage(rcScenarioSafeMessage(error))
       }
     }
@@ -311,7 +376,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
     <button type="button" disabled={busy || disabled || !scenarios.length || !transport.current} onClick={() => void download()}>Export scenario JSON</button>
     <p role="status">{message}</p>
     <ul>{scenarios.map(row => <li key={row.intent.id} data-scenario-id={row.intent.id}>
-      <strong>{row.intent.name}</strong> — <span>{row.status}</span>{row.jobRef && <> · <code>{row.jobRef.jobId}</code>{onOpenJob && <> <button type="button" disabled={busy || disabled} onClick={() => onOpenJob(row.jobRef!.jobId, row.jobRef!)}>Open job</button></>}</>}
+      <strong>{row.intent.name}</strong> — <span>{row.status}</span>{row.jobRef && <> · <code>{row.jobRef.jobId}</code>{onOpenJob && <> <button type="button" disabled={disabled} onClick={() => onOpenJob(row.jobRef!.jobId, row.jobRef!)}>Open job</button></>}</>}
       {row.message && <p>{row.message}</p>}
       {row.status === 'captured' && <button type="button" disabled={busy || disabled} onClick={() => {
         update(current.current.filter(item => item.intent.id !== row.intent.id))
@@ -326,6 +391,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
           <dt>Member forces</dt><dd>{row.summary.memberForcesAvailable ? 'Available from original result review' : 'Unavailable in the saved nodal report'}</dd><dt>Financial cost</dt><dd>Unknown; no price or cost is inferred.</dd></dl>
       </details>}
     </li>)}</ul>
+    {scenarios.length > 0 && <CapturedInputComparison rows={scenarios} />}
     {succeeded.length > 0 && <>
       <label>Baseline design <select value={baselineId} disabled={busy || disabled} onChange={event => setBaselineId(event.target.value)}>
         {baselineId && !baseline && <option value={baselineId} disabled>Stored baseline awaiting verification</option>}

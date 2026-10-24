@@ -18,6 +18,8 @@ from structural_analysis.execution.job_service import (
     DurableJobService,
     JobClaim,
     JobServiceError,
+    JobView,
+    RcControlBoundaryStop,
     build_job_completion_evidence,
 )
 from structural_analysis.execution.rc_fiber_direct_control_worker import _LeaseKeeper
@@ -232,7 +234,17 @@ def _execute(
 
             def invoke(phase, call):
                 lease.check()
-                ordinal = service.reserve_execution_attempt(job_id, **credentials)
+                ordinal = service.reserve_rc_execution_attempt(
+                    job_id,
+                    **credentials,
+                    phase=phase,
+                    chunk_request_hash=binding["chunk_request_hash"],
+                    analysis_ordinal=analysis_ordinal
+                    if phase == "verification"
+                    else None,
+                )
+                if isinstance(ordinal, JobView):
+                    raise RcControlBoundaryStop(ordinal)
                 outcome = dict(
                     binding,
                     phase=phase,
@@ -422,6 +434,8 @@ def _execute(
                 progress_total=typed.progress_total,
                 resume_contract_hash=typed.resume_contract_hash,
             )
+    except RcControlBoundaryStop as stop:
+        return stop.job
     except (JobServiceError, RCCorotationalWorkerError, RCFiberPhaseError) as error:
         fail_active(error.code)
         raise

@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useState, type ReactElement } from 'react'
 import {
-  changeRcEditorRows, createRcEditorExample, createRcPortalEditorExample, rcEditorPreview, rcEditorSections,
+  changeRcEditorRows, changeRcPortalDimensions, createRcEditorExample, createRcPortalEditorExample, rcEditorPreview, rcEditorSections, rcPortalDimensions,
   resolveRcEditorDraft, type RcEditorPreview,
 } from '../model/rcModelEditor'
 
@@ -64,18 +64,21 @@ export function RcModelEditor({ value, onChange, onDirtyChange, disabled = false
   const prefix = useId()
   const [base, setBase] = useState(value)
   const [edits, setEdits] = useState<Record<string, string>>({})
+  const [dimensionInputs, setDimensionInputs] = useState<{ span: string; height: string } | null>(null)
   const [exampleRevision, setExampleRevision] = useState('')
   const [portalRevision, setPortalRevision] = useState('')
   const [message, setMessage] = useState('')
   const [dirty, setDirty] = useState(false)
-  useEffect(() => { setBase(value); setEdits({}); setDirty(false); setMessage('') }, [value])
+  useEffect(() => { setBase(value); setEdits({}); setDimensionInputs(null); setDirty(false); setMessage('') }, [value])
   const sections = useMemo(() => base ? rcEditorSections(base) : [], [base])
   const resolution = useMemo(() => base ? resolveRcEditorDraft(base, edits) : null, [base, edits])
+  const dimensions = useMemo(() => base ? rcPortalDimensions(base, edits) : null, [base, edits])
+  const dimensionChange = useMemo(() => base && dimensionInputs ? changeRcPortalDimensions(base, edits, dimensionInputs.span, dimensionInputs.height) : null, [base, edits, dimensionInputs])
   useEffect(() => { onDirtyChange?.(dirty) }, [dirty, onDirtyChange])
   useEffect(() => () => { onDirtyChange?.(false) }, [onDirtyChange])
   const preview = useMemo(() => resolution?.value ? rcEditorPreview(resolution.value) : null, [resolution])
   const rowChange = (path: string, action: 'copy' | 'remove', index: number) => {
-    if (disabled || !resolution?.value) return
+    if (disabled || dimensionInputs || !resolution?.value) return
     try {
       setBase(changeRcEditorRows(resolution.value, path, action, index))
       setEdits({}); setDirty(true); setMessage('Row changed locally. References are retained; resolve admission errors before Apply.')
@@ -94,7 +97,7 @@ export function RcModelEditor({ value, onChange, onDirtyChange, disabled = false
       <label htmlFor={`${prefix}-source`}>Caller-declared source revision for example</label>
       <input id={`${prefix}-source`} value={exampleRevision} onChange={event => setExampleRevision(event.target.value)} disabled={disabled} placeholder="40 hexadecimal characters or sha256:…" />
       <button type="button" disabled={disabled || !/^(?:[a-f0-9]{40}|sha256:[a-f0-9]{64})$/.test(exampleRevision)} onClick={() => {
-        setBase(createRcEditorExample(exampleRevision)); setEdits({}); setDirty(true)
+        setBase(createRcEditorExample(exampleRevision)); setEdits({}); setDimensionInputs(null); setDirty(true)
         setMessage('Repository example loaded locally. Review every input, then Apply to update the submission draft.')
       }}>Load repository example locally</button>
     </details>
@@ -104,14 +107,46 @@ export function RcModelEditor({ value, onChange, onDirtyChange, disabled = false
       <label htmlFor={`${prefix}-portal-source`}>Caller-declared source revision for portal example</label>
       <input id={`${prefix}-portal-source`} value={portalRevision} onChange={event => setPortalRevision(event.target.value)} disabled={disabled} placeholder="40 hexadecimal characters" />
       <button type="button" disabled={disabled || !/^[a-f0-9]{40}$/.test(portalRevision)} onClick={() => {
-        setBase(createRcPortalEditorExample(portalRevision)); setEdits({}); setDirty(true)
+        setBase(createRcPortalEditorExample(portalRevision)); setEdits({}); setDimensionInputs(null); setDirty(true)
         setMessage('Portal example loaded locally. Review its gravity preload, lateral targets and model, then Apply. No job has been submitted.')
       }}>Load portal example locally</button>
     </details>
     {!base && <p>Import an RC request below, or explicitly load the repository example to begin editing.</p>}
     {base && <>
       <p>Profile: <code>{String(base.schema_version)}</code> · local changes: {dirty ? 'not applied' : 'none'}</p>
-      {(base.config as Record<string, unknown> | undefined)?.experimental_portal_frame === true && <p data-rc-portal-profile>RC portal: four rectangular corner nodes, two fixed bases, two columns and one beam. Adjust both right-hand X coordinates for span and both roof Y coordinates for height. Gravity FY remains negative at both roof nodes; reference loads are horizontal FX.</p>}
+      {(base.config as Record<string, unknown> | undefined)?.experimental_portal_frame === true && <>
+        <p data-rc-portal-profile>RC portal: four rectangular corner nodes, two fixed bases, two columns and one beam. Gravity FY remains negative at both roof nodes; reference loads are horizontal FX.</p>
+        <fieldset data-rc-portal-dimensions disabled={disabled} style={{ minWidth: 0 }}>
+          <legend>Portal dimensions</legend>
+          <p>Keep the left-hand X and base Y origin. Update both right-hand X coordinates and both roof Y coordinates together; member directions, supports, loads and all other fields are retained.</p>
+          {dimensions ? <p data-rc-portal-current-dimensions>Current local model: span {dimensions.span} m, height {dimensions.height} m; origin ({dimensions.leftX}, {dimensions.baseY}) m.</p>
+            : <p>Dimension update unavailable until the current node coordinates, members and fixed bases form a rectangle. Resolve those fields below; other edits remain in place.</p>}
+          {(['span', 'height'] as const).map(name => {
+            const fieldId = `${prefix}-portal-${name}`
+            const related = dimensionChange?.issues.filter(issue => issue.path === `/portal_dimensions/${name}`) ?? []
+            return <div key={name}>
+              <label htmlFor={fieldId}>Portal {name} (m)</label>{' '}
+              <input id={fieldId} inputMode="decimal" style={{ maxWidth: '100%', boxSizing: 'border-box' }}
+                value={dimensionInputs?.[name] ?? (dimensions ? String(dimensions[name]) : '')}
+                aria-invalid={related.length > 0} aria-describedby={related.length ? `${fieldId}-error` : undefined}
+                onChange={event => {
+                  setDimensionInputs(previous => ({ span: previous?.span ?? (dimensions ? String(dimensions.span) : ''), height: previous?.height ?? (dimensions ? String(dimensions.height) : ''), [name]: event.target.value }))
+                  setDirty(true); setMessage('')
+                }} />
+              {related.length > 0 && <small id={`${fieldId}-error`}>{related.map(issue => issue.message).join(' ')}</small>}
+            </div>
+          })}
+          <button type="button" disabled={!dimensionChange?.edits} onClick={() => {
+            if (disabled || !dimensionChange?.edits) return
+            setEdits(dimensionChange.edits); setDimensionInputs(null); setDirty(true)
+            setMessage('Portal dimensions updated locally. Review the coordinates and preview, then Apply to update the submission draft.')
+          }}>Update portal dimensions locally</button>
+          {dimensionInputs && <div data-rc-portal-dimensions-pending aria-live="polite">
+            <p>Dimension inputs are not yet reflected in the current local model. Update dimensions locally or Undo before Apply or saving the project.</p>
+            {dimensionChange?.issues.filter(issue => issue.path === '/portal_dimensions').map(issue => <p key={issue.path}>{issue.message}</p>)}
+          </div>}
+        </fieldset>
+      </>}
       {resolution?.value && Number.isInteger(resolution.value.config?.control_global_dof) && <p>Indexed control currently selects{' '}
         <strong>{String(resolution.value.model?.nodes?.[Math.floor(resolution.value.config.control_global_dof / 3)]?.id ?? 'unavailable')}</strong>{' '}
         {['UX', 'UY', 'RZ'][resolution.value.config.control_global_dof % 3] ?? 'unavailable'}. Copied nodes are appended so existing indexed controls retain their node.</p>}
@@ -135,8 +170,8 @@ export function RcModelEditor({ value, onChange, onDirtyChange, disabled = false
               })}
             </div>
             {section.path && <p>
-              <button type="button" disabled={!resolution?.value} onClick={() => rowChange(section.path!, 'copy', index)}>Copy {row.label}</button>{' '}
-              <button type="button" disabled={!resolution?.value} onClick={() => rowChange(section.path!, 'remove', index)}>Remove {row.label}</button>
+              <button type="button" disabled={!!dimensionInputs || !resolution?.value} onClick={() => rowChange(section.path!, 'copy', index)}>Copy {row.label}</button>{' '}
+              <button type="button" disabled={!!dimensionInputs || !resolution?.value} onClick={() => rowChange(section.path!, 'remove', index)}>Remove {row.label}</button>
             </p>}
           </fieldset>)}
           {section.rows.length === 0 && <p>No rows remain. Undo the local changes to restore the imported rows.</p>}
@@ -149,11 +184,11 @@ export function RcModelEditor({ value, onChange, onDirtyChange, disabled = false
           : <p>Local profile and reference checks pass. No calculation has run.</p>}
         {message && <p role="status">{message}</p>}
       </div>
-      <button type="button" disabled={disabled || !dirty || !resolution?.value || !!resolution.issues.length} onClick={() => {
-        if (disabled || !resolution?.value || resolution.issues.length) return
+      <button type="button" disabled={disabled || !dirty || !!dimensionInputs || !resolution?.value || !!resolution.issues.length} onClick={() => {
+        if (disabled || dimensionInputs || !resolution?.value || resolution.issues.length) return
         onChange(resolution.value); setDirty(false); setMessage('Applied to the submission draft. Submit is a separate explicit action.')
       }}>Apply structured model to draft</button>{' '}
-      <button type="button" disabled={disabled || !dirty} onClick={() => { setBase(value); setEdits({}); setDirty(false); setMessage('Local edits discarded; the imported request is restored.') }}>Undo local model changes</button>
+      <button type="button" disabled={disabled || !dirty} onClick={() => { setBase(value); setEdits({}); setDimensionInputs(null); setDirty(false); setMessage('Local edits discarded; the imported request is restored.') }}>Undo local model changes</button>
     </>}
   </section>
 }

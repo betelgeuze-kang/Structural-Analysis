@@ -263,7 +263,7 @@ async function observationHash(report: RcCorotationalReport, raw: string): Promi
 }
 
 /** AJV sees 1, 1.0 and 1e0 as the same JS integer. Retain Python's exact int contract. */
-function integerTokens(value: unknown, raw: string, schema: RcObject): void {
+export function corotationalIntegerTokens(value: unknown, raw: string, schema: RcObject): void {
   if (schema.type === 'integer' && typeof value !== 'number') return
   if (schema.type === 'object' && (value === null || typeof value !== 'object' || Array.isArray(value))) return
   if (schema.type === 'array' && !Array.isArray(value)) return
@@ -272,26 +272,26 @@ function integerTokens(value: unknown, raw: string, schema: RcObject): void {
     && /^(?:0|[1-9]\d*)$/.test(raw), 'integer_token_invalid')
   for (const alternatives of [schema.anyOf, schema.oneOf]) {
     if (Array.isArray(alternatives)) {
-      for (const branch of alternatives) integerTokens(value, raw, branch)
+      for (const branch of alternatives) corotationalIntegerTokens(value, raw, branch)
     }
   }
   if (Array.isArray(value)) {
     const tokens = rawValues(raw)
     for (let i = 0; i < value.length; i++) {
       const child = schema.prefixItems?.[i] ?? schema.items
-      if (child && typeof child === 'object') integerTokens(value[i], tokens[i].trim(), child)
+      if (child && typeof child === 'object') corotationalIntegerTokens(value[i], tokens[i].trim(), child)
     }
   } else if (value && typeof value === 'object') {
     const members = fields(raw)
     for (const [key, childValue] of Object.entries(value)) {
       const child = schema.properties?.[key] ?? schema.additionalProperties
-      if (child && typeof child === 'object') integerTokens(childValue, members.get(key)!.value, child)
+      if (child && typeof child === 'object') corotationalIntegerTokens(childValue, members.get(key)!.value, child)
     }
   }
 }
 
 /** Python's UTF-8 producer cannot emit lone escaped UTF-16 surrogates. */
-function unicodeScalars(value: unknown): void {
+export function corotationalUnicodeScalars(value: unknown): void {
   if (typeof value === 'string') {
     for (let i = 0; i < value.length; i++) {
       const code = value.charCodeAt(i)
@@ -302,8 +302,8 @@ function unicodeScalars(value: unknown): void {
     }
   } else if (value && typeof value === 'object') {
     for (const [key, item] of Object.entries(value)) {
-      unicodeScalars(key)
-      unicodeScalars(item)
+      corotationalUnicodeScalars(key)
+      corotationalUnicodeScalars(item)
     }
   }
 }
@@ -571,9 +571,9 @@ export async function parseRcCorotationalReport(bytes: Uint8Array, expected: RcC
       && bytes.byteLength <= RC_COROTATIONAL_REPORT_MAX_BYTES, 'size_invalid')
     requireReport(!(bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf), 'encoding_invalid')
     const { raw, value } = document(bytes)
-    unicodeScalars(value)
+    corotationalUnicodeScalars(value)
     requireReport(validateShape(value), 'schema_invalid')
-    integerTokens(value, raw, reportSchema)
+    corotationalIntegerTokens(value, raw, reportSchema)
     await selfHash(raw, value, 'report_hash')
     const report = value as unknown as RcCorotationalReport
     requireReport(report.claim_boundary === RC_COROTATIONAL_REPORT_CLAIM_BOUNDARY, 'claim_boundary_invalid')

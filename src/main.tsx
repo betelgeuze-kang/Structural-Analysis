@@ -1,6 +1,7 @@
-import React, { lazy, Suspense, useEffect, useState, type ReactElement } from 'react'
+import React, { lazy, Suspense, useEffect, useRef, useState, type ReactElement } from 'react'
 import ReactDOM from 'react-dom/client'
 import { WorkbenchPage } from './workbench-v2/WorkbenchPage'
+import { confirmUnsavedProjectNavigation } from './workbench-v2/model/unsavedProjectGuard'
 import './index.css'
 
 const LegacyApp = lazy(() => import('./App'))
@@ -48,11 +49,23 @@ function LegacyAppSurface(): ReactElement {
 function RootRouter(): ReactElement {
   // URL identity matters even when navigation remains on the same surface.
   const [route, setRoute] = useState(() => window.location.href)
+  const acceptedRoute = useRef(route)
   const location = new URL(route)
   const surface = resolveProductSurface(location)
 
   useEffect(() => {
-    const updateSurface = () => setRoute(window.location.href)
+    const updateSurface = () => {
+      const next = window.location.href
+      // Back/Forward can emit both popstate and hashchange. Decide once, before
+      // changing props that could unmount the editor or replace its session.
+      if (next === acceptedRoute.current) return
+      if (!confirmUnsavedProjectNavigation()) {
+        window.history.replaceState(window.history.state, '', acceptedRoute.current)
+        return
+      }
+      acceptedRoute.current = next
+      setRoute(next)
+    }
     window.addEventListener('hashchange', updateSurface)
     window.addEventListener('popstate', updateSurface)
     return () => {

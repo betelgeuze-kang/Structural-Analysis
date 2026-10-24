@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test'
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
-import { createRcEditorExample } from '../../src/workbench-v2/model/rcModelEditor'
+import { createRcEditorExample, createRcPortalEditorExample } from '../../src/workbench-v2/model/rcModelEditor'
 import {
   compareRcScenarios, exportRcScenarios, fixedRcScenarioSummary,
-  rcScenarioAuthorizationFailure, rcScenarioCompatibility, rcScenarioRecordedWallSeconds, type RcScenarioSummary,
+  rcScenarioAuthorizationFailure, rcScenarioCompatibility, rcScenarioCompatibilityFields, rcScenarioRecordedWallSeconds, type RcScenarioSummary,
 } from '../../src/workbench-v2/model/rcScenarioComparison'
+import { compareRcScenarioInputs, RC_INPUT_COMPARISON_BYTES } from '../../src/workbench-v2/model/rcScenarioInputComparison'
 import { captureRcScenario, runRcScenario, RcScenarioUnconfirmedError } from '../../src/workbench-v2/model/rcScenarioRunner'
 import type { RcJobTransport } from '../../src/workbench-v2/model/jobTransport'
 import type { WorkbenchJobView } from '../../src/workbench-v2/model/jobSchema'
@@ -67,6 +68,117 @@ test('captures immutable original bytes and rejects invalid name/request', () =>
   expect(preserved.serialized).toBe(nativeText)
   expect(preserved.serialized).toContain('"native_float":1.0')
   expect(preserved.serialized).toContain('9007199254740993')
+})
+
+test('captured input comparison separates original text equality from formatting and decoded value equality', () => {
+  const input = draft(), raw = JSON.stringify(input)
+  const captured = captureRcScenario(input, 'Original', 'input-original', raw)
+  input.model.sections[0].width_m = 9
+  const exact = compareRcScenarioInputs(captured.serialized, raw)
+  expect(exact).toMatchObject({ status: 'available', rawIdentical: true, changes: [], compatibility: 'compatible', precisionLimited: false })
+  const formatted = compareRcScenarioInputs(raw, JSON.stringify(JSON.parse(raw), null, 2))
+  expect(formatted).toMatchObject({ rawIdentical: false, changes: [], compatibility: 'compatible' })
+  expect(formatted.message).toContain('Whitespace, key order or string escaping')
+  const reordered = Object.fromEntries(Object.entries(JSON.parse(raw)).reverse())
+  expect(compareRcScenarioInputs(raw, JSON.stringify(reordered))).toMatchObject({ rawIdentical: false, changes: [], compatibility: 'compatible' })
+})
+
+test('captured input comparison names shared numerical scope mismatches while allowing geometric and material design changes', () => {
+  const left = draft(), changed = structuredClone(left)
+  changed.model.nodes[1].coordinates[0] = 4.5; changed.model.sections[0].width_m = 0.6; changed.model.materials[0].yield_stress_mpa = 350
+  expect(compareRcScenarioInputs(JSON.stringify(left), JSON.stringify(changed))).toMatchObject({ compatibility: 'compatible', reasons: [] })
+  for (const [key, mutate] of [
+    ['source', (value: any) => { value.source_revision = 'b'.repeat(40) }],
+    ['loads', (value: any) => { value.model.loads[0].components.FY = -99 }],
+    ['supports', (value: any) => { value.model.supports[0].node = 'N2'; value.config.control_global_dof = 1 }],
+    ['control', (value: any) => { value.config.control_global_dof = 3 }],
+    ['members', (value: any) => { value.model.elements[0].nodes.reverse() }],
+    ['targets', (value: any) => { value.config.targets_m = [-1e-6, -3e-6] }],
+  ] as const) {
+    const right = structuredClone(left); mutate(right)
+    const comparison = compareRcScenarioInputs(JSON.stringify(left), JSON.stringify(right))
+    expect(comparison.status, key).toBe('available')
+    expect(comparison.compatibility, key).toBe('incompatible')
+    expect(comparison.reasons.map(reason => reason.key), key).toContain(key)
+    expect(rcScenarioCompatibility(left), key).not.toBe(rcScenarioCompatibility(right))
+  }
+  const supportOrder = structuredClone(left); supportOrder.model.supports[0].dofs.reverse()
+  expect(compareRcScenarioInputs(JSON.stringify(left), JSON.stringify(supportOrder))).toMatchObject({ compatibility: 'compatible', reasons: [] })
+  const portal = createRcPortalEditorExample(source), portalChanged = structuredClone(portal)
+  portalChanged.model.nodes[1].coordinates[0] = portalChanged.model.nodes[3].coordinates[0] = 5
+  expect(compareRcScenarioInputs(JSON.stringify(portal), JSON.stringify(portalChanged)).compatibility).toBe('compatible')
+  expect(rcScenarioCompatibilityFields(portal).find(field => field.key === 'portal')).toMatchObject({ label: 'Portal profile opt-in', signature: 'true' })
+  delete portalChanged.config.experimental_portal_frame
+  expect(rcScenarioCompatibility(portal)).not.toBe(rcScenarioCompatibility(portalChanged))
+  expect(compareRcScenarioInputs(JSON.stringify(portal), JSON.stringify(portalChanged))).toMatchObject({ status: 'invalid', compatibility: 'unavailable' })
+})
+
+test('captured input comparison preserves unsafe integer digits and never infers numerical compatibility from rounded equality', () => {
+  const value = draft(); value.model.loads[0].components.FY = 0
+  const raw = JSON.stringify(value)
+  const left = raw.replace('"FY":0', '"FY":9007199254740992'), right = raw.replace('"FY":0', '"FY":9007199254740993')
+  expect(JSON.parse(left)).toEqual(JSON.parse(right))
+  const compared = compareRcScenarioInputs(left, right)
+  expect(compared).toMatchObject({ status: 'available', rawIdentical: false, precisionLimited: true, compatibility: 'unavailable' })
+  expect(compared.changes).toContainEqual({ path: '/model/loads/0/components/FY', before: '9007199254740992', after: '9007199254740993', beforeClipped: false, afterClipped: false, kind: 'numeric_token' })
+  expect(compareRcScenarioInputs(left, left)).toMatchObject({ rawIdentical: true, precisionLimited: true, compatibility: 'unavailable' })
+})
+
+test('captured input comparison distinguishes harmless numeric spelling, negative zero and actual decimal precision collisions', () => {
+  const value = draft(); value.model.metadata = { amount: 0 }
+  const raw = JSON.stringify(value), authored = (token: string) => raw.replace('"amount":0', `"amount":${token}`)
+  for (const [a, b] of [['1.0', '1'], ['-0', '0'], ['1e-3', '0.001'], ['10e-1', '1']]) {
+    const compared = compareRcScenarioInputs(authored(a), authored(b))
+    expect(compared).toMatchObject({ rawIdentical: false, precisionLimited: false, compatibility: 'compatible' })
+    expect(compared.changes).toEqual([{ path: '/model/metadata/amount', before: a, after: b, beforeClipped: false, afterClipped: false, kind: 'numeric_token' }])
+  }
+  const collision = compareRcScenarioInputs(authored('0.10000000000000001'), authored('0.1'))
+  expect(collision).toMatchObject({ precisionLimited: true, compatibility: 'unavailable' })
+  expect(collision.changes[0]).toMatchObject({ before: '0.10000000000000001', after: '0.1' })
+  expect(compareRcScenarioInputs(authored('1e-999'), authored('0'))).toMatchObject({ precisionLimited: true, compatibility: 'unavailable' })
+  expect(compareRcScenarioInputs(authored('1e999'), authored('0'))).toMatchObject({ status: 'invalid', compatibility: 'unavailable' })
+})
+
+test('captured input comparison preserves missing, null, zero, escaped paths and prototype-named authored keys', () => {
+  const left = draft(), right = draft()
+  left.model.metadata = { 'a/b~c': 0, presentNull: null }
+  right.model.metadata = { addedZero: 0, presentNull: 0 }
+  const compared = compareRcScenarioInputs(JSON.stringify(left), JSON.stringify(right))
+  expect(compared.changes).toEqual(expect.arrayContaining([
+    expect.objectContaining({ path: '/model/metadata/a~1b~0c', before: '0', after: '(absent)' }),
+    expect.objectContaining({ path: '/model/metadata/addedZero', before: '(absent)', after: '0' }),
+    expect.objectContaining({ path: '/model/metadata/presentNull', before: 'null', after: '0' }),
+  ]))
+  left.model.metadata = {}; right.model.metadata = JSON.parse('{"__proto__":{},"constructor":0,"toString":0,"":0}')
+  const special = compareRcScenarioInputs(JSON.stringify(left), JSON.stringify(right))
+  expect(special.changes).toEqual(expect.arrayContaining([
+    expect.objectContaining({ path: '/model/metadata/__proto__', before: '(absent)', after: '{}' }),
+    expect.objectContaining({ path: '/model/metadata/constructor', before: '(absent)', after: '0' }),
+    expect.objectContaining({ path: '/model/metadata/toString', before: '(absent)', after: '0' }),
+    expect.objectContaining({ path: '/model/metadata/', before: '(absent)', after: '0' }),
+  ]))
+})
+
+test('captured input comparison marks cell and row truncation and refuses bounded or invalid inputs explicitly', () => {
+  const left = draft(), right = draft()
+  left.model.metadata = { value: 'a'.repeat(300) }; right.model.metadata = { value: 'b'.repeat(300) }
+  const clipped = compareRcScenarioInputs(JSON.stringify(left), JSON.stringify(right))
+  expect(clipped.changes[0]).toMatchObject({ beforeClipped: true, afterClipped: true })
+  expect(clipped.changes[0].before).toHaveLength(240)
+  left.model.metadata = {}; right.model.metadata = { a: 0, b: 1, c: 2 }
+  expect(compareRcScenarioInputs(JSON.stringify(left), JSON.stringify(right), 2)).toMatchObject({ truncated: true, changes: [expect.anything(), expect.anything()] })
+  const raw = JSON.stringify(left)
+  expect(compareRcScenarioInputs(null, raw)).toMatchObject({ status: 'missing', rawIdentical: null, compatibility: 'unavailable' })
+  const missingProjection = structuredClone(left); delete missingProjection.model.loads
+  expect(compareRcScenarioInputs(raw, JSON.stringify(missingProjection))).toMatchObject({ status: 'invalid', compatibility: 'unavailable' })
+  for (const invalid of ['', '{}', '{"a":1,"a":2}', raw.replace('"case_id":', '"case_id":"duplicate","case_id":')]) expect(compareRcScenarioInputs(raw, invalid)).toMatchObject({ status: 'invalid', compatibility: 'unavailable' })
+  expect(compareRcScenarioInputs(raw, ' '.repeat(RC_INPUT_COMPARISON_BYTES + 1))).toMatchObject({ status: 'limited', compatibility: 'unavailable', truncated: true })
+  right.model.metadata = Array.from({ length: 20001 }, () => 0)
+  expect(compareRcScenarioInputs(raw, JSON.stringify(right)).status).toBe('limited')
+  right.model.metadata = { deeply: 0 }
+  for (let count = 0; count < 50; count++) right.model.metadata = { child: right.model.metadata }
+  expect(compareRcScenarioInputs(raw, JSON.stringify(right)).status).toBe('limited')
+  expect(compareRcScenarioInputs(raw, raw.replace('"metadata":{}', `"metadata":{"number":${'1'.repeat(257)}}`)).status).toBe('limited')
 })
 
 test('matches actual entity/component/unit keys across row order and preserves missing values', () => {
@@ -192,8 +304,13 @@ test('browser captures without executing; uncertain submission stops the queue a
   await expect(panel).toContainText('Submission outcome is unconfirmed')
   expect(posts).toHaveLength(1)
   await expect(panel.getByRole('button', { name: 'Run captured designs', exact: true })).toBeDisabled()
+  const inputs = panel.locator('[data-rc-scenario-input-comparison]')
+  await expect(inputs.getByLabel('Input baseline design', { exact: true }).locator('option')).toContainText(['Select a captured input', 'Design 1 (unconfirmed)', 'Second design (captured)'])
+  await expect(inputs.locator('[data-rc-input-identity]')).toContainText('exactly identical')
   const changed = draft(); changed.model.sections[0].width_m = 0.8
   await page.getByLabel('Typed RC request JSON', { exact: true }).fill(JSON.stringify(changed))
+  await expect(inputs.locator('[data-rc-input-identity]')).toContainText('exactly identical')
+  expect(posts).toHaveLength(1)
   await panel.getByRole('button', { name: 'Retry same submission for Design 1', exact: true }).click()
   await expect.poll(() => posts.length).toBe(2)
   expect(posts[0]).toEqual(posts[1])
@@ -208,4 +325,51 @@ test('browser captures without executing; uncertain submission stops the queue a
   await page.evaluate(() => { (window as any).__rcScenarioTenant = 'b' })
   await expect(panel).toContainText('Authorization changed')
   await expect(panel.locator('[data-scenario-id]')).toHaveCount(0)
+})
+
+
+test('browser compares original captured numeric tokens without posting or changing saved numerical selections', async ({ page }) => {
+  const posts: string[] = []
+  page.on('request', outgoing => { if (outgoing.method() === 'POST') posts.push(outgoing.url()) })
+  await page.addInitScript(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcJobCollectionUrl: '/v1/jobs' } })
+  await page.goto(`${baseUrl}/#/workbench-v2`)
+  await page.getByText('Submit a new RC input', { exact: true }).click()
+  const request = draft(); request.model.metadata = { native_integer: 0, native_float: 1 }
+  const left = JSON.stringify(request).replace('"native_integer":0', '"native_integer":9007199254740992').replace('"native_float":1', '"native_float":1.0')
+  const right = JSON.stringify(request).replace('"native_integer":0', '"native_integer":9007199254740993')
+  const raw = page.getByLabel('Typed RC request JSON', { exact: true })
+  const panel = page.locator('[data-rc-scenario-comparison]')
+  await raw.fill(left)
+  await panel.getByLabel('Scenario name', { exact: true }).fill('Input A')
+  await panel.getByRole('button', { name: 'Capture current design', exact: true }).click()
+  await raw.fill(right)
+  await panel.getByLabel('Scenario name', { exact: true }).fill('Input B')
+  await panel.getByRole('button', { name: 'Capture current design', exact: true }).click()
+  const inputs = panel.locator('[data-rc-scenario-input-comparison]')
+  const integer = inputs.locator('[data-rc-input-change="/model/metadata/native_integer"]')
+  const float = inputs.locator('[data-rc-input-change="/model/metadata/native_float"]')
+  await expect(integer.locator('td').nth(1)).toHaveText('9007199254740992')
+  await expect(integer.locator('td').nth(2)).toHaveText('9007199254740993')
+  await expect(float.locator('td').nth(1)).toHaveText('1.0')
+  await expect(float.locator('td').nth(2)).toHaveText('1')
+  await expect(inputs.locator('[data-rc-input-precision]')).toBeVisible()
+  await expect(inputs.locator('[data-rc-input-compatibility]')).toContainText('unavailable')
+  // Current draft is a third design, and is deliberately not captured.
+  request.model.sections[0].width_m = 0.9
+  await raw.fill(JSON.stringify(request))
+  await expect(integer.locator('td').nth(2)).toHaveText('9007199254740993')
+  await expect(inputs.locator('[data-rc-input-change="/model/sections/0/width_m"]')).toHaveCount(0)
+  const ids = await panel.locator('[data-scenario-id]').evaluateAll(rows => rows.map(row => row.getAttribute('data-scenario-id')!))
+  await inputs.getByLabel('Input compared design', { exact: true }).selectOption(ids[0])
+  await expect(inputs.locator('[data-rc-input-identity]')).toContainText('exactly identical')
+  await inputs.getByLabel('Input baseline design', { exact: true }).selectOption(ids[1])
+  await expect(integer.locator('td').nth(1)).toHaveText('9007199254740993')
+  await expect(integer.locator('td').nth(2)).toHaveText('9007199254740992')
+  const pending = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Save RC project', exact: true }).click()
+  const download = await pending, project = JSON.parse(await readFile((await download.path())!, 'utf8'))
+  expect(project.scenarios.map((row: any) => row.intent.serialized)).toEqual([left, right])
+  expect(project.baselineId).toBeNull(); expect(project.variantId).toBeNull()
+  expect(project.draft).toBe(JSON.stringify(request))
+  expect(posts).toEqual([])
 })

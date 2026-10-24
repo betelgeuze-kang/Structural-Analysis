@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { createHash } from 'node:crypto'
 import { loadRcInvocationDetail, loadRcJobDiagnostics, parseRcJobDiagnostics, rcRequestChanges, type RcInvocationObservation } from '../../src/workbench-v2/model/rcJobDiagnostics'
-import { createJobWorkflowTransport, type RcJobTransport } from '../../src/workbench-v2/model/jobTransport'
+import { createJobReadTransport, createJobWorkflowTransport, type RcJobTransport } from '../../src/workbench-v2/model/jobTransport'
 import type { WorkbenchJobView } from '../../src/workbench-v2/model/jobSchema'
 
 const requestHash = `sha256:${'1'.repeat(64)}`
@@ -313,4 +313,56 @@ test('invocation transport uses exact same-origin routes and rejects invalid ord
     for (const ordinal of [0, -1, 1.5, 10000, Number.MAX_SAFE_INTEGER + 1, NaN]) expect(() => api.getRcInvocations!(jobId, ordinal)).toThrow('rc_invocation_ordinal_invalid')
     expect(calls).toHaveLength(2)
   } finally { globalThis.fetch = original }
+})
+
+test('detailed corotational reports use bound read-only routes in every transport', async () => {
+  const original = globalThis.fetch
+  const calls: Array<{ url: string; method: string; redirect: string; headers: Headers }> = []
+  globalThis.fetch = async (input, init) => {
+    calls.push({ url: String(input), method: init?.method ?? '', redirect: init?.redirect ?? '', headers: new Headers(init?.headers) })
+    return jsonResponse({})
+  }
+  const binding = { requestHash, resultHash: chunkHash, evidenceHash: artifactHash }
+  try {
+    const workflow = await createJobWorkflowTransport('https://workbench.test/v1/jobs')
+    const read = await createJobReadTransport(`https://workbench.test/v1/jobs/${jobId}`)
+    await workflow.getCorotationalDetailReport!(jobId, binding)
+    await workflow.readTransport(jobId).getCorotationalDetailReport!(binding)
+    await read.getCorotationalDetailReport!(binding)
+    expect(calls).toHaveLength(3)
+    for (const call of calls) {
+      expect(call).toMatchObject({ url: `https://workbench.test/v1/jobs/${jobId}/rc-corotational-detail-report`, method: 'GET', redirect: 'error' })
+      expect(call.headers.get('X-Structural-Expected-Request-Hash')).toBe(requestHash)
+      expect(call.headers.get('X-Structural-Expected-Result-Hash')).toBe(chunkHash)
+      expect(call.headers.get('X-Structural-Expected-Evidence-Hash')).toBe(artifactHash)
+    }
+    await expect(read.getCorotationalDetailReport!({ ...binding, resultHash: 'invalid' })).rejects.toThrow('rc_corotational_report_binding_invalid')
+    expect(() => workflow.getCorotationalDetailReport!('invalid', binding)).toThrow('job_id_invalid')
+    expect(calls).toHaveLength(3)
+  } finally { globalThis.fetch = original }
+})
+
+for (const kind of ['read', 'workflow'] as const) test(`detailed report ${kind} transport discards bytes after an account change`, async () => {
+  const originalFetch = globalThis.fetch, originalLocation = Object.getOwnPropertyDescriptor(globalThis, 'location')
+  Object.defineProperty(globalThis, 'location', { value: { origin: 'https://workbench.test' }, configurable: true })
+  let changed = false, calls = 0, cancelled = false
+  const authorize = async () => ({ tenantId: changed ? 'other-account' : 'original-account', bearerToken: 'test-token' })
+  globalThis.fetch = async () => {
+    calls++; changed = true
+    return new Response(new ReadableStream({ cancel() { cancelled = true } }), { headers: { 'Content-Type': 'application/json' } })
+  }
+  try {
+    const read = kind === 'read'
+      ? await createJobReadTransport(`https://workbench.test/v1/jobs/${jobId}`, undefined, authorize)
+      : (await createJobWorkflowTransport('https://workbench.test/v1/jobs', undefined, authorize)).readTransport(jobId)
+    const binding = { requestHash, resultHash: chunkHash, evidenceHash: artifactHash }
+    await expect(read.getCorotationalDetailReport!(binding)).rejects.toThrow('job_authorization_scope_changed')
+    expect(cancelled).toBe(true)
+    await expect(read.getCorotationalDetailReport!(binding)).rejects.toThrow('job_authorization_scope_changed')
+    expect(calls).toBe(1)
+  } finally {
+    globalThis.fetch = originalFetch
+    if (originalLocation) Object.defineProperty(globalThis, 'location', originalLocation)
+    else Reflect.deleteProperty(globalThis, 'location')
+  }
 })

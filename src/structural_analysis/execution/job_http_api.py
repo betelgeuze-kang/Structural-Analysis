@@ -32,8 +32,9 @@ _RC_QUANTITY_ROUTE = re.compile(
     r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})/rc-quantity-reports(?:/(?P<report_id>rcq_[0-9a-f]{64}))?$"
 )
 _RC_COROTATIONAL_REPORT_ROUTE = re.compile(
-    r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})/rc-corotational-report$"
+    r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})/rc-corotational-(?P<kind>detail-report|report)$"
 )
+_RC_CONTROL_ROUTE = re.compile(r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})/rc-control$")
 _MAX_HTTP_BODY = 192 * 1024 * 1024
 _MAX_SUBMIT_BODY = 16 * 1024 * 1024
 # Base64 of a bounded RC result plus the existing small completion envelope.
@@ -41,7 +42,9 @@ _MAX_RC_COMPLETE_BODY = 800 * 1024 * 1024
 
 
 def _transport_body_limit(method: str, path: str) -> int:
-    if method.upper() == "POST" and _RC_QUANTITY_ROUTE.fullmatch(path):
+    if method.upper() == "POST" and (
+        _RC_QUANTITY_ROUTE.fullmatch(path) or _RC_CONTROL_ROUTE.fullmatch(path)
+    ):
         return 16 * 1024
     if method.upper() == "POST" and path == "/v1/jobs":
         return _MAX_SUBMIT_BODY
@@ -97,6 +100,14 @@ class DurableJobHttpApi:
                 )
             if path == "/v1/jobs" and normalized_method == "POST":
                 return self._submit(normalized_headers, raw)
+            control_match = _RC_CONTROL_ROUTE.fullmatch(path)
+            if control_match is not None:
+                return self._rc_control_route(
+                    normalized_method,
+                    control_match.group("job_id"),
+                    normalized_headers,
+                    raw,
+                )
             corotational_match = _RC_COROTATIONAL_REPORT_ROUTE.fullmatch(path)
             if corotational_match is not None:
                 return self._rc_corotational_report_route(
@@ -104,6 +115,7 @@ class DurableJobHttpApi:
                     corotational_match.group("job_id"),
                     normalized_headers,
                     raw,
+                    detail=corotational_match.group("kind") == "detail-report",
                 )
             quantity_match = _RC_QUANTITY_ROUTE.fullmatch(path)
             if quantity_match is not None:
@@ -148,15 +160,42 @@ class DurableJobHttpApi:
                 "One or more request fields have an invalid type or range.",
             )
 
+    def _rc_control_route(self, method, job_id, headers, body):
+        tenant_id, token = _tenant_credentials(headers)
+        credentials = {"tenant_id": tenant_id, "authorization_token": token}
+        if method == "GET":
+            if body:
+                _api_fail("unexpected_body", 400, "Control reads do not accept a body.")
+            return _json_response(
+                200, self.service.get_rc_control(job_id, **credentials)
+            )
+        if method == "POST":
+            return _json_response(
+                200,
+                self.service.submit_rc_control(job_id, _json_body(body), **credentials),
+            )
+        _api_fail("method_not_allowed", 405, "Control supports GET and POST.")
+
     def _rc_corotational_report_route(
-        self, method: str, job_id: str, headers: Mapping[str, str], body: bytes
+        self,
+        method: str,
+        job_id: str,
+        headers: Mapping[str, str],
+        body: bytes,
+        *,
+        detail: bool = False,
     ) -> JobHttpResponse:
         tenant_id, token = _tenant_credentials(headers)
         if method != "GET":
             _api_fail("method_not_allowed", 405, "Report reads require GET.")
         if body:
             _api_fail("unexpected_body", 400, "Report reads do not accept a body.")
-        raw = self.service.read_rc_corotational_report(
+        reader = (
+            self.service.read_rc_corotational_detail_report
+            if detail
+            else self.service.read_rc_corotational_report
+        )
+        raw = reader(
             job_id,
             tenant_id=tenant_id,
             authorization_token=token,
@@ -169,12 +208,13 @@ class DurableJobHttpApi:
             ),
         )
         digest = hashlib.sha256(raw).hexdigest()
-        report_id = "rcc_" + digest
+        report_id = ("rcd_" if detail else "rcc_") + digest
+        label = "detail" if detail else "nodal"
         return JobHttpResponse(
             200,
             {
                 **_headers("application/json"),
-                "content-disposition": f'attachment; filename="{report_id}-corotational-nodal-report.json"',
+                "content-disposition": f'attachment; filename="{report_id}-corotational-{label}-report.json"',
                 "x-structural-report-sha256": "sha256:" + digest,
                 "x-structural-report-id": report_id,
             },
@@ -653,6 +693,11 @@ def _service_status(code: str) -> int:
     }:
         return 404
     if code in {
+        "rc_control_id_conflict",
+        "rc_control_source_conflict",
+        "rc_control_state_conflict",
+        "rc_control_route_required",
+        "rc_control_boundary_stop",
         "idempotency_conflict",
         "job_revision_conflict",
         "lease_expired",

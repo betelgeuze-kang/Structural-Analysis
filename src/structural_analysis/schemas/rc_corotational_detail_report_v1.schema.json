@@ -1,0 +1,642 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/rc_corotational_detail_report_v1.schema.json",
+  "title": "Saved corotational RC member and material detail projection v1",
+  "description": "Strict bounded projection shape. Service verifies original artifacts, accepted native states and feature response hashes; local force is only a declared coordinate rotation of stored physical net end force.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "bindings",
+    "nodal_report_hash",
+    "units",
+    "responses",
+    "structural_authority",
+    "derivation",
+    "claim_boundary",
+    "report_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "durable-rc-corotational-detail-report.v1"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id",
+        "job_id",
+        "completed_job_revision",
+        "terminal_event_hash",
+        "original_artifacts",
+        "case_id",
+        "request_schema_version",
+        "source_revision",
+        "source_revision_is_execution_attestation",
+        "recorded_source_identity",
+        "canonical_model_checksum",
+        "model_input_checksum",
+        "problem_contract_hash",
+        "resume_contract_hash",
+        "durable_result_hash",
+        "terminal_api_artifact_sha256",
+        "terminal_native_checkpoint_sha256",
+        "terminal_native_checkpoint_byte_length",
+        "worker_validator_id",
+        "worker_validation_report_hash",
+        "receipt_hashes",
+        "invocation_artifact_hashes"
+      ],
+      "properties": {
+        "tenant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "job_id": {
+          "type": "string",
+          "pattern": "^job_[0-9a-f]{32}$"
+        },
+        "completed_job_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "terminal_event_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "original_artifacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "request",
+            "checkpoint",
+            "result",
+            "evidence"
+          ],
+          "properties": {
+            "request": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "role",
+                "content_hash",
+                "byte_length",
+                "media_type"
+              ],
+              "properties": {
+                "role": {
+                  "enum": [
+                    "request",
+                    "checkpoint",
+                    "result",
+                    "evidence"
+                  ]
+                },
+                "content_hash": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "byte_length": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "media_type": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "checkpoint": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "role",
+                    "content_hash",
+                    "byte_length",
+                    "media_type"
+                  ],
+                  "properties": {
+                    "role": {
+                      "enum": [
+                        "request",
+                        "checkpoint",
+                        "result",
+                        "evidence"
+                      ]
+                    },
+                    "content_hash": {
+                      "type": "string",
+                      "pattern": "^sha256:[0-9a-f]{64}$"
+                    },
+                    "byte_length": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "media_type": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "result": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "role",
+                "content_hash",
+                "byte_length",
+                "media_type"
+              ],
+              "properties": {
+                "role": {
+                  "enum": [
+                    "request",
+                    "checkpoint",
+                    "result",
+                    "evidence"
+                  ]
+                },
+                "content_hash": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "byte_length": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "media_type": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "evidence": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "role",
+                "content_hash",
+                "byte_length",
+                "media_type"
+              ],
+              "properties": {
+                "role": {
+                  "enum": [
+                    "request",
+                    "checkpoint",
+                    "result",
+                    "evidence"
+                  ]
+                },
+                "content_hash": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "byte_length": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "media_type": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_schema_version": {
+          "enum": [
+            "structural-analysis-job-request.v6",
+            "structural-analysis-job-request.v7"
+          ]
+        },
+        "source_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "source_revision_is_execution_attestation": {
+          "const": false
+        },
+        "recorded_source_identity": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "canonical_model_checksum": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "model_input_checksum": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "problem_contract_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "resume_contract_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "durable_result_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "terminal_api_artifact_sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "terminal_native_checkpoint_sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "terminal_native_checkpoint_byte_length": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "worker_validator_id": {
+          "const": "structural_analysis.execution.rc_corotational_job_contract.validate_rc_corotational_job_result"
+        },
+        "worker_validation_report_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "receipt_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "minItems": 1
+        },
+        "invocation_artifact_hashes": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "nodal_report_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "units": {
+      "const": {
+        "end_force_components": [
+          "FX_i",
+          "FY_i",
+          "MZ_i",
+          "FX_j",
+          "FY_j",
+          "MZ_j"
+        ],
+        "end_force_units": [
+          "kN",
+          "kN",
+          "kN*m",
+          "kN",
+          "kN",
+          "kN*m"
+        ],
+        "global_frame": "global",
+        "local_frame": "current_chord_i_to_j",
+        "local_projection": "FX=c*FX_global+s*FY_global;FY=-s*FX_global+c*FY_global;MZ=MZ_global",
+        "end_force_definition": "element_internal_minus_scaled_consistent_member_dead_load",
+        "section_resultant_units": [
+          "kN",
+          "kN*m"
+        ],
+        "section_strain_relation": "epsilon_f=epsilon_0-kappa_z*y_f",
+        "section_resultant_definition": "N=sum(sigma_f*A_f);M_z=-sum(sigma_f*A_f*y_f)",
+        "curvature": "1/m",
+        "fiber_stress": "MPa",
+        "fiber_strain": "1",
+        "integration_coordinate": "xi_in_[-1,1]_along_initial_member_i_to_j"
+      }
+    },
+    "responses": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4097,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "state_index",
+          "phase",
+          "checkpoint_hash",
+          "parent_checkpoint_hash",
+          "load_factor",
+          "members"
+        ],
+        "properties": {
+          "state_index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "phase": {
+            "enum": [
+              "preload",
+              "control"
+            ]
+          },
+          "checkpoint_hash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "parent_checkpoint_hash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "load_factor": {
+            "type": "number"
+          },
+          "members": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 15,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "member_index",
+                "member_id",
+                "node_i",
+                "node_j",
+                "element_contract_hash",
+                "member_feature_contract_hash",
+                "member_feature_response_hash",
+                "initial_length_m",
+                "current_length_m",
+                "current_direction",
+                "end_force_global_kn_knm",
+                "end_force_local_kn_knm",
+                "sections"
+              ],
+              "properties": {
+                "member_index": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "member_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "node_i": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "node_j": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "element_contract_hash": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "member_feature_contract_hash": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "member_feature_response_hash": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "initial_length_m": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "current_length_m": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "current_direction": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "number"
+                  }
+                },
+                "end_force_global_kn_knm": {
+                  "type": "array",
+                  "minItems": 6,
+                  "maxItems": 6,
+                  "items": {
+                    "type": "number"
+                  }
+                },
+                "end_force_local_kn_knm": {
+                  "type": "array",
+                  "minItems": 6,
+                  "maxItems": 6,
+                  "items": {
+                    "type": "number"
+                  }
+                },
+                "sections": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 3,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "integration_point_index",
+                      "xi",
+                      "weight",
+                      "section_id",
+                      "section_contract_hash",
+                      "state_hash",
+                      "step_index",
+                      "axial_strain",
+                      "curvature_z_per_m",
+                      "axial_force_kn",
+                      "moment_z_kn_m",
+                      "fibers"
+                    ],
+                    "properties": {
+                      "integration_point_index": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "xi": {
+                        "type": "number",
+                        "minimum": -1,
+                        "maximum": 1
+                      },
+                      "weight": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "section_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128
+                      },
+                      "section_contract_hash": {
+                        "type": "string",
+                        "pattern": "^sha256:[0-9a-f]{64}$"
+                      },
+                      "state_hash": {
+                        "type": "string",
+                        "pattern": "^sha256:[0-9a-f]{64}$"
+                      },
+                      "step_index": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "axial_strain": {
+                        "type": "number"
+                      },
+                      "curvature_z_per_m": {
+                        "type": "number"
+                      },
+                      "axial_force_kn": {
+                        "type": "number"
+                      },
+                      "moment_z_kn_m": {
+                        "type": "number"
+                      },
+                      "fibers": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 2080,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "fiber_index",
+                            "material_kind",
+                            "strain",
+                            "stress_mpa",
+                            "state_hash"
+                          ],
+                          "properties": {
+                            "fiber_index": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "material_kind": {
+                              "enum": [
+                                "concrete",
+                                "steel"
+                              ]
+                            },
+                            "strain": {
+                              "type": "number"
+                            },
+                            "stress_mpa": {
+                              "type": "number"
+                            },
+                            "state_hash": {
+                              "type": "string",
+                              "pattern": "^sha256:[0-9a-f]{64}$"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "structural_authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "experimental_corotational_rc_control",
+        "trusted_worker_verification_attestation",
+        "service_numerical_verification_performed",
+        "independent_execution_authentication",
+        "independent_physical_validation",
+        "design_authority",
+        "release_approved",
+        "production_promotion_eligible"
+      ],
+      "properties": {
+        "experimental_corotational_rc_control": {
+          "const": true
+        },
+        "trusted_worker_verification_attestation": {
+          "const": true
+        },
+        "service_numerical_verification_performed": {
+          "const": false
+        },
+        "independent_execution_authentication": {
+          "const": false
+        },
+        "independent_physical_validation": {
+          "const": false
+        },
+        "design_authority": {
+          "const": false
+        },
+        "release_approved": {
+          "const": false
+        },
+        "production_promotion_eligible": {
+          "const": false
+        }
+      }
+    },
+    "derivation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "fresh_analysis_invocations",
+        "fresh_verification_invocations",
+        "source_fingerprint_invocations",
+        "new_structural_authority"
+      ],
+      "properties": {
+        "version": {
+          "const": "rc_corotational_stored_detail_projection.v1"
+        },
+        "fresh_analysis_invocations": {
+          "const": 0
+        },
+        "fresh_verification_invocations": {
+          "const": 0
+        },
+        "source_fingerprint_invocations": {
+          "const": 0
+        },
+        "new_structural_authority": {
+          "const": false
+        }
+      }
+    },
+    "claim_boundary": {
+      "const": "Saved experimental corotational RC accepted member, section and fiber responses only. Local end forces are a declared current-chord coordinate rotation of stored global element net end forces, not a new equilibrium or engineering-recovery validation. Source order, member i-to-j orientation and preload/subdivision states are retained. Fiber indices identify stored integration samples, not individual reinforcing bars. Source revision is a caller declaration. No fresh analysis, verification or source fingerprint; no independent physical validation, design approval or release readiness."
+    },
+    "report_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}
