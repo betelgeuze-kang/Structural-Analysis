@@ -85,14 +85,54 @@ references; it has not acquired result or authorization authority.
    cross-computer transfer with external users. Internal tests do not stand in for
    this observation or for physical validation.
 
-## Parallel building acceptance slice
+## Implemented building slice: declared member mapping over saved results
 
-Start with an explicit physical member → analysis element → review location map
-over supported saved results. Preserve storey/member identities, element
-orientation and member intervals through subdivision and revision. Keep each
-signed force tuple attached to its original combination, location, units and
-source row; do not combine unrelated component maxima. Unmapped and unreviewed
-items remain visible and cannot make a whole member pass.
+Choose **Review building members** in the Workbench, or open `#/building-review`
+(also `/building-review`). Select a matching stored ModelIR v2 and bounded native
+linear Frame3D ResultIR v1. Each file is limited to 2 MiB. The source profile's
+existing node/member limits still apply; this does not extend its analysis scope
+to general building models. This dedicated workspace reads local files without
+mounting the job panel, requesting credentials or running analysis.
+
+Choose **Prepare empty member mapping**. The application binds an empty mapping
+to the model's three identity hashes and the stored result identity; it infers no
+storeys or physical members. Use the forms to add your storey and physical member
+IDs, then assign each analysis element, normalized member interval and native
+i-to-j or j-to-i orientation. The segment form adds the two existing native end
+review locations. The JSON editor also allows a subset of endpoint locations,
+members without elements and an imported mapping. Choose **Open declared mapping**
+to validate and apply the draft; editing a draft does not change the open review.
+Drafts live in this browser session. Download a draft to retain unfinished or
+invalid edits; that download does not validate or apply them. Unsaved authored
+mapping changes trigger the existing navigation/reload guard. Opening a mapping
+is not a save; exporting the admitted mapping saves only the displayed mapping.
+
+Every native endpoint remains in the review and export. Empty physical members
+remain `UNMAPPED`; gaps in declared member coverage remain `PARTIAL` with their
+missing intervals. Overlap, duplicate ownership, dangling IDs and disconnected
+contiguous segments are rejected. Both sides of a shared station remain separate,
+including force jumps. Declared orientation locates endpoints along the physical
+member only: it never transforms native axes or force signs. The view does not
+infer geometry alignment or section compatibility, interpolate interior forces,
+average end forces, or combine unrelated component maxima.
+
+Each signed six-component force tuple retains its native i/j end and node,
+member-local frame and units, stable ModelIR member index, original model/result
+row indices, recovery order, load pattern or combination and source identities.
+All physical members and endpoints remain `NOT_REVIEWED`. Complete mapping does
+not establish structural suitability or a design-code pass.
+
+Download **Export admitted member mapping** and **Export complete member review**
+to retain the displayed records, including unmapped endpoints and unreviewed
+members. Keep the original model and result files to reopen the mapping in a new
+session. A mapping for an older mesh is rejected against changed model/result
+bindings; explicitly reassign the new elements to the same physical member IDs
+and validate a new mapping. File hashes and internal bindings are checked;
+origin and execution are not authenticated. A bad replacement retains the
+previous valid review. This is a saved endpoint-review workflow, not a verified
+execution bundle, complete building modeler, design report or KDS check.
+
+## Next building acceptance slices
 
 Then connect the selected building type's loads/mass, analysis, storey/member
 review and revision workflow. Add code-review rules as a separately versioned
@@ -114,4 +154,7 @@ validators; missing data and failed runs must not disappear.
 Portable review tests reuse retained v6/v7 hosted software fixtures. They never
 generate a new numerical fixture locally. The normal Runtime Input and Viewer CI
 executes the portable contracts and browser workflow alongside the saved report
-checks. These software checks do not close either product's external acceptance.
+checks. Building mapping tests use synthetic data contracts and existing saved
+native fixture shapes without running a solver. The default Workbench regression
+suite includes their contract and browser cases. These software checks do not
+close either product's external acceptance.

@@ -6,17 +6,20 @@ import './index.css'
 
 const LegacyApp = lazy(() => import('./App'))
 const PortableRcReview = lazy(async () => ({ default: (await import('./workbench-v2/components/RcPortableReviewPanel')).RcPortableReviewPanel }))
+const BuildingMemberReview = lazy(async () => ({ default: (await import('./workbench-v2/components/BuildingMemberReviewPanel')).BuildingMemberReviewPanel }))
 
-export type ProductSurface = 'workbench-v2' | 'legacy-app' | 'rc-portable-review'
+export type ProductSurface = 'workbench-v2' | 'legacy-app' | 'rc-portable-review' | 'building-member-review'
 
 export function resolveProductSurface(location: Pick<Location, 'pathname' | 'hash'>): ProductSurface {
   const path = location.pathname.replace(/\/+$/, '')
   const hash = location.hash.replace(/\/+$/, '')
   if (hash === '#/rc-review') return 'rc-portable-review'
+  if (hash === '#/building-review') return 'building-member-review'
   // Explicit in-app navigation also works when opened from a direct path.
   if (hash === '#/workbench-v2') return 'workbench-v2'
   if (hash === '#/legacy') return 'legacy-app'
   if (path.endsWith('/rc-review')) return 'rc-portable-review'
+  if (path.endsWith('/building-review')) return 'building-member-review'
   const legacyRoute = path.endsWith('/legacy') || hash === '#/legacy'
   return legacyRoute ? 'legacy-app' : 'workbench-v2'
 }
@@ -81,6 +84,7 @@ function RootRouter(): ReactElement {
   }, [])
 
   if (surface === 'rc-portable-review') return <Suspense fallback={<p role="status">Opening saved RC review workspace…</p>}><PortableRcReview /></Suspense>
+  if (surface === 'building-member-review') return <Suspense fallback={<p role="status">Opening building member review workspace…</p>}><BuildingMemberReview /></Suspense>
 
   const jobStatusUrl = resolveSameOriginJobUrl(
     import.meta.env.VITE_JOB_STATUS_URL

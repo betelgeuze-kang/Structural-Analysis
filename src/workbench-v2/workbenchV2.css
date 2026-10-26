@@ -373,3 +373,9 @@
 .wb2-portable-file { display: block; padding: 1rem 0; }
 .wb2-portable-file input { max-width: 100%; }
 .wb2-portable-workspace .wb2-rc-job { margin-top: 1.5rem; overflow-wrap: anywhere; }
+[data-building-member-workspace] fieldset { display: flex; flex-wrap: wrap; gap: .75rem; min-width: 0; margin: 1rem 0; padding: 1rem; border: 1px solid var(--wb2-border); border-radius: .4rem; }
+[data-building-member-workspace] fieldset label { display: flex; flex-direction: column; gap: .35rem; min-width: 0; }
+[data-building-member-workspace] fieldset input,
+[data-building-member-workspace] fieldset select { max-width: 100%; box-sizing: border-box; }
+[data-building-member-workspace] .wb2-table { min-width: 60rem; }
+[data-building-member-workspace] .wb2-num { white-space: nowrap; overflow-wrap: normal; min-width: 4.5rem; }

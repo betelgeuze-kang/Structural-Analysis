@@ -29,5 +29,5 @@ export function registerUnsavedProjectGuard(shouldBlock: () => boolean): () => v
  */
 export function confirmUnsavedProjectNavigation(): boolean {
   if (![...guards.values()].some(blocks)) return true
-  return window.confirm('This RC project has changes since its last export or open. Leave this page and discard the local changes?')
+  return window.confirm('This local project or member mapping has changes since its last export or open. Leave this page and discard the local changes?')
 }

@@ -294,6 +294,51 @@ export interface NativeFrameModelIdentity {
   model_provenance_hash: string
 }
 
+export interface SavedNativeFramePair {
+  resultIr: NativeFrame3dResultIr
+  elementRecovery: NativeFrameElementRecoveryProjection
+  modelFileHash: string
+  resultFileHash: string
+  modelElementRowIndices: Record<string, number>
+}
+
+/** Admit a local saved pair using the same model/result checks as the bundle path.
+ * This checks file integrity and bindings, not the origin of either file or a bundle/report.
+ */
+export async function parseSavedNativeFramePair(
+  modelBytes: Uint8Array,
+  resultBytes: Uint8Array,
+): Promise<SavedNativeFramePair> {
+  if (modelBytes.byteLength === 0 || modelBytes.byteLength > MODEL_MAX_BYTES) throw new Error('ModelIR file size is invalid')
+  if (resultBytes.byteLength === 0 || resultBytes.byteLength > RESULT_MAX_BYTES) throw new Error('ResultIR file size is invalid')
+  // Capture caller-owned buffers before the first await so decoded values and file
+  // hashes always describe the same bytes, even if the caller reuses its buffers.
+  modelBytes = new Uint8Array(modelBytes)
+  resultBytes = new Uint8Array(resultBytes)
+  function localJson(bytes: Uint8Array, limit: number, label: string): unknown {
+    if (bytes.byteLength === 0 || bytes.byteLength > limit) throw new Error(`${label} file size is invalid`)
+    if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) throw new Error(`${label} UTF-8 BOM is not supported`)
+    return parseNativeJsonStrict(new TextDecoder('utf-8', { fatal: true }).decode(bytes))
+  }
+  const modelValue = localJson(modelBytes, MODEL_MAX_BYTES, 'ModelIR')
+  const validation = await validateResultIr(localJson(resultBytes, RESULT_MAX_BYTES, 'ResultIR'))
+  if (validation.error) throw new Error(validation.error)
+  if (validation.integrityUnavailable) throw new Error('ResultIR integrity is unavailable')
+  const elementRecovery = await buildElementRecoveryProjection(modelValue, validation.value)
+  const [modelFileHash, resultFileHash] = await Promise.all([
+    sha256Bytes(modelBytes), sha256Bytes(resultBytes),
+  ])
+  if (modelFileHash === null || resultFileHash === null) throw new Error('Saved pair file integrity is unavailable')
+  const elements = (modelValue as { elements: Array<{ id: string }> }).elements
+  return {
+    resultIr: validation.value,
+    elementRecovery,
+    modelFileHash,
+    resultFileHash,
+    modelElementRowIndices: Object.fromEntries(elements.map((element, index) => [element.id, index])),
+  }
+}
+
 /** Reproduce the Rust ModelIR v2 canonical identity projections in the browser. */
 export async function nativeFrameModelIdentity(value: unknown): Promise<NativeFrameModelIdentity> {
   if (!validateModelIrV2Schema(value)) {
