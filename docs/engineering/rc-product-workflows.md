@@ -175,8 +175,8 @@ retains the current authoring draft and its original parent identities. Preparin
 or importing a replacement requires an explicit decision when that draft has
 unsaved edits.
 
-The target is always `NOT_RUN` and `NOT_REVIEWED`; it has no ResultIR. Original
-forces belong to the stored parent model only. The program never attaches the old
+The authoring target record remains `NOT_RUN` and `NOT_REVIEWED` with
+`result: null`. Original forces belong to the stored parent model only. The program never attaches the old
 result hash to new model hashes or treats the old member mapping as a result-bound
 mapping for the target. Keep the parent result review separate from target input
 preparation. The exported ModelIR can be selected in the existing configured
@@ -187,6 +187,46 @@ The current static ModelIR has no node/storey mass-source field. Density used fo
 self-weight is not modal mass-source support. This slice does not add load-to-mass
 conversion, modal analysis, code-generated combinations, KDS design checks or
 physical validation.
+
+## Implemented building slice: attach a saved result to an exact revision
+
+Validate the current load revision, explicitly select the intended load pattern
+or combination, then choose its saved ResultIR under **Open a stored result for a
+revised model**. The workspace recompiles the exact saved draft and requires the
+result to match the derived target model's content, semantic and provenance
+hashes. It also verifies the existing native ResultIR/recovery contracts and the
+explicitly selected load source. The parent result, a different model, or a
+different selected load source is rejected. Result ID alone is not identity: the
+ID and result hash are retained together. This workspace reads saved files and
+does not submit a run.
+
+A new result-bound mapping is derived from the original declared storeys, physical
+members, analysis segments and review locations. Their IDs, gaps and unmapped
+members remain intact. The view preserves every native signed endpoint tuple and
+both sides of a shared station, without interpolation, averaging or automatic
+parent/target comparison. Parent and attached load sources remain separate and
+visible. All members and rows remain `NOT_REVIEWED`.
+
+Download **Export linked revision result** to carry the exact draft, result bytes
+and explicit source selection to a fresh session. Open that file directly with no
+parent files, job database or service. The envelope is limited to 16 MiB, with an
+8 MiB draft and a 2 MiB ResultIR limit. Byte lengths, canonical base64, hashes,
+strict JSON and schema are checked. Reopening derives and validates the target,
+mapping, review and lineage again; imported derived review/status fields are not
+accepted. Separate downloads retain the exact target model, result, derived
+mapping, complete review and lineage. Bad replacements leave the previous valid
+attached session open.
+
+An attached session freezes its own draft and files. Editing or replacing the
+current authoring draft disables new attachments until that draft is validated,
+and a notice distinguishes any retained older attached session. It never relabels
+old forces as a result for a new draft. The authoring record itself still says
+`NOT_RUN` and `result: null`; the separate attachment records only
+`STORED_RESULT_FILE_CONSISTENT`. Result origin remains `UNVERIFIED`, execution is
+`NOT_VERIFIED` and comparison is `NOT_COMPUTED`. Internally consistent hashes do
+not authenticate the producer or establish execution, numerical/physical validity,
+KDS compliance or engineering acceptance. This is saved-result continuation, not
+completion of the building analysis and design workflow.
 
 ## Next building acceptance slices
 
@@ -210,7 +250,7 @@ validators; missing data and failed runs must not disappear.
 Portable review tests reuse retained v6/v7 hosted software fixtures. They never
 generate a new numerical fixture locally. The normal Runtime Input and Viewer CI
 executes the portable contracts and browser workflow alongside the saved report
-checks. Building mapping tests use synthetic data contracts and existing saved
-native fixture shapes without running a solver. The default Workbench regression
+checks. Building mapping, load-revision and result-attachment tests use synthetic data
+contracts and existing saved native fixture shapes without running a solver. The default Workbench regression
 suite includes their contract and browser cases. These software checks do not
 close either product's external acceptance.

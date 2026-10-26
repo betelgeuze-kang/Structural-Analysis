@@ -10,6 +10,8 @@ import {
   type BuildingLoadRevisionDraft,
 } from '../model/buildingLoadRevision'
 import { registerUnsavedProjectGuard } from '../model/unsavedProjectGuard'
+import type { BuildingRevisionLoadSource } from '../model/buildingRevisionResult'
+import { BuildingRevisionResultPanel } from './BuildingRevisionResultPanel'
 
 interface BuildingLoadRevisionPanelProps {
   modelBytes?: Uint8Array
@@ -151,6 +153,10 @@ export function BuildingLoadRevisionPanel(props: BuildingLoadRevisionPanelProps)
     } catch (error) { setMessage(error instanceof Error ? error.message : 'The draft could not be saved. Your edits are retained.') }
   }
   const selected = patterns.find(pattern => pattern.id === patternId)
+  const resultLoadSources: BuildingRevisionLoadSource[] = compiled ? [
+    ...(compiled.modelIr.load_patterns as Array<{ id: string }>).map(row => ({ kind: 'load_pattern' as const, id: row.id })),
+    ...(compiled.modelIr.load_combinations as Array<{ id: string }>).map(row => ({ kind: 'load_combination' as const, id: row.id })),
+  ] : []
   function updatePattern(change: (pattern: PatternEditor) => void): void {
     setPatterns(previous => previous.map(pattern => { if (pattern.id !== patternId) return pattern; const next = structuredClone(pattern); change(next); return next }))
     changed()
@@ -226,15 +232,20 @@ export function BuildingLoadRevisionPanel(props: BuildingLoadRevisionPanelProps)
         <button type="button" className="wb2-btn" disabled={busy || pendingNewLoad} onClick={() => void validate()}>Validate load revision</button></div>
       {compiled ? <section aria-label="Validated load revision target" data-building-load-target>
         <h3>Target model: NOT_RUN / NOT_REVIEWED</h3>
-        <p>No result is attached to this target. Stored force tables describe their separately admitted source, never this target. This revision’s own frozen parent identity is shown here.</p>
+        <p>No result is attached to this authoring record. Parent force tables describe the original admitted source. A separate stored result may be attached below to this exact validated target without changing the authoring record’s NOT_RUN status.</p>
         <details><summary>Target model identities</summary><pre style={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}>{JSON.stringify(compiled.targetIdentity, null, 2)}</pre></details>
         <div className="wb2-actions"><button type="button" className="wb2-btn" disabled={busy} onClick={() => download(compiled.modelBytes as BlobPart, 'building-load-revision.model-ir.json')}>Export revised ModelIR</button>
           <button type="button" className="wb2-btn" disabled={busy} onClick={() => download(JSON.stringify(compiled.revisionRecord, null, 2), 'building-load-revision.record.json')}>Export load revision record</button>
           <button type="button" className="wb2-btn" disabled={busy} onClick={() => download(compiled.recipeBytes as BlobPart, 'building-load-revision.recipe.json')}>Export load edit recipe</button></div>
-        <p>Keep the revision draft to reopen these edits. A future, explicit analysis must produce a new result bound to this target before target member forces can be reviewed. File validation does not establish solver acceptance, design compliance or physical validity.</p>
-      </section> : <p data-building-load-target-unavailable>Target downloads are unavailable until this exact draft is validated. No target result exists.</p>}
+        <p>Keep the revision draft to reopen these edits. Reviewing target forces requires a separately stored ResultIR bound to this exact target and the explicitly selected load source. File validation does not establish solver execution, design compliance or physical validity.</p>
+      </section> : <p data-building-load-target-unavailable>Target downloads are unavailable until this exact draft is validated. This authoring editor does not generate a result; any separately attached review below retains its own frozen target.</p>}
     </> : null}
     {busy ? <p role="status">Checking the local load revision…</p> : null}
     {message ? <p role="status" data-building-load-status>{message}</p> : null}
+    <BuildingRevisionResultPanel
+      draft={compiled ? session?.draft : undefined}
+      draftFingerprint={compiled?.revisionRecord.target.model_file_hash}
+      loadSources={resultLoadSources}
+    />
   </section>
 }
