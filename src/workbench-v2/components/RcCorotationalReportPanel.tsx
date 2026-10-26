@@ -95,18 +95,20 @@ export function RcCorotationalReportPanel({ review, expectedReportId }: { review
     } catch { if (generation.current === ownGeneration) setFileMessage('This file does not match the exact authenticated saved report. The saved review is retained.') }
     finally { if (generation.current === ownGeneration) setReadingFile(false) }
   }
-  async function exportPortable(): Promise<void> {
+  async function exportPortable(includeDetails = false): Promise<void> {
     if (!review.portableDownload || exportingPortable || readingFile) return
     const ownGeneration = generation.current
     setExportingPortable(true); setFileMessage('')
     try {
-      const blob = await review.portableDownload()
+      const blob = await review.portableDownload(includeDetails ? { includeDetails: true } : undefined)
       if (generation.current !== ownGeneration) return
       const url = URL.createObjectURL(blob), anchor = document.createElement('a')
-      urls.current.add(url); anchor.href = url; anchor.download = `${summary.reportId}-portable-rc-review.json`
+      urls.current.add(url); anchor.href = url; anchor.download = `${summary.reportId}-portable-rc-review${includeDetails ? '-with-details' : ''}.json`
       document.body.append(anchor); anchor.click(); anchor.remove()
       window.setTimeout(() => { URL.revokeObjectURL(url); urls.current.delete(url) }, 0)
-    } catch { if (generation.current === ownGeneration) setFileMessage('The portable review could not be exported. Reopen the saved job with the current account and try again.') }
+    } catch { if (generation.current === ownGeneration) setFileMessage(includeDetails
+      ? 'The portable review with details could not be exported. The saved nodal review is retained. You can export a nodal-only file separately.'
+      : 'The portable review could not be exported. Reopen the saved job with the current account and try again.') }
     finally { if (generation.current === ownGeneration) setExportingPortable(false) }
   }
   function inspectState(next: number): void {
@@ -164,10 +166,11 @@ export function RcCorotationalReportPanel({ review, expectedReportId }: { review
     <RcCorotationalDetailPanel review={review} index={index} selectedMember={selectedMember} onSelectMember={setSelectedMember} onSelectState={inspectState} />
     <div className="wb2-actions"><button type="button" className="wb2-btn" onClick={() => void download()}>Download corotational nodal report</button>
       {review.portableDownload ? <button type="button" className="wb2-btn" disabled={exportingPortable || readingFile} onClick={() => void exportPortable()}>Export portable RC review</button> : null}
+      {review.portableDownload ? <button type="button" className="wb2-btn" disabled={exportingPortable || readingFile} onClick={() => void exportPortable(true)}>Export portable RC review with details</button> : null}
       <label>Reopen corotational report JSON <input type="file" aria-label="Reopen corotational report JSON" accept="application/json,.json" disabled={readingFile || exportingPortable} onChange={e => { void reopen(e.target.files?.[0]); e.target.value = '' }} /></label>
       <a data-rc-corotational-project-link href={rcCorotationalReportLink(summary.jobId, summary.reportId)} target="_blank" rel="noopener">Reopen this corotational report</a>
     </div>
-    {review.portableDownload ? <p className="wb2-note">The portable file includes this job record, original input and nodal report for viewing on another computer. Share only with intended recipients. It contains no account credential and does not authorize a new run.</p> : null}
+    {review.portableDownload ? <p className="wb2-note">The portable file includes this job record, original input and nodal report for viewing on another computer. Choose the export with details to also include the saved member, section and fiber histories. If those details are unavailable, export the nodal-only file separately. Share only with intended recipients. The file stores no service credential and does not authorize a new run.</p> : null}
     {fileMessage ? <p role="status" data-rc-corotational-file-status>{fileMessage}</p> : null}
   </section>
 }

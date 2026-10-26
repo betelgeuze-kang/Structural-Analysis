@@ -265,7 +265,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
               const original = loaded.rcCorotationalReview
               const scoped: RcCorotationalReportReview = { ...original,
                 ...(original.geometry ? { geometry: () => guardProjection(() => original.geometry!()) } : {}),
-                ...(original.portableDownload ? { portableDownload: () => guardProjection(() => original.portableDownload!()) } : {}),
+                ...(original.portableDownload ? { portableDownload: (options?: { includeDetails?: boolean }) => guardProjection(() => original.portableDownload!(options)) } : {}),
                 ...(original.comparisonSummary ? { comparisonSummary: () => guard(() => original.comparisonSummary!()) } : {}),
                 ...(original.openDetails ? { openDetails: () => guardProjection(() => original.openDetails!()) } : {}),
                 ...(original.detailMember ? { detailMember: (...args: Parameters<NonNullable<RcCorotationalReportReview['detailMember']>>) => guardProjection(() => original.detailMember!(...args)) } : {}),

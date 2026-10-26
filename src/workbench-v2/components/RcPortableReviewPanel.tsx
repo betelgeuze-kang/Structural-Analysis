@@ -4,6 +4,7 @@ import type { RcCorotationalStateChoice } from '../model/rcCorotationalReportRev
 import type { RcCorotationalReportResponse } from '../model/rcCorotationalReportSchema'
 import type { RcResultGeometry } from '../model/rcResultVisualization'
 import { NodalTable, RcCorotationalControlDescription } from './RcCorotationalReportPanel'
+import { RcCorotationalDetailPanel } from './RcCorotationalDetailPanel'
 import { RcDeformedShape, RcHistoryPlot } from './RcResultVisualization'
 import '../workbenchV2.css'
 
@@ -32,7 +33,7 @@ export function RcPortableReviewPanel(): ReactElement {
     setMessage('')
     if (!file.size || file.size > RC_PORTABLE_REVIEW_MAX_BYTES) {
       setBusy(false)
-      setMessage('Choose a non-empty portable RC review file of at most 112 MiB. Any previously opened review is retained.')
+      setMessage(`Choose a non-empty portable RC review file of at most ${RC_PORTABLE_REVIEW_MAX_BYTES / (1024 * 1024)} MiB. Any previously opened review is retained.`)
       return
     }
     setBusy(true)
@@ -44,9 +45,11 @@ export function RcPortableReviewPanel(): ReactElement {
       const previous = current.current
       current.current = candidate; setReview(candidate); setEpoch(own)
       previous?.dispose()
-      setMessage('Opened saved input and nodal results. No analysis was run.')
+      setMessage(candidate.detailSummary
+        ? 'Opened saved input, nodal results and included member, section and fiber details. No analysis was run.'
+        : 'Opened saved input and nodal results. Member, section and fiber details are omitted from this file. No analysis was run.')
     } catch {
-      if (own === generation.current) setMessage('This file could not be verified. Any previously opened review is retained.')
+      if (own === generation.current) setMessage('The input, nodal report or included detail report could not be verified. Any previously opened review is retained.')
     } finally {
       if (own === generation.current) { setBusy(false); opening.current = null }
     }
@@ -148,7 +151,9 @@ function PortableNodalResults({ review }: { review: RcPortableReview }): ReactEl
     <details><summary>Recorded source and file scope</summary>
       <p className="wb2-mono" style={{ overflowWrap: 'anywhere' }}>Source revision: {summary.sourceRevision} · caller declaration</p>
       <p className="wb2-mono" style={{ overflowWrap: 'anywhere' }}>Report: {summary.reportId}</p>
-      <p>This version contains one completed job’s original input and nodal report. Detailed member, section and fiber histories, original result/evidence artifacts and a rerun environment are not included. Keep the project and original service records for those materials.</p>
+      <p>This file contains one completed job’s original input and nodal report.{review.detailSummary
+        ? ' The included member, section and fiber detail report is bound to the same stored nodal states.'
+        : ' Member, section and fiber details are omitted from this nodal-only file.'} Original result/evidence artifacts and a rerun environment are not included. Keep the project and original service records for those materials.</p>
     </details>
     <label>Portable accepted state page{' '}
       <select aria-label="Portable accepted state page" value={page} onChange={event => selectState(Number(event.target.value) * PAGE_SIZE)}>
@@ -179,6 +184,13 @@ function PortableNodalResults({ review }: { review: RcPortableReview }): ReactEl
       <NodalTable nodes={state.nodes} kind="reactions_kn_knm" state={state.state_index} selectedNodes={selectedNodes} />
       <p className="wb2-note">A zero reaction at a free DOF is not the applied load. Use the stored applied nodal load table.</p>
     </>}
+    {review.detailSummary ? <div data-rc-portable-details="included">
+      <p data-rc-portable-detail-status>Member, section and fiber details are included and checked against this file’s nodal report. Origin is not authenticated.</p>
+      <RcCorotationalDetailPanel review={review} index={index} selectedMember={memberId} onSelectMember={setMemberId} onSelectState={selectState} source="portable" />
+    </div> : <section data-rc-portable-details="omitted" aria-label="Stored member, section and fiber details">
+      <h3>Member, section and fiber details omitted</h3>
+      <p data-rc-portable-detail-status>This nodal-only file does not include member end forces, section moment–curvature or fiber stress–strain histories. The saved nodal results remain available.</p>
+    </section>}
     <div className="wb2-actions">
       <button type="button" className="wb2-btn" disabled={downloading} onClick={() => void download('request')}>Download original RC input</button>
       <button type="button" className="wb2-btn" disabled={downloading} onClick={() => void download('report')}>Download stored nodal report</button>

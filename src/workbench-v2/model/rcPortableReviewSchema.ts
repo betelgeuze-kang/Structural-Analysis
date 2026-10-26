@@ -4,12 +4,16 @@ import { parseNativeJsonStrict } from './nativeFrameProvider'
 import { document, validateRcCorotationalRequestProfile, type RcObject } from './rcJobSchema'
 import { parseRcCorotationalReport, type RcCorotationalReport } from './rcCorotationalReportSchema'
 import type { RcCorotationalReportSummary } from './rcCorotationalReportReview'
+import { parseRcCorotationalDetailReport, type RcCorotationalDetailReport, type RcCorotationalDetailSummary } from './rcCorotationalDetailReport'
 
-export const RC_PORTABLE_REVIEW_MAX_BYTES = 112 * 1024 * 1024
+export const RC_PORTABLE_REVIEW_MAX_BYTES = 200 * 1024 * 1024
+export const RC_PORTABLE_REVIEW_V1_MAX_BYTES = 112 * 1024 * 1024
 export const RC_PORTABLE_REVIEW_REQUEST_MAX_BYTES = 16 * 1024 * 1024
 export const RC_PORTABLE_REVIEW_REPORT_MAX_BYTES = 64 * 1024 * 1024
+export const RC_PORTABLE_REVIEW_DETAIL_MAX_BYTES = 64 * 1024 * 1024
 const JOB_MAX_BYTES = 64 * 1024
-const SCHEMA = 'rc-portable-nodal-review.v1'
+const SCHEMA_V1 = 'rc-portable-nodal-review.v1'
+const SCHEMA_V2 = 'rc-portable-nodal-review.v2'
 const CUSTODY = 'portable_unverified_origin'
 const HASH = /^sha256:[0-9a-f]{64}$/
 const CHUNK = 48 * 1024 // Divisible by three: only the final base64 chunk is padded.
@@ -22,11 +26,14 @@ export interface RcPortableReviewSource {
   reportBytes: Uint8Array
   reportId: string
   contentHash: string
+  detailReport?: { bytes: Uint8Array; reportId: string; contentHash: string }
 }
 export interface RcPortableReviewDocument extends RcPortableReviewSource {
   request: RcObject
   report: RcCorotationalReport
   summary: RcCorotationalReportSummary
+  detail: RcCorotationalDetailReport | null
+  detailSummary: RcCorotationalDetailSummary | null
 }
 interface EncodedArtifact { encoding: 'base64'; byte_length: number; content_hash: string; body_base64: string }
 
@@ -115,6 +122,12 @@ export function rcPortableReviewSummary(report: RcCorotationalReport, reportId: 
   }
 }
 
+export function rcPortableDetailSummary(detail: RcCorotationalDetailReport, reportId: string, contentHash: string): RcCorotationalDetailSummary {
+  return { reportId, contentHash, reportHash: detail.report_hash, stateCount: detail.responses.length,
+    members: detail.responses[0].members.map(member => ({ member_id: member.member_id, node_i: member.node_i,
+      node_j: member.node_j, sectionCount: member.sections.length })) }
+}
+
 /** Called by the authenticated worker using already validated original custody.
  * This envelope records provenance; its contents never carry authentication.
  */
@@ -125,15 +138,23 @@ export async function createRcPortableReviewBlob(source: RcPortableReviewSource)
   const requestHash = await hash(source.requestBytes), reportHash = await hash(source.reportBytes)
   check(source.requestBytes.byteLength === job.request.byte_length && requestHash === job.request.content_hash, 'request_binding_invalid')
   check(reportHash === source.contentHash && source.reportId === `rcc_${reportHash.slice(7)}`, 'report_binding_invalid')
+  const detail = source.detailReport
+  let detailHash: string | null = null
+  if (detail) {
+    bytesWithin(detail.bytes, RC_PORTABLE_REVIEW_DETAIL_MAX_BYTES)
+    detailHash = await hash(detail.bytes)
+    check(detailHash === detail.contentHash && detail.reportId === `rcd_${detailHash.slice(7)}`, 'detail_binding_invalid')
+  }
   const jobBytes = encoder.encode(JSON.stringify(job)), jobHash = await hash(jobBytes)
   const artifact = (bytes: Uint8Array, content_hash: string) => ({ encoding: 'base64', byte_length: bytes.byteLength, content_hash, body_base64: encode(bytes) })
   // Blob parts avoid a second complete JSON string containing both base64 bodies.
   const blob = new Blob([
-    `{"schema_version":"${SCHEMA}","custody":"${CUSTODY}","recorded_tenant_id":${JSON.stringify(tenantId)},"job":`,
+    `{"schema_version":"${detail ? SCHEMA_V2 : SCHEMA_V1}","custody":"${CUSTODY}","recorded_tenant_id":${JSON.stringify(tenantId)},"job":`,
     JSON.stringify(artifact(jobBytes, jobHash)), `,"report_id":${JSON.stringify(source.reportId)},"request":`,
-    JSON.stringify(artifact(source.requestBytes, requestHash)), ',"report":', JSON.stringify(artifact(source.reportBytes, reportHash)), '}',
+    JSON.stringify(artifact(source.requestBytes, requestHash)), ',"report":', JSON.stringify(artifact(source.reportBytes, reportHash)),
+    ...(detail && detailHash ? [',"detail_report_id":', JSON.stringify(detail.reportId), ',"detail_report":', JSON.stringify(artifact(detail.bytes, detailHash))] : []), '}',
   ], { type: 'application/json' })
-  check(blob.size <= RC_PORTABLE_REVIEW_MAX_BYTES, 'file_too_large')
+  check(blob.size <= (detail ? RC_PORTABLE_REVIEW_MAX_BYTES : RC_PORTABLE_REVIEW_V1_MAX_BYTES), 'file_too_large')
   return blob
 }
 
@@ -145,8 +166,12 @@ export async function parseRcPortableReview(bytes: Uint8Array): Promise<RcPortab
     check(bytes instanceof Uint8Array && bytes.byteLength > 0 && bytes.byteLength <= RC_PORTABLE_REVIEW_MAX_BYTES, 'file_too_large')
     check(!(bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf), 'encoding_invalid')
     const value = parseNativeJsonStrict(new TextDecoder('utf-8', { fatal: true }).decode(bytes))
-    const row = exact(value, ['schema_version', 'custody', 'recorded_tenant_id', 'job', 'report_id', 'request', 'report'], 'file_fields_invalid')
-    check(row.schema_version === SCHEMA, 'schema_unsupported')
+    check(value !== null && typeof value === 'object' && !Array.isArray(value), 'file_fields_invalid')
+    const schema = (value as Record<string, unknown>).schema_version
+    check(schema === SCHEMA_V1 || schema === SCHEMA_V2, 'schema_unsupported')
+    check(schema !== SCHEMA_V1 || bytes.byteLength <= RC_PORTABLE_REVIEW_V1_MAX_BYTES, 'file_too_large')
+    const row = exact(value, ['schema_version', 'custody', 'recorded_tenant_id', 'job', 'report_id', 'request', 'report',
+      ...(schema === SCHEMA_V2 ? ['detail_report_id', 'detail_report'] : [])], 'file_fields_invalid')
     check(row.custody === CUSTODY, 'custody_invalid')
     const tenantId = admittedTenant(row.recorded_tenant_id), jobRef = encoded(row.job, JOB_MAX_BYTES)
     const jobBytes = decode(jobRef)
@@ -162,9 +187,22 @@ export async function parseRcPortableReview(bytes: Uint8Array): Promise<RcPortab
     validateRcCorotationalRequestProfile(request)
     const reportBytes = decode(reportRef)
     check(await hash(reportBytes) === reportRef.content_hash, 'report_hash_mismatch')
-    const report = await parseRcCorotationalReport(reportBytes, { job, tenantId, request })
+    const expected = { job, tenantId, request }
+    const report = await parseRcCorotationalReport(reportBytes, expected)
+    let detail: RcCorotationalDetailReport | null = null, detailSummary: RcCorotationalDetailSummary | null = null
+    let detailReport: RcPortableReviewSource['detailReport']
+    if (schema === SCHEMA_V2) {
+      const ref = encoded(row.detail_report, RC_PORTABLE_REVIEW_DETAIL_MAX_BYTES)
+      check(typeof row.detail_report_id === 'string' && row.detail_report_id === `rcd_${ref.content_hash.slice(7)}`, 'detail_binding_invalid')
+      const detailBytes = decode(ref)
+      check(await hash(detailBytes) === ref.content_hash, 'detail_hash_mismatch')
+      detail = await parseRcCorotationalDetailReport(detailBytes, expected, report)
+      detailReport = { bytes: detailBytes, reportId: row.detail_report_id, contentHash: ref.content_hash }
+      detailSummary = rcPortableDetailSummary(detail, row.detail_report_id, ref.content_hash)
+    }
     return { job, tenantId, requestBytes, reportBytes, request, report, reportId: row.report_id,
-      contentHash: reportRef.content_hash, summary: rcPortableReviewSummary(report, row.report_id, reportRef.content_hash) }
+      contentHash: reportRef.content_hash, summary: rcPortableReviewSummary(report, row.report_id, reportRef.content_hash),
+      detailReport, detail, detailSummary }
   } catch (error) {
     if (error instanceof Error && /^rc_portable_review_[a-z_]+$/.test(error.message)) throw error
     throw new Error('rc_portable_review_contract_invalid')

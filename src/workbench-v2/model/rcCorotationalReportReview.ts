@@ -24,7 +24,7 @@ export interface RcCorotationalReportReview {
   state(index: number): Promise<RcCorotationalReportResponse>
   statePage(start: number, count: number): Promise<RcCorotationalStateChoice[]>
   download(): Promise<Blob>
-  portableDownload?(): Promise<Blob>
+  portableDownload?(options?: { includeDetails?: boolean }): Promise<Blob>
   comparisonSummary?(): Promise<RcScenarioSummary>
   geometry?(): Promise<RcResultGeometry>
   openDetails?(): Promise<RcCorotationalDetailSummary>
@@ -107,25 +107,31 @@ export async function loadRcCorotationalReportReview(
     signal?.throwIfAborted()
     const authorized = async <T,>(operation: () => Promise<T>): Promise<T> => {
       try {
+        if (failure) throw new JobArtifactError(failure)
         await transport.verifyAuthorizationScope?.()
         signal?.throwIfAborted()
+        if (failure) throw new JobArtifactError(failure)
         const result = await operation()
         await transport.verifyAuthorizationScope?.()
         signal?.throwIfAborted()
+        if (failure) throw new JobArtifactError(failure)
         return result
       } catch (error) {
         if (error instanceof Error && /authorization_|AbortError/.test(error.message + error.name)) stop('rc_corotational_report_authorization_changed')
         throw error
       }
     }
-    const portableDownload = async (): Promise<Blob> => {
+    const portableDownload = async (options?: { includeDetails?: boolean }): Promise<Blob> => {
       if (failure) throw new JobArtifactError(failure)
       if (portableExporting) throw new JobArtifactError('rc_corotational_report_portable_export_busy')
       // Acquire before authorization yields; duplicate calls must never queue
       // another full report encoding in the worker.
       portableExporting = true
       try {
-        const blob = await authorized(() => call<Blob>('portableDownload'))
+        const includeDetails = options?.includeDetails === true
+        if (includeDetails) await openDetails()
+        if (failure) throw new JobArtifactError(failure)
+        const blob = await authorized(() => call<Blob>('portableDownload', { includeDetails }))
         // Disposal can happen after the worker answered while the final
         // authorization check is pending. Never publish its completed Blob.
         if (failure) throw new JobArtifactError(failure)

@@ -5,8 +5,10 @@ import type { RcCorotationalDetailSummary, RcCorotationalDetailMemberView, RcCor
 import { RcHistoryPlot } from './RcResultVisualization'
 
 const PAGE_SIZE = 20
-export function RcCorotationalDetailPanel({ review, index, selectedMember, onSelectMember, onSelectState }: {
-  review: RcCorotationalReportReview; index: number; selectedMember: string
+export type RcCorotationalDetailReview = Pick<RcCorotationalReportReview,
+  'openDetails' | 'detailMember' | 'detailSection' | 'detailFiber' | 'detailSectionPage' | 'detailFiberPage' | 'detailDownload'>
+export function RcCorotationalDetailPanel({ review, index, selectedMember, onSelectMember, onSelectState, source = 'service' }: {
+  review: RcCorotationalDetailReview; index: number; selectedMember: string; source?: 'service' | 'portable'
   onSelectMember: (member: string) => void; onSelectState: (state: number) => void
 }): ReactElement {
   const fieldId = useId()
@@ -95,9 +97,11 @@ export function RcCorotationalDetailPanel({ review, index, selectedMember, onSel
     } catch { if (own === generation.current) setMessage('The exact stored detail report could not be downloaded.') }
   }
   return <section data-rc-corotational-details={summary ? 'verified' : opening ? 'loading' : 'closed'} aria-label="Stored member, section and fiber details" style={{ minWidth: 0, maxWidth: '100%' }}>
-    <h4>Stored member, section and fiber details</h4>
+    {source === 'portable' ? <h3>Stored member, section and fiber details</h3> : <h4>Stored member, section and fiber details</h4>}
     {!summary ? <>
-      <p data-rc-corotational-member-unavailable>Member end forces, section moment–curvature and fiber stress–strain are unavailable in this saved nodal report. Open the separate stored detail report to inspect them when available.</p>
+      <p data-rc-corotational-member-unavailable>{source === 'portable'
+        ? 'This file includes a separate stored detail report. Open it to inspect member end forces, section moment–curvature and fiber stress–strain. File origin is not authenticated.'
+        : 'Member end forces, section moment–curvature and fiber stress–strain are unavailable in this saved nodal report. Open the separate stored detail report to inspect them when available.'}</p>
       <button type="button" disabled={opening || !review.openDetails} onClick={() => void open()}>Open stored RC details</button>
     </> : <>
       <p>Read from the saved accepted responses, including gravity preload and subdivisions. No analysis is run. Member endpoints and integration points keep their authored order.</p>

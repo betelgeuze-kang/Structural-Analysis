@@ -58,7 +58,11 @@ self.onmessage = async ({ data }) => {
       try {
         if (!requestBytes) unavailable()
         const value = await createRcPortableReviewBlob({ job: expected.job, tenantId: expected.tenantId,
-          requestBytes, reportBytes: bytes, reportId: summary.reportId, contentHash: summary.contentHash })
+          requestBytes, reportBytes: bytes, reportId: summary.reportId, contentHash: summary.contentHash,
+          ...(data.includeDetails === true ? { detailReport: (() => {
+            if (!detail || !detailBytes || !detailSummary) throw new Error('rc_corotational_report_detail_unavailable')
+            return { bytes: detailBytes, reportId: detailSummary.reportId, contentHash: detailSummary.contentHash }
+          })() } : {}) })
         self.postMessage({ id, value })
       } catch { self.postMessage({ id, operationError: 'rc_corotational_report_portable_export_unavailable' }) }
       finally { portableExporting = false }

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import path from 'node:path'
 import { createRcPortableReviewBlob } from '../../src/workbench-v2/model/rcPortableReviewSchema'
 
@@ -18,14 +19,19 @@ async function verified(page: Page): Promise<void> {
 
 for (const profile of ['v6', 'v7'] as const) test.describe(`Portable RC nodal review ${profile}`, () => {
   test.skip(!retained, 'Retained hosted software fixtures are required; never generate a numerical fixture here.')
-  let snapshot: any, request: Buffer, report: Buffer, archive: Buffer
+  let snapshot: any, request: Buffer, report: Buffer, detailBytes: Buffer, archive: Buffer, detailedArchive: Buffer
   test.beforeAll(async () => {
     snapshot = JSON.parse(readFileSync(path.join(retained!, `${profile}-review-snapshot.json`), 'utf8'))
     request = Buffer.from(snapshot.artifacts.request, 'base64')
     report = Buffer.from(snapshot.report.body_base64, 'base64')
+    detailBytes = Buffer.from(snapshot.detail_report.body_base64, 'base64')
     archive = Buffer.from(await (await createRcPortableReviewBlob({ job: snapshot.job, tenantId: snapshot.tenant_id,
       requestBytes: request, reportBytes: report, reportId: snapshot.report.headers['x-structural-report-id'],
       contentHash: snapshot.report.headers['x-structural-report-sha256'] })).arrayBuffer())
+    detailedArchive = Buffer.from(await (await createRcPortableReviewBlob({ job: snapshot.job, tenantId: snapshot.tenant_id,
+      requestBytes: request, reportBytes: report, reportId: snapshot.report.headers['x-structural-report-id'],
+      contentHash: snapshot.report.headers['x-structural-report-sha256'], detailReport: { bytes: detailBytes,
+        reportId: snapshot.detail_report.headers['x-structural-report-id'], contentHash: snapshot.detail_report.headers['x-structural-report-sha256'] } })).arrayBuffer())
   })
 
   async function live(page: Page): Promise<Array<string>> {
@@ -39,6 +45,7 @@ for (const profile of ['v6', 'v7'] as const) test.describe(`Portable RC nodal re
       const req = route.request(), pathname = new URL(req.url()).pathname
       calls.push(`${req.method()} ${pathname}`)
       if (req.headers()['x-structural-tenant'] !== snapshot.tenant_id) return route.fulfill({ status: 401 })
+      if (pathname.endsWith('/rc-corotational-detail-report')) return route.fulfill({ status: 200, headers: snapshot.detail_report.headers, body: detailBytes })
       if (pathname.endsWith('/rc-corotational-report')) return route.fulfill({ status: 200, headers: snapshot.report.headers, body: report })
       if (pathname.endsWith('/request')) return route.fulfill({ status: 200, contentType: 'application/json', body: request })
       if (pathname === `/v1/jobs/${snapshot.job.job_id}`) return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(snapshot.job) })
@@ -71,6 +78,9 @@ for (const profile of ['v6', 'v7'] as const) test.describe(`Portable RC nodal re
       await openFile(offline, exportedBytes); await verified(offline)
       await expect(offline.locator('[data-rc-portable-custody]')).toHaveText('File integrity checked. Origin is not authenticated.')
       await expect(offline.locator('[data-rc-portable-unknown]')).toContainText('Unknown work remains')
+      await expect(offline.locator('[data-rc-portable-details]')).toHaveAttribute('data-rc-portable-details', 'omitted')
+      await expect(offline.locator('[data-rc-portable-detail-status]')).toContainText('nodal-only file does not include')
+      await expect(offline.getByRole('button', { name: 'Open stored RC details', exact: true })).toHaveCount(0)
       await expect(offline.getByLabel('Portable accepted state', { exact: true })).toHaveValue('3')
       const response = JSON.parse(report.toString('utf8')).responses[3]
       for (const node of response.nodes) await expect(offline.locator('[data-rc-corotational-table="displacements_m_rad"] tbody tr')
@@ -89,6 +99,85 @@ for (const profile of ['v6', 'v7'] as const) test.describe(`Portable RC nodal re
       expect(await offline.evaluate(() => (window as any).__portableAuthCalls)).toBe(0)
       expect(serviceCalls).toEqual([])
       await offline.screenshot({ path: testInfo.outputPath('portable-offline-review.png'), fullPage: true })
+    } finally { await context.close() }
+    expect(calls.filter(call => call.endsWith('/rc-corotational-detail-report'))).toEqual([])
+  })
+
+  test('exports included details and reads exact member, section and fiber histories in a fresh session without service access', async ({ page, browser }, testInfo) => {
+    const calls = await live(page)
+    const event = page.waitForEvent('download')
+    await page.getByRole('button', { name: 'Export portable RC review with details', exact: true }).click()
+    const exportedBytes = readFileSync((await (await event).path())!)
+    expect(calls.filter(call => call.endsWith('/rc-corotational-detail-report'))).toHaveLength(1)
+    expect(calls.filter(call => !call.startsWith('GET '))).toEqual([])
+    const detail = JSON.parse(detailBytes.toString('utf8'))
+    const context = await browser.newContext()
+    try {
+      await context.addInitScript(() => {
+        const host = window as any; host.__portableAuthCalls = 0
+        host.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcJobCollectionUrl: '/v1/jobs', jobStatusUrl: '/v1/jobs/unavailable',
+          jobAuthorization: async () => { host.__portableAuthCalls++; throw new Error('original_service_unavailable') } }
+      })
+      const serviceCalls: string[] = []
+      await context.route('**/v1/jobs**', async route => { serviceCalls.push(route.request().url()); await route.abort() })
+      const offline = await context.newPage()
+      await offline.goto(`${origin}/#/rc-review`); await openFile(offline, exportedBytes); await verified(offline)
+      await expect(offline.locator('[data-rc-project-workspace]')).toHaveCount(0)
+      await expect(offline.locator('[data-rc-portable-details]')).toHaveAttribute('data-rc-portable-details', 'included')
+      await expect(offline.locator('[data-rc-portable-detail-status]')).toContainText('Origin is not authenticated')
+      await offline.getByRole('button', { name: 'Open stored RC details', exact: true }).click()
+      const panel = offline.locator('[data-rc-corotational-details="verified"]')
+      await expect(panel).toBeVisible()
+      for (const state of detail.responses) {
+        await offline.getByLabel('Portable accepted state', { exact: true }).selectOption(String(state.state_index))
+        for (const member of state.members) {
+          await panel.getByLabel('Detail member', { exact: true }).selectOption(member.member_id)
+          await expect(panel.locator('[data-rc-detail-member]')).toContainText(`Accepted state ${state.state_index} · ${member.member_id}:`)
+          for (const frame of ['global', 'local']) for (const [end, offset] of [['i', 0], ['j', 3]] as const) {
+            await expect(panel.locator(`[data-rc-detail-force="${frame}:${end}"] td`)).toHaveText([
+              `${end}: ${member[`node_${end}`]}`, ...member[`end_force_${frame}_kn_knm`].slice(offset, offset + 3).map(String),
+            ])
+          }
+          const section = member.sections.at(-1)
+          await panel.getByLabel('Detail integration point', { exact: true }).selectOption(String(section.integration_point_index))
+          await expect(panel.locator('[data-rc-detail-section-table] tbody td')).toHaveText([
+            section.axial_strain, section.curvature_z_per_m, section.axial_force_kn, section.moment_z_kn_m,
+          ].map(String))
+          const fiber = section.fibers.at(-1)
+          await panel.getByLabel('Detail fiber index', { exact: true }).fill(String(fiber.fiber_index))
+          await expect(panel.locator('[data-rc-detail-fiber-table] tbody td')).toHaveText([
+            fiber.fiber_index, fiber.material_kind, fiber.strain, fiber.stress_mpa,
+          ].map(String))
+        }
+      }
+      const member = detail.responses.at(-1).members.at(-1), section = member.sections.at(-1), fiber = section.fibers.at(-1)
+      const sectionPlot = panel.locator('[data-rc-history-plot="Section moment–curvature history"]')
+      const fiberPlot = panel.locator('[data-rc-history-plot="Fiber stress–strain history"]')
+      for (const [plot, values] of [[sectionPlot, detail.responses.map((row: any) => {
+        const selected = row.members[member.member_index].sections[section.integration_point_index]
+        return { state: row.state_index, x: selected.curvature_z_per_m, y: selected.moment_z_kn_m }
+      })], [fiberPlot, detail.responses.map((row: any) => {
+        const selected = row.members[member.member_index].sections[section.integration_point_index].fibers[fiber.fiber_index]
+        return { state: row.state_index, x: selected.strain, y: selected.stress_mpa }
+      })]] as const) {
+        await expect(plot.locator('[data-rc-history-point]')).toHaveCount(detail.responses.length)
+        expect(await plot.locator('[data-rc-history-point]').evaluateAll(elements => elements.map(element => ({
+          state: Number(element.getAttribute('data-rc-history-point')), x: Number(element.getAttribute('data-rc-x')), y: Number(element.getAttribute('data-rc-y')),
+        })))).toEqual(values)
+      }
+      await sectionPlot.getByRole('button', { name: 'Inspect stored state 0', exact: true }).press('Enter')
+      await expect(offline.getByLabel('Portable accepted state', { exact: true })).toHaveValue('0')
+      await expect(panel.locator('[data-rc-detail-member]')).toContainText(`Accepted state 0 · ${member.member_id}:`)
+      for (const [label, bytes] of [['Download original RC input', request], ['Download stored nodal report', report],
+        ['Download corotational detail report', detailBytes]] as const) {
+        const download = offline.waitForEvent('download')
+        await offline.getByRole('button', { name: label, exact: true }).click()
+        expect(readFileSync((await (await download).path())!).equals(bytes)).toBe(true)
+      }
+      await expect(offline.getByRole('button', { name: /submit|resume|pause|cancel|run analysis/i })).toHaveCount(0)
+      expect(await offline.evaluate(() => (window as any).__portableAuthCalls)).toBe(0)
+      expect(serviceCalls).toEqual([])
+      await offline.screenshot({ path: testInfo.outputPath('portable-offline-details.png'), fullPage: true })
     } finally { await context.close() }
   })
 
@@ -113,6 +202,82 @@ for (const profile of ['v6', 'v7'] as const) test.describe(`Portable RC nodal re
     expect(serviceCalls).toEqual([])
   })
 
+  test('rejects corrupted and mismatched included details while retaining the previous nodal and detail selections', async ({ page }) => {
+    const serviceCalls: string[] = []
+    await page.route('**/v1/jobs**', async route => { serviceCalls.push(route.request().url()); await route.abort() })
+    await page.goto(`${origin}/#/rc-review`); await openFile(page, detailedArchive); await verified(page)
+    await page.getByRole('button', { name: 'Open stored RC details', exact: true }).click()
+    const panel = page.locator('[data-rc-corotational-details="verified"]')
+    await expect(panel).toBeVisible()
+    await page.getByLabel('Portable accepted state', { exact: true }).selectOption('1')
+    const detail = JSON.parse(detailBytes.toString('utf8')), member = detail.responses[1].members.at(-1)
+    await panel.getByLabel('Detail member', { exact: true }).selectOption(member.member_id)
+    const section = member.sections.at(-1), fiber = section.fibers.at(-1)
+    await panel.getByLabel('Detail integration point', { exact: true }).selectOption(String(section.integration_point_index))
+    await panel.getByLabel('Detail fiber index', { exact: true }).fill(String(fiber.fiber_index))
+    const fiberCells = [fiber.fiber_index, fiber.material_kind, fiber.strain, fiber.stress_mpa].map(String)
+    await expect(panel.locator('[data-rc-detail-fiber-table] tbody td')).toHaveText(fiberCells)
+    const corrupted = JSON.parse(detailedArchive.toString('utf8'))
+    corrupted.detail_report.body_base64 = `${corrupted.detail_report.body_base64[0] === 'A' ? 'B' : 'A'}${corrupted.detail_report.body_base64.slice(1)}`
+    const other = JSON.parse(readFileSync(path.join(retained!, `${profile === 'v6' ? 'v7' : 'v6'}-review-snapshot.json`), 'utf8'))
+    const otherBytes = Buffer.from(other.detail_report.body_base64, 'base64')
+    const mismatched = JSON.parse(detailedArchive.toString('utf8'))
+    mismatched.detail_report_id = other.detail_report.headers['x-structural-report-id']
+    mismatched.detail_report = { encoding: 'base64', byte_length: otherBytes.byteLength,
+      content_hash: `sha256:${createHash('sha256').update(otherBytes).digest('hex')}`, body_base64: otherBytes.toString('base64') }
+    for (const bytes of [Buffer.from(JSON.stringify(corrupted)), Buffer.from(JSON.stringify(mismatched))]) {
+      await openFile(page, bytes)
+      await expect(page.locator('[data-rc-portable-file-status]')).toContainText('included detail report could not be verified')
+      await expect(page.locator('[data-rc-portable-file-status]')).toContainText('previously opened review is retained')
+      await expect(page.locator('[data-rc-portable-selected]')).toContainText('Accepted state 1')
+      await expect(panel.locator('[data-rc-detail-member]')).toContainText(`Accepted state 1 · ${member.member_id}:`)
+      await expect(panel.getByLabel('Detail integration point', { exact: true })).toHaveValue(String(section.integration_point_index))
+      await expect(panel.getByLabel('Detail fiber index', { exact: true })).toHaveValue(String(fiber.fiber_index))
+      await expect(panel.locator('[data-rc-detail-fiber-table] tbody td')).toHaveText(fiberCells)
+      await verified(page)
+    }
+    for (const [label, bytes] of [['Download stored nodal report', report], ['Download corotational detail report', detailBytes]] as const) {
+      const event = page.waitForEvent('download')
+      await page.getByRole('button', { name: label, exact: true }).click()
+      expect(readFileSync((await (await event).path())!).equals(bytes)).toBe(true)
+    }
+    expect(serviceCalls).toEqual([])
+  })
+
+  for (const failure of ['missing 404', 'malformed 200'] as const) test(`${failure} detailed export preserves nodal review and permits a separate nodal-only export`, async ({ page }) => {
+    await live(page)
+    let detailRequests = 0
+    await page.route('**/rc-corotational-detail-report', route => {
+      detailRequests++
+      return route.fulfill(failure === 'missing 404' ? { status: 404 }
+        : { status: 200, headers: snapshot.detail_report.headers, body: '{}' })
+    })
+    const downloads: string[] = []; page.on('download', download => downloads.push(download.suggestedFilename()))
+    const withDetails = page.getByRole('button', { name: 'Export portable RC review with details', exact: true })
+    await withDetails.click()
+    await expect(page.locator('[data-rc-corotational-file-status]')).toContainText('with details could not be exported')
+    await expect(page.locator('[data-rc-corotational-table="displacements_m_rad"]')).toBeVisible()
+    await expect(withDetails).toBeEnabled()
+    expect(downloads).toEqual([])
+    expect(detailRequests).toBe(1)
+    const event = page.waitForEvent('download')
+    await page.getByRole('button', { name: 'Export portable RC review', exact: true }).click()
+    const file = JSON.parse(readFileSync((await (await event).path())!, 'utf8'))
+    expect(file.schema_version).toBe('rc-portable-nodal-review.v1')
+    expect(file).not.toHaveProperty('detail_report')
+    expect(detailRequests).toBe(1)
+  })
+
+  test('detail export authorization refusal revokes the retained live review and never downloads a file', async ({ page }) => {
+    await live(page)
+    await page.route('**/rc-corotational-detail-report', route => route.fulfill({ status: 403 }))
+    const downloads: string[] = []; page.on('download', download => downloads.push(download.suggestedFilename()))
+    await page.getByRole('button', { name: 'Export portable RC review with details', exact: true }).click()
+    await expect(page.locator('[data-rc-corotational-table]')).toHaveCount(0)
+    await expect(page.locator('[data-rc-detail-force-table]')).toHaveCount(0)
+    expect(downloads).toEqual([])
+  })
+
   test('revoked live account scope prevents exporting a portable file', async ({ page }) => {
     await live(page)
     const downloads: string[] = []; page.on('download', download => downloads.push(download.suggestedFilename()))
@@ -130,12 +295,13 @@ for (const profile of ['v6', 'v7'] as const) test.describe(`Portable RC nodal re
     })
     const exported = page.waitForEvent('download')
     const exportButton = page.getByRole('button', { name: 'Export portable RC review', exact: true })
+    const detailedExportButton = page.getByRole('button', { name: 'Export portable RC review with details', exact: true })
     const reopen = page.getByLabel('Reopen corotational report JSON', { exact: true })
     await exportButton.click()
-    await expect(exportButton).toBeDisabled(); await expect(reopen).toBeDisabled()
+    await expect(exportButton).toBeDisabled(); await expect(detailedExportButton).toBeDisabled(); await expect(reopen).toBeDisabled()
     await page.evaluate(() => { (window as any).__releasePortableAuthorization() })
     await exported
-    await expect(exportButton).toBeEnabled(); await expect(reopen).toBeEnabled()
+    await expect(exportButton).toBeEnabled(); await expect(detailedExportButton).toBeEnabled(); await expect(reopen).toBeEnabled()
     for (const [bytes, message] of [
       [Buffer.from('{}'), 'does not match'], [report, 'Reopened exact report bytes match'],
     ] as const) {

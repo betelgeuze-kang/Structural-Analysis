@@ -1,8 +1,9 @@
 import { parseRcPortableReview, type RcPortableReviewDocument } from './rcPortableReviewSchema'
+import { corotationalDetailMember, corotationalDetailSection, corotationalDetailFiber, corotationalDetailSectionPage, corotationalDetailFiberPage } from './rcCorotationalDetailReport'
 import { rcResultGeometry } from './rcResultVisualization'
 
 let current: RcPortableReviewDocument | null = null, initializing = false
-const safe = (error: unknown) => error instanceof Error && /^rc_portable_review_[a-z_]+$/.test(error.message)
+const safe = (error: unknown) => error instanceof Error && /^(rc_portable_review_|rc_corotational_report_detail_)[a-z_]+$/.test(error.message)
   ? error.message : 'rc_portable_review_contract_invalid'
 self.onmessage = async ({ data }) => {
   const { id, type } = data
@@ -11,7 +12,7 @@ self.onmessage = async ({ data }) => {
       if (current || initializing) throw new Error('rc_portable_review_already_initialized')
       initializing = true
       current = await parseRcPortableReview(data.bytes)
-      self.postMessage({ id, value: current.summary })
+      self.postMessage({ id, value: { summary: current.summary, detailSummary: current.detailSummary } })
       return
     }
     if (!current) throw new Error('rc_portable_review_unavailable')
@@ -27,6 +28,17 @@ self.onmessage = async ({ data }) => {
         state_index: row.state_index, phase: row.phase, control_displacement_m: row.control_displacement_m,
         load_factor: row.load_factor, checkpoint_hash: row.checkpoint_hash,
       }))
+    } else if (type === 'openDetails' || typeof type === 'string' && type.startsWith('detail')) {
+      const detail = current.detail, original = current.detailReport
+      if (!detail || !original || !current.detailSummary) throw new Error('rc_corotational_report_detail_unavailable')
+      if (type === 'openDetails') value = current.detailSummary
+      else if (type === 'detailMember') value = corotationalDetailMember(detail, data.state, data.member)
+      else if (type === 'detailSection') value = corotationalDetailSection(detail, data.state, data.member, data.point)
+      else if (type === 'detailFiber') value = corotationalDetailFiber(detail, data.state, data.member, data.point, data.fiber)
+      else if (type === 'detailSectionPage') value = corotationalDetailSectionPage(detail, data.member, data.point, data.start, data.count)
+      else if (type === 'detailFiberPage') value = corotationalDetailFiberPage(detail, data.member, data.point, data.fiber, data.start, data.count)
+      else if (type === 'detailDownload') value = new Blob([original.bytes], { type: 'application/json' })
+      else throw new Error('rc_corotational_report_detail_operation_invalid')
     } else if (type === 'geometry') value = rcResultGeometry(current.request)
     else if (type === 'requestDownload') value = new Blob([current.requestBytes], { type: 'application/json' })
     else if (type === 'reportDownload') value = new Blob([current.reportBytes], { type: 'application/json' })

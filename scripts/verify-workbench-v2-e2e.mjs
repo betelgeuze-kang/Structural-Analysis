@@ -18,6 +18,7 @@ const specs = savedReportMode ? [
   'tests/frontend/rc-corotational-report-schema.spec.ts',
   'tests/frontend/rc-corotational-report-browser.spec.ts',
   'tests/frontend/rc-portable-review.spec.ts',
+  'tests/frontend/rc-portable-detail-review.spec.ts',
   'tests/frontend/rc-portable-review-browser.spec.ts',
 ] : [
   'tests/frontend/workbench-v2-e2e.spec.ts',

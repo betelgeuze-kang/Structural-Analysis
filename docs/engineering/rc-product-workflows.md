@@ -15,7 +15,7 @@ is not a prerequisite for every building workflow. CPU assembly, solve, recovery
 storage and review costs must be considered together before interpreting a GPU
 kernel speedup. Existing bounded candidates retain their support boundaries.
 
-## First implemented slice: portable nodal review
+## Implemented research slices: portable nodal and detailed review
 
 In a completed corotational RC job's saved nodal report, choose **Export portable
 RC review**. On the other computer, open the Workbench and choose **Open a portable
@@ -23,21 +23,38 @@ RC review**, or navigate directly to `#/rc-review`. Select the exported JSON fil
 The dedicated workspace does not mount the service-backed job panel, contact the
 original service, request account credentials, submit or resume an analysis.
 
+Choose **Export portable RC review with details** to also carry the saved member,
+section and fiber response histories. This explicit action reads and validates
+the optional saved detail report; the nodal-only export does not fetch it. If the
+detail report is missing, too large or invalid, the detailed export fails and the
+nodal review remains available. Export a nodal-only file separately if needed;
+the program never silently substitutes it for the requested detailed file.
+
 The file contains one recorded completed job, its exact canonical request bytes,
 and its exact saved nodal-report bytes. It preserves the recorded source and
 settings, preload/subdivision ordering, accepted states, invocation accounting
 and unknown work. Input/report downloads retain the original bytes. Geometry,
 nodal displacements, applied loads, reactions and accepted control history are
-reviewed from those stored records. A bad replacement file leaves the previous
-verified file open.
+reviewed from those stored records. When included, the detailed review shows
+stored member endpoint forces, section moment–curvature and fiber stress–strain
+histories in accepted-state order, with exact original detail-report download.
+A bad replacement file leaves the previous verified file and its selected state
+open.
 
-The versioned `rc-portable-nodal-review.v1` envelope stores bounded base64 payloads
-with byte lengths and SHA256 hashes. Request and nodal-report binding, the report's
-self-hash and existing semantic contracts are checked inside an isolated worker.
-The envelope is capped at 112 MiB, the request at 16 MiB, the report at 64 MiB and
-the recorded job at 64 KiB. Large state arrays remain in the worker; the view asks
-for a state or a bounded page. Original request/report numeric tokens are not
-reserialized.
+The original `rc-portable-nodal-review.v1` envelope remains the nodal-only format
+and remains readable. Detailed exports use `rc-portable-nodal-review.v2` with an
+explicit detail artifact. Both formats store bounded base64 payloads with byte
+lengths and SHA256 hashes. Request and nodal-report binding, the report's self-hash
+and existing semantic contracts are checked inside an isolated worker. Included
+details must also match the job, request, nodal report, accepted states and
+checkpoint identities. A declared but invalid detail artifact rejects the whole
+candidate file; it is never treated as missing or silently downgraded.
+
+The v1 envelope is capped at 112 MiB and v2 at 200 MiB. Requests are capped at
+16 MiB, each nodal/detail report at 64 MiB, and the recorded job at 64 KiB. These
+are admission ceilings, not a qualification for large-model memory use. Parsed
+state arrays remain in the worker; the view asks for a state or a bounded page.
+Original request, nodal and detail numeric tokens are not reserialized.
 
 **File integrity checked. Origin is not authenticated.** An internally consistent
 file can be authored by someone other than the original service. Its hashes do
@@ -46,12 +63,13 @@ approval. Recorded tenant identity is provenance only, and the file grants no
 account access. The live export retains the service's authorization and stale
 workspace guards. The offline interface has no execution or control operation.
 
-This is a result-review file, not a complete reproducibility package. It does not
-include detailed member/section/fiber histories, original result/evidence or
-checkpoint artifacts, execution environment, experiment data, every scenario,
-failed runs or a rerun command. Those records remain in their existing project
-and service stores. Project file v1 still preserves authoring state and untrusted
-job references; it has not acquired result or authorization authority.
+This is a result-review file, not a complete reproducibility package. Nodal-only
+files explicitly omit detailed histories; detailed files include only the saved
+detail report. Neither format contains the original result/evidence or checkpoint
+artifacts, execution environment, experiment data, every scenario, failed runs or
+a rerun command. Those records remain in their existing project and service
+stores. Project file v1 still preserves authoring state and untrusted job
+references; it has not acquired result or authorization authority.
 
 ## Next research acceptance slices
 

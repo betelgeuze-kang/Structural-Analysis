@@ -1,4 +1,5 @@
 import type { RcCorotationalReportSummary, RcCorotationalStateChoice } from './rcCorotationalReportReview'
+import type { RcCorotationalDetailSummary, RcCorotationalDetailMemberView, RcCorotationalDetailSectionView, RcCorotationalDetailFiber, RcCorotationalSectionHistory, RcCorotationalFiberHistory } from './rcCorotationalDetailReport'
 import type { RcCorotationalReportResponse } from './rcCorotationalReportSchema'
 import type { RcResultGeometry } from './rcResultVisualization'
 import { RC_PORTABLE_REVIEW_MAX_BYTES } from './rcPortableReviewSchema'
@@ -7,6 +8,14 @@ export { RC_PORTABLE_REVIEW_MAX_BYTES } from './rcPortableReviewSchema'
 export interface RcPortableReview {
   custody: 'portable_unverified_origin'
   summary: RcCorotationalReportSummary
+  readonly detailSummary: RcCorotationalDetailSummary | null
+  openDetails(): Promise<RcCorotationalDetailSummary>
+  detailMember(state: number, member: string): Promise<RcCorotationalDetailMemberView>
+  detailSection(state: number, member: string, point: number): Promise<RcCorotationalDetailSectionView>
+  detailFiber(state: number, member: string, point: number, fiber: number): Promise<RcCorotationalDetailFiber>
+  detailSectionPage(member: string, point: number, start: number, count: number): Promise<RcCorotationalSectionHistory[]>
+  detailFiberPage(member: string, point: number, fiber: number, start: number, count: number): Promise<RcCorotationalFiberHistory[]>
+  detailDownload(): Promise<Blob>
   state(index: number): Promise<RcCorotationalReportResponse>
   statePage(start: number, count: number): Promise<RcCorotationalStateChoice[]>
   geometry(): Promise<RcResultGeometry>
@@ -44,7 +53,7 @@ export async function openRcPortableReview(bytes: Uint8Array, signal?: AbortSign
     if (!item) return
     if (data.error) { stop(typeof data.error === 'string' && /^rc_portable_review_[a-z_]+$/.test(data.error) ? data.error : 'rc_portable_review_worker_failed'); return }
     pending.delete(data.id); clearTimeout(item.timer)
-    if (data.operationError) item.reject(new Error(typeof data.operationError === 'string' && /^rc_portable_review_[a-z_]+$/.test(data.operationError)
+    if (data.operationError) item.reject(new Error(typeof data.operationError === 'string' && /^(rc_portable_review_|rc_corotational_report_detail_)[a-z_]+$/.test(data.operationError)
       ? data.operationError : 'rc_portable_review_operation_invalid'))
     else item.resolve(data.value)
   }
@@ -60,10 +69,17 @@ export async function openRcPortableReview(bytes: Uint8Array, signal?: AbortSign
   try {
     // Never transfer unrelated bytes outside a caller-provided subarray.
     const input = bytes.byteOffset === 0 && bytes.byteLength === bytes.buffer.byteLength ? bytes : bytes.slice()
-    const summary = await call<RcCorotationalReportSummary>('initialize', { bytes: input }, [input.buffer])
+    const { summary, detailSummary } = await call<{ summary: RcCorotationalReportSummary; detailSummary: RcCorotationalDetailSummary | null }>('initialize', { bytes: input }, [input.buffer])
     signal?.throwIfAborted()
     return {
-      custody: 'portable_unverified_origin', summary,
+      custody: 'portable_unverified_origin', summary, detailSummary,
+      openDetails: () => call('openDetails'),
+      detailMember: (state, member) => call('detailMember', { state, member }),
+      detailSection: (state, member, point) => call('detailSection', { state, member, point }),
+      detailFiber: (state, member, point, fiber) => call('detailFiber', { state, member, point, fiber }),
+      detailSectionPage: (member, point, start, count) => call('detailSectionPage', { member, point, start, count }),
+      detailFiberPage: (member, point, fiber, start, count) => call('detailFiberPage', { member, point, fiber, start, count }),
+      detailDownload: () => call('detailDownload'),
       state: index => call('state', { index }),
       statePage: (start, count) => call('statePage', { start, count }),
       geometry: () => call('geometry'),
