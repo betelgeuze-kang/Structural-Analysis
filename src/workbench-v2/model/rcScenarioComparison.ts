@@ -52,9 +52,9 @@ function sorted(rows: unknown[]): unknown[] { return [...rows].sort((a, b) => st
  * Source, control, target occurrence order, loading, units, topology and supports
  * must match so a numerical delta has a defined entity and physical meaning.
  */
-export function rcScenarioCompatibility(request: RcObject): string {
+function compatibilityProjection(request: RcObject): RcObject {
   const config = request.config, model = request.model
-  return stable({
+  return {
     schema: request.schema_version, operation: request.operation, resultContract: request.result_contract,
     source: request.source_revision, configSchema: config.schema_version ?? null,
     control: config.control_observation ?? (config.control_node_id !== undefined
@@ -66,7 +66,22 @@ export function rcScenarioCompatibility(request: RcObject): string {
     supports: sorted(model.supports.map((support: RcObject) => ({ ...support, dofs: sorted(support.dofs) }))),
     loads: sorted(model.loads), constantLoads: sorted(config.fixed_nodal_loads ?? config.constant_nodal_loads ?? []),
     pinRoller: config.experimental_pin_roller_beam ?? null, fixedGuided: config.experimental_fixed_guided_axial ?? null,
-  })
+    portal: config.experimental_portal_frame ?? null,
+  }
+}
+
+export function rcScenarioCompatibility(request: RcObject): string { return stable(compatibilityProjection(request)) }
+
+/** Named views of the same numerical-comparison contract; these are not model equality. */
+export function rcScenarioCompatibilityFields(request: RcObject): Array<{ key: string; label: string; signature: string }> {
+  const labels: Record<string, string> = {
+    schema: 'Request profile', operation: 'Analysis operation', resultContract: 'Result contract', source: 'Caller-declared source revision',
+    configSchema: 'Control configuration profile', control: 'Control definition and indexed node order', targets: 'Target occurrence order',
+    units: 'Model units', coordinates: 'Coordinate convention', nodes: 'Node identities', members: 'Member connectivity and authored direction',
+    supports: 'Support restraints', loads: 'Reference loads', constantLoads: 'Fixed preload', pinRoller: 'Pin/roller profile opt-in',
+    fixedGuided: 'Fixed/guided profile opt-in', portal: 'Portal profile opt-in',
+  }
+  return Object.entries(compatibilityProjection(request)).map(([key, value]) => ({ key, label: labels[key], signature: stable(value) }))
 }
 
 

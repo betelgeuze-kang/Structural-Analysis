@@ -24,7 +24,7 @@
           "lockfile_version": 3,
           "package_count": 68,
           "package_json_sha256": "fb748915d54464c9f70f2b4970b395463edb39dcaae5a1b75c89f31b434812fb",
-          "package_lock_sha256": "4a49818721f8f61aa9b2b84e04be70a39639910c2432d10ff7a770c541a94980",
+          "package_lock_sha256": "80d38c443a7db85d6ef559f3d813de8327c1c117b5e50d7259e30f3477ef4376",
           "postcss_version": "8.5.26",
           "requires": true
         },
@@ -74,6 +74,6 @@
       "status": "manifest_ready"
     }
   ],
-  "generated_at": "2026-10-22T22:49:46.304318+00:00",
+  "generated_at": "2026-10-24T04:24:27.629170+00:00",
   "schema_version": "runtime-version-compatibility-matrix.v1"
 }

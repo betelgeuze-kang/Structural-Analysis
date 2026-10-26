@@ -43,7 +43,7 @@ function project(serialized = nativeDraft()) {
   }
 }
 async function workspace(page: Page, options: {
-  mode?: ReadMode; serialized?: string; postGate?: Promise<void>
+  mode?: ReadMode; serialized?: string; postGate?: Promise<void>; jobReadGate?: Promise<void>; requestReadGate?: Promise<void>; initialJob?: boolean
   firstPostResult?: WorkbenchJobView; onPostSettled?: () => void
   records?: Record<string, { serialized: string; mode?: ReadMode; attempt?: number }>
 } = {}) {
@@ -55,6 +55,12 @@ async function workspace(page: Page, options: {
       rcJobCollectionUrl: '/v1/jobs',
       jobAuthorization: async () => {
         const tenantId = (window as any).__rcProjectTenant
+        const split = (window as any).__rcProjectSplitAuthorization
+        if (split && ++split.calls === split.blockedCall) {
+          split.waiting = true
+          await (window as any).__rcProjectSplitAuthorizationGate
+          return { tenantId: 'project-tenant', bearerToken: privateToken }
+        }
         const marker = (window as any).__rcProjectRestoreGateMarker
         if (marker && document.querySelector<HTMLTextAreaElement>('textarea[aria-label="Typed RC request JSON"]')?.value.includes(marker)) {
           ;(window as any).__rcProjectRestoreWaiting = true
@@ -79,6 +85,8 @@ async function workspace(page: Page, options: {
       } finally { options.onPostSettled?.() }
     }
     gets.push(path)
+    if (options.jobReadGate && path === `/v1/jobs/${jobId}`) await options.jobReadGate
+    if (options.requestReadGate && path === `/v1/jobs/${jobId}/request`) await options.requestReadGate
     const matched = /^\/v1\/jobs\/(job_[0-9a-f]{32})(\/request)?$/.exec(path)
     const identity = matched?.[1]
     const record = identity ? options.records ? options.records[identity]
@@ -93,7 +101,7 @@ async function workspace(page: Page, options: {
     }
     return route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
   })
-  await page.goto(`${baseUrl}/#/workbench-v2`)
+  await page.goto(`${baseUrl}/${options.initialJob ? `?rcJob=${jobId}` : ''}#/workbench-v2`)
   await expect(page.locator('[data-rc-project-file]')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Save RC project', exact: true })).toBeEnabled()
   return { posts, gets }
@@ -102,13 +110,19 @@ async function revealDraft(page: Page): Promise<void> {
   const input = page.getByLabel('Typed RC request JSON', { exact: true })
   if (!await input.isVisible()) await page.getByText('Submit a new RC input', { exact: true }).click()
 }
-async function openProject(page: Page, content: unknown): Promise<void> {
+async function openProject(page: Page, content: unknown, replacement?: 'accept' | 'cancel'): Promise<void> {
   const input = page.getByLabel('Open RC project file', { exact: true })
   await expect(input).toBeEnabled()
+  const confirmation = replacement ? page.waitForEvent('dialog').then(async dialog => {
+    expect(dialog.type()).toBe('confirm')
+    expect(dialog.message()).toContain('Replace it with the selected file')
+    if (replacement === 'accept') await dialog.accept(); else await dialog.dismiss()
+  }) : null
   await input.setInputFiles({
     name: 'saved-project.json', mimeType: 'application/json',
     buffer: Buffer.from(typeof content === 'string' ? content : JSON.stringify(content)),
   })
+  if (confirmation) await confirmation
 }
 async function saveProject(page: Page): Promise<{ text: string; value: any }> {
   const pending = page.waitForEvent('download')
@@ -118,6 +132,7 @@ async function saveProject(page: Page): Promise<{ text: string; value: any }> {
   const path = await download.path()
   expect(path).not.toBeNull()
   const text = await readFile(path!, 'utf8')
+  await expect(page.getByRole('button', { name: 'Save RC project', exact: true })).toBeEnabled()
   return { text, value: JSON.parse(text) }
 }
 function expectPrivateDataAbsent(text: string): void {
@@ -182,6 +197,7 @@ test('RC project cross-account refresh clears scenario custody and stored select
   await expect(page.getByRole('button', { name: 'Save RC project', exact: true })).toBeEnabled()
   const saved = await saveProject(page)
   expect(saved.value.scope.tenantId).toBe('other-tenant')
+  expect(saved.value.draft).toBe('')
   expect(saved.value.scenarios).toEqual([])
   expect(saved.value.baselineId).toBeNull()
   expect(saved.value.variantId).toBeNull()
@@ -215,7 +231,7 @@ test('RC project opening another file after same-account refresh replaces the pr
 })
 
 for (const authorizationFails of [false, true]) {
-  test(`RC project account refresh ${authorizationFails ? 'recovers a failed' : 'continues a pending'} restore without mixing scenario custody`, async ({ page }) => {
+  test(`RC project account refresh ${authorizationFails ? 'clears a failed authorization' : 'continues a pending'} restore without mixing scenario custody`, async ({ page }) => {
     const { posts, gets } = await workspace(page)
     const first = custodyProject(), second = custodyProject()
     second.draft = second.draft.replace(/"case_id": "[^"]+"/, '"case_id": "refresh-race-B"')
@@ -254,9 +270,14 @@ for (const authorizationFails of [false, true]) {
       await expect(panel).toContainText('Authorization changed or became unavailable')
       await expect(panel.locator('[data-scenario-id]')).toHaveCount(0)
       await expect(page.getByRole('button', { name: 'Save RC project', exact: true })).toBeDisabled()
+      await expect(page.getByLabel('Typed RC request JSON', { exact: true })).toHaveValue('')
+      await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'false')
       await page.evaluate(() => { (window as any).__rcProjectRestoreAuthorizationFailure = false })
       await expect(refresh).toBeEnabled()
       await refresh.click()
+      await expect(page.getByRole('button', { name: 'Save RC project', exact: true })).toBeEnabled()
+      await expect(panel.locator('[data-scenario-id]')).toHaveCount(0)
+      await openProject(page, second)
     }
     await expect(panel.locator('[data-scenario-id="pending-2"]')).toBeVisible()
     await expect(panel.locator('[data-scenario-id="known-design"]')).toHaveCount(0)
@@ -633,8 +654,9 @@ test('RC project does not apply a file after the authenticated tenant changes du
       ;(window as any).__rcProjectTenant = 'other-tenant'
       ;(window as any).__rcProjectReleaseFile()
     })
-    await expect(page.locator('[data-rc-project-file-message]')).toContainText('could not be opened')
-    await expect(page.getByLabel('Typed RC request JSON', { exact: true })).toHaveValue(original)
+    await expect(page.locator('[data-rc-workflow-error]')).toContainText(/Authentication|account/i)
+    await expect(page.getByLabel('Typed RC request JSON', { exact: true })).toHaveValue('')
+    await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'false')
     await expect(page.getByRole('button', { name: 'Submit RC analysis', exact: true })).toBeDisabled()
     expect(posts).toEqual([])
   } finally {
@@ -719,4 +741,213 @@ test('RC project removing a restored captured design clears its baseline and var
   expect(saved.value.variantId).toBeNull()
   expect(saved.value.draft).toBe(file.draft)
   expect(posts).toEqual([])
+})
+
+
+test('RC project dirty state tracks incomplete drafts, captured custody and successful export or open baselines', async ({ page }) => {
+  const { posts } = await workspace(page)
+  const dirty = page.locator('[data-rc-project-dirty]')
+  await expect(dirty).toHaveAttribute('data-rc-project-dirty', 'false')
+  await revealDraft(page)
+  const raw = page.getByLabel('Typed RC request JSON', { exact: true })
+  await raw.fill('{ "unfinished":')
+  await expect(dirty).toHaveAttribute('data-rc-project-dirty', 'true')
+  expect((await saveProject(page)).value.draft).toBe('{ "unfinished":')
+  await expect(dirty).toHaveAttribute('data-rc-project-dirty', 'false')
+  await expect(page.locator('[data-rc-project-file-message]')).toContainText('download initiated')
+  await raw.fill(nativeDraft())
+  await expect(dirty).toHaveAttribute('data-rc-project-dirty', 'true')
+  await saveProject(page)
+  await page.getByRole('button', { name: 'Capture current design', exact: true }).click()
+  await expect(dirty).toHaveAttribute('data-rc-project-dirty', 'true')
+  await saveProject(page)
+  await expect(dirty).toHaveAttribute('data-rc-project-dirty', 'false')
+  await page.getByRole('button', { name: 'Run captured designs', exact: true }).click()
+  await expect(page.locator('[data-rc-scenario-comparison]')).toContainText('Submission outcome is unconfirmed')
+  await expect(dirty).toHaveAttribute('data-rc-project-dirty', 'true')
+  expect((await saveProject(page)).value.scenarios[0].attempted).toBe(true)
+  await expect(dirty).toHaveAttribute('data-rc-project-dirty', 'false')
+  expect(posts).toHaveLength(1)
+})
+
+test('RC project replacement validates before prompting and cancellation retains native draft and scenario custody', async ({ page }) => {
+  const { posts } = await workspace(page)
+  const first = custodyProject(), second = project(nativeDraft().replace('authored-rc-cantilever', 'replacement-project'))
+  await openProject(page, first)
+  await expect(page.locator('[data-scenario-id]')).toHaveCount(3)
+  await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'false')
+  await revealDraft(page)
+  const changed = first.draft + '\n', raw = page.getByLabel('Typed RC request JSON', { exact: true })
+  await raw.fill(changed)
+  let dialogs = 0
+  const unexpected = async (dialog: any) => { dialogs++; await dialog.dismiss() }
+  page.on('dialog', unexpected)
+  try {
+    for (const invalid of ['{', { ...second, scope: { ...second.scope, tenantId: 'foreign' } }]) {
+      await openProject(page, invalid)
+      await expect(page.locator('[data-rc-project-file-message]')).toContainText('could not be opened')
+      await expect(raw).toHaveValue(changed)
+    }
+  } finally { page.off('dialog', unexpected) }
+  expect(dialogs).toBe(0)
+  await openProject(page, second, 'cancel')
+  await expect(page.locator('[data-rc-project-file-message]')).toContainText('opening cancelled')
+  await expect(raw).toHaveValue(changed)
+  await expect(page.locator('[data-scenario-id]')).toHaveCount(3)
+  await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'true')
+  const retained = await saveProject(page)
+  expect(retained.value.scenarios).toEqual(first.scenarios)
+  expect(retained.value.baselineId).toBe(first.baselineId)
+  expect(retained.value.variantId).toBe(first.variantId)
+  await raw.fill(changed + ' ')
+  await openProject(page, second, 'accept')
+  await expect(raw).toHaveValue(second.draft)
+  await expect(page.locator('[data-scenario-id]')).toHaveCount(0)
+  await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'false')
+  expect(posts).toEqual([])
+})
+
+for (const failure of ['blob', 'url', 'click'] as const) {
+  test(`RC project failed ${failure} export keeps its changes unexported`, async ({ page }) => {
+    const { posts } = await workspace(page)
+    await revealDraft(page)
+    await page.getByLabel('Typed RC request JSON', { exact: true }).fill(nativeDraft())
+    await page.evaluate(failure => {
+      const host = window as any
+      if (failure === 'blob') { const original = window.Blob; host.__rcRestoreExport = () => { window.Blob = original }; window.Blob = class { constructor() { throw new Error('test blob failure') } } as any }
+      if (failure === 'url') { const original = URL.createObjectURL; host.__rcRestoreExport = () => { URL.createObjectURL = original }; URL.createObjectURL = () => { throw new Error('test URL failure') } }
+      if (failure === 'click') { const original = HTMLAnchorElement.prototype.click; host.__rcRestoreExport = () => { HTMLAnchorElement.prototype.click = original }; HTMLAnchorElement.prototype.click = () => { throw new Error('test click failure') } }
+    }, failure)
+    try {
+      await page.getByRole('button', { name: 'Save RC project', exact: true }).click()
+      await expect(page.locator('[data-rc-project-file-message]')).toContainText('could not be exported')
+      await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'true')
+    } finally { await page.evaluate(() => { (window as any).__rcRestoreExport() }) }
+    expect((await saveProject(page)).value.draft).toBe(nativeDraft())
+    await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'false')
+    expect(posts).toEqual([])
+  })
+}
+
+test('RC project clean baseline retains scenario custody through transient same-account authorization and tracks new draft edits', async ({ page }) => {
+  const { posts } = await workspace(page), file = custodyProject()
+  await openProject(page, file)
+  await expect(page.locator('[data-scenario-id]')).toHaveCount(3)
+  const dirty = page.locator('[data-rc-project-dirty]')
+  await expect(dirty).toHaveAttribute('data-rc-project-dirty', 'false')
+  await revealDraft(page)
+  await page.evaluate(() => { (window as any).__rcProjectAuthorizationGate = new Promise<void>(resolve => { (window as any).__rcReleaseProjectAuthorization = resolve }) })
+  try {
+    await page.getByRole('button', { name: 'Refresh account and job', exact: true }).click()
+    await expect(page.locator('[data-scenario-id]')).toHaveCount(0)
+    await expect(dirty).toHaveAttribute('data-rc-project-dirty', 'false')
+    await page.getByLabel('Typed RC request JSON', { exact: true }).fill('{ "new pending draft":')
+    await expect(dirty).toHaveAttribute('data-rc-project-dirty', 'true')
+  } finally { await page.evaluate(() => { (window as any).__rcReleaseProjectAuthorization() }) }
+  await expect(page.locator('[data-scenario-id]')).toHaveCount(3)
+  await expect(dirty).toHaveAttribute('data-rc-project-dirty', 'true')
+  const saved = await saveProject(page)
+  expect(saved.value.scenarios).toEqual(file.scenarios)
+  expect(saved.value.draft).toBe('{ "new pending draft":')
+  expect(posts).toEqual([])
+})
+
+for (const blockedCall of [1, 2]) {
+  test(`RC project clears private state when reauthorization callers disagree before delayed response ${blockedCall}`, async ({ page }) => {
+    const { posts } = await workspace(page)
+    await openProject(page, custodyProject())
+    await expect(page.locator('[data-scenario-id]')).toHaveCount(3)
+    await revealDraft(page)
+    await page.evaluate(blockedCall => {
+      const host = window as any
+      host.__rcProjectSplitAuthorization = { calls: 0, blockedCall, waiting: false }
+      host.__rcProjectSplitAuthorizationGate = new Promise<void>(resolve => { host.__rcReleaseSplitAuthorization = resolve })
+      host.__rcProjectTenant = 'other-tenant'
+    }, blockedCall)
+    try {
+      await page.getByRole('button', { name: 'Refresh account and job', exact: true }).click()
+      await expect.poll(() => page.evaluate(() => (window as any).__rcProjectSplitAuthorization.waiting)).toBe(true)
+      await expect(page.getByLabel('Typed RC request JSON', { exact: true })).toHaveValue('')
+      await expect(page.locator('[data-scenario-id]')).toHaveCount(0)
+      await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'false')
+    } finally { await page.evaluate(() => { (window as any).__rcReleaseSplitAuthorization() }) }
+    const saved = await saveProject(page)
+    expect(saved.value.scope.tenantId).toBe('other-tenant')
+    expect(saved.value.draft).toBe(''); expect(saved.value.scenarios).toEqual([])
+    expect(posts).toEqual([])
+  })
+}
+
+test('RC project new primary key becomes dirty while POST is pending and explicit retry retains the exact key', async ({ page }) => {
+  let release!: () => void
+  const gate = new Promise<void>(resolve => { release = resolve })
+  const { posts } = await workspace(page, { postGate: gate })
+  await revealDraft(page)
+  await page.getByLabel('Typed RC request JSON', { exact: true }).fill(nativeDraft())
+  await saveProject(page)
+  await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'false')
+  try {
+    await page.getByRole('button', { name: 'Submit RC analysis', exact: true }).click()
+    await expect.poll(() => posts.length).toBe(1)
+    await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'true')
+    const rejected = page.waitForEvent('dialog').then(async dialog => { expect(dialog.type()).toBe('confirm'); await dialog.dismiss() })
+    await page.evaluate(() => { location.hash = '#/workbench' })
+    await rejected
+    await expect(page.locator('[data-rc-workflow="project"]')).toBeVisible()
+  } finally { release() }
+  await expect(page.getByRole('button', { name: 'Submit RC analysis', exact: true })).toBeEnabled()
+  const saved = await saveProject(page)
+  expect(saved.value.submission).toEqual({ serialized: nativeDraft(), idempotencyKey: posts[0].key, job: null })
+  await page.getByRole('button', { name: 'Submit RC analysis', exact: true }).click()
+  await expect.poll(() => posts.length).toBe(2)
+  expect(posts[1]).toEqual(posts[0])
+})
+
+test('RC project initial read-only link is clean but a selected reference arriving after export remains a new change', async ({ page }) => {
+  let release!: () => void
+  const gate = new Promise<void>(resolve => { release = resolve })
+  const serialized = nativeDraft()
+  const { posts } = await workspace(page, { initialJob: true, jobReadGate: gate, records: { [jobId]: { serialized, attempt: 0 } } })
+  await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'false')
+  await revealDraft(page)
+  await page.getByLabel('Typed RC request JSON', { exact: true }).fill('{ "saved before read":')
+  try {
+    const early = await saveProject(page)
+    expect(early.value.selectedJob).toBeNull()
+    await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'false')
+  } finally { release() }
+  await expect(page.locator('[data-rc-input-summary="stored"]')).toBeVisible()
+  await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'true')
+  const later = await saveProject(page)
+  expect(later.value.selectedJob).toEqual({ jobId, requestHash: hash(serialized) })
+  expect(later.value.draft).toBe('{ "saved before read":')
+  expect(posts).toEqual([])
+})
+
+test('RC project restored uncertain submission becomes dirty as soon as a job reference arrives before binding read completes', async ({ page }) => {
+  let release!: () => void
+  const gate = new Promise<void>(resolve => { release = resolve })
+  const serialized = nativeDraft(), file = project(serialized)
+  file.submission = { serialized, idempotencyKey: primaryKey, job: null }
+  const { posts, gets } = await workspace(page, {
+    requestReadGate: gate, firstPostResult: storedJob(serialized, jobId, 0),
+    records: { [jobId]: { serialized, attempt: 0 } },
+  })
+  await openProject(page, file)
+  await revealDraft(page)
+  await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'false')
+  try {
+    await page.getByRole('button', { name: 'Submit RC analysis', exact: true }).click()
+    await expect.poll(() => gets.includes(`/v1/jobs/${jobId}/request`)).toBe(true)
+    expect(posts).toEqual([{ body: serialized, key: primaryKey }])
+    await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'true')
+    page.once('dialog', async dialog => { expect(dialog.type()).toBe('confirm'); await dialog.dismiss() })
+    await page.locator('[data-wb2-legacy-link]').click()
+    await expect(page.locator('[data-rc-workflow="project"]')).toBeVisible()
+  } finally { release() }
+  await expect(page.getByRole('button', { name: 'Save RC project', exact: true })).toBeEnabled()
+  const saved = await saveProject(page)
+  expect(saved.value.submission).toEqual({ serialized, idempotencyKey: primaryKey, job: { jobId, requestHash: hash(serialized) } })
+  await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'false')
+  expect(posts).toHaveLength(1)
 })

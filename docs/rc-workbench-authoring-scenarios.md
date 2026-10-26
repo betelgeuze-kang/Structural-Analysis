@@ -32,12 +32,31 @@ first. Saving and opening are disabled while a submission or design queue is
 active. Save the file before closing the browser; no automatic browser storage
 is used.
 
+The workspace indicates changes since its last project export or open. This
+includes unapplied structured fields and portal dimensions, captured inputs,
+submission keys and job links. Ordinary result polling does not mark an unchanged
+project as edited. A successful export means the browser download was initiated;
+check that the file reached your downloads folder. Failed exports retain the
+change indicator, and edits made while exporting still need another export.
+
+When changes remain, reload or close uses the browser's leave-page confirmation.
+Navigation within the app asks before replacing the current view. Choosing to
+stay preserves the local draft. Downloads and links opened in another tab do not
+discard it. This is a loss warning, not automatic recovery after a browser crash.
+
 **Open RC project file** replaces the local project after checking the file and
 the currently configured service/account. The service URL in the file cannot
 redirect requests or provide authorization. Bearer tokens and numerical result
 summaries are not saved. Native input strings are retained exactly, including
 integer and floating-point tokens. Only the supported v1 format is accepted;
 files are bounded to 96 MiB and each draft/request to 16 MiB.
+
+A valid project file asks before replacing a workspace that has changes.
+Cancelling keeps the current project; malformed files or files for another
+account/service cannot replace it. Ordinary refresh within the same account
+retains editing and submission custody. Confirmed authorization loss or an
+account change clears private local content; after signing in, explicitly reopen
+the exported file for that account.
 
 Opening a project never submits or resumes an analysis. The selected job is read
 again, and each restored design with a known job needs an explicit **Refresh**
@@ -54,8 +73,26 @@ continues to export derived comparison results and is a separate format.
 
 ## Compare designs
 
-Capture up to four named variants of the applied request and explicitly select
-**Run captured designs**. Each design has its own immutable input, submission key
+Capture up to four named variants of the applied request. Before running them,
+compare two captured inputs in the input preview, including designs without
+results. The preview uses their original captured strings; later edits to the
+current draft do not change them. It lists bounded input changes and names
+differences in the conditions required for numerical comparison. Its selections
+are separate from the successful-result comparison selections.
+
+Native numeric tokens are retained in this preview, including large integers
+and different decimal spellings. Exact input equality means identical original
+text. If browser number conversion cannot safely represent or distinguish numeric
+inputs, comparison compatibility remains uncertain. The preview accepts up to
+1 MiB and 20,000 values per input, with depth at most 48 and numeric tokens at most
+256 characters; larger captured inputs stay intact but have no input comparison.
+The table shows at most 200 changes and 240 characters per value. Clipped values
+or a limited change list require checking the full input. Matching inputs or comparison conditions
+does not predict convergence, accuracy or speed. Previewing inputs performs no
+submission or numerical calculation.
+
+Explicitly select **Run captured designs** to submit the designs.
+Each design has its own immutable input, submission key
 and durable job. The queue runs sequentially and pauses when a submission outcome
 is uncertain or a known job exceeds its bounded polling interval. Retrying an
 uncertain submission uses its original bytes/key. Refreshing a known job uses
@@ -67,8 +104,9 @@ must be compatible. Geometry, sections and material declarations can differ.
 Quantities match by entity, component and unit rather than row order. The table
 shows compared minus baseline at the final authored target. Curves retain actual
 accepted state order; subdivisions and reversals are not sorted or fitted.
-Corotational saved reports currently provide nodal quantities, so member forces
-remain unavailable for that review path. Missing results, incompatible designs
+Corotational scenario comparison uses the original nodal report; member-force
+deltas remain unavailable there even when a separate detail report can be opened
+for an individual job. Missing results, incompatible designs
 and failed cases remain visible. JSON export retains bindings, statuses, scalar
 curves and derived comparisons.
 
@@ -76,6 +114,39 @@ Recorded analysis/verification phase wall time is distinct from total elapsed
 time and CPU time. Missing phase evidence or unknown reservations cannot become
 zero time. Financial cost remains unknown without an explicit price declaration;
 the existing quantity-report workflow remains available for supported jobs.
+
+## Pause, cancel and resume an RC job
+
+Open the selected durable job and use **Pause job**, **Cancel job**, or
+**Resume paused job**. A known job in the captured-design queue can also be opened
+while that queue is waiting. Opening it reads the job; it does not submit it again.
+Controls require a service that supports the RC control endpoint and current
+authorization for that job.
+
+The panel distinguishes a pending request from an applied pause or cancellation.
+A running calculation finishes its current analysis and required verification
+before applying the request at a durable boundary. This is not an immediate stop
+inside a numerical iteration. Pausing a queued job holds it before calculation.
+An applied pause prevents automatic worker pickup; resuming releases that hold
+on the same job with its original input, checkpoint and consumed budget.
+
+If the current chunk finishes the entire job, a pending pause resolves as
+completed. A cancellation accepted before final publication prevents that final
+result from being published and retains the previous verified checkpoint, if
+one exists. Cancellation is terminal. Actual calculation or verification errors
+remain failures; they are not reported as successful pauses. Neither pause nor
+cancel refunds reservations whose outcomes are unknown.
+
+An applied pause also holds the local captured-design queue before it submits
+remaining inputs. Cancellation affects the selected job; the queue can continue
+to the next captured input after the cancelled job becomes terminal.
+
+If a command response is lost, use **Refresh job control** to read the current
+state or **Retry same control request** to repeat the original command identity.
+A conflict requires a fresh inspection and a new explicit decision. Refreshing,
+opening a project, or reopening a saved job never sends a control command.
+The durable service retains control state; the project file retains its job
+reference, not a queued instruction to pause or resume it.
 
 ## Explore verified results
 
@@ -105,8 +176,12 @@ Page boundaries are not stitched into a fabricated continuous history.
 Saved corotational reports provide a displaced chord view, selected member
 endpoint highlights in the nodal tables, and a control-displacement/load-factor
 plot for the current accepted-state page. Preload and accepted subdivisions
-remain separate from authored targets. Member forces, section moment–curvature
-and fiber stress–strain remain explicitly unavailable in this nodal-only format.
+remain separate from authored targets. **Open stored RC details** reads a
+separate source-bound report for member endpoint forces, section moment–curvature
+and fiber stress–strain. These details retain kN, kN*m, 1/m and MPa units; steel
+fiber indices can represent aggregate bar layers. Their local endpoint forces
+rotate the stored global forces along the current i-to-j chord. The original
+nodal-only report remains available if optional details cannot be verified.
 Changing a selection, page or visual scale does not submit or resume an analysis.
 Original artifact downloads remain unchanged.
 

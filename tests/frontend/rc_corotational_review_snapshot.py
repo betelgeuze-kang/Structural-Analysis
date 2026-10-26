@@ -102,7 +102,7 @@ def forbid_report_execution(*args, **kwargs):
     raise RuntimeError("saved report attempted numerical or current source execution")
 
 
-def read_without_execution(current, job):
+def read_without_execution(current, job, *, detail=False):
     with ExitStack() as stack:
         for name in (
             "structural_analysis.api.rc_corotational_control.analyze_rc_corotational_control",
@@ -116,7 +116,7 @@ def read_without_execution(current, job):
             stack.enter_context(patch(name, forbid_report_execution))
         return DurableJobHttpApi(current).handle(
             "GET",
-            f"/v1/jobs/{job.job_id}/rc-corotational-report",
+            f"/v1/jobs/{job.job_id}/rc-corotational-{'detail-report' if detail else 'report'}",
             headers={
                 "X-Structural-Tenant": helpers.TENANT["tenant_id"],
                 "Authorization": "Bearer " + helpers.TENANT["authorization_token"],
@@ -253,12 +253,21 @@ def generate_snapshot(
         before = numerical_state(restored)
         response = read_without_execution(fresh, completed)
         assert response.status == 200, response.body.decode()
+        detail_response = read_without_execution(fresh, completed, detail=True)
+        assert detail_response.status == 200, detail_response.body.decode()
         reopened = service(restored)
         repeated = read_without_execution(reopened, completed)
         assert repeated.status == 200 and repeated.body == response.body
         assert repeated.headers == response.headers
+        repeated_detail = read_without_execution(reopened, completed, detail=True)
+        assert repeated_detail.status == 200
+        assert repeated_detail.body == detail_response.body
+        assert repeated_detail.headers == detail_response.headers
         assert numerical_state(restored) == before
         report = json.loads(response.body)
+        detail_report = json.loads(detail_response.body)
+        assert detail_report["nodal_report_hash"] == report["report_hash"]
+        assert detail_report["bindings"] == report["bindings"]
         assert report["execution"]["budget"] == {
             "maximum_attempts": 6,
             "reserved_attempts": 5,
@@ -278,6 +287,13 @@ def generate_snapshot(
         assert (
             response.headers["x-structural-report-id"]
             == "rcc_" + sha(response.body)[7:]
+        )
+        assert detail_response.headers["x-structural-report-sha256"] == sha(
+            detail_response.body
+        )
+        assert (
+            detail_response.headers["x-structural-report-id"]
+            == "rcd_" + sha(detail_response.body)[7:]
         )
         child_observations = [
             row["phase_supervision"]["supervisor"]
@@ -305,6 +321,11 @@ def generate_snapshot(
                 "status": response.status,
                 "headers": dict(response.headers),
                 "body_base64": base64.b64encode(response.body).decode("ascii"),
+            },
+            "detail_report": {
+                "status": detail_response.status,
+                "headers": dict(detail_response.headers),
+                "body_base64": base64.b64encode(detail_response.body).decode("ascii"),
             },
             "proof": {
                 "claim_boundary": "actual tiny authored example workflow only; no measured specimen, independent physical validation, design approval or release qualification",
@@ -339,6 +360,7 @@ def generate_snapshot(
                 "report_reads_numerical_invocations": 0,
                 "report_reads_source_fingerprint_invocations": 0,
                 "reopened_report_byte_identical": True,
+                "reopened_detail_report_byte_identical": True,
                 "independent_physical_validation": False,
                 "design_authority": False,
                 "release_approved": False,

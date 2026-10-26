@@ -156,7 +156,33 @@ def drive(workspace):
                     job = current.get_job(message["job_id"], **tenant())
                     raw = original_bytes(current, job.request)
                     assert json.loads(raw) == authored_request()
-                    result = {"job": job.to_dict(), "request_hash": digest(raw)}
+                    result = {
+                        "job": job.to_dict(),
+                        "request_hash": digest(raw),
+                        "control": current.get_rc_control(job.job_id, **tenant()),
+                        "invocations": current.read_rc_invocation_evidence(
+                            job.job_id, **tenant()
+                        ),
+                    }
+                elif command == "inspect_paused":
+                    current = service(supervisor.store)
+                    job_id = message["job_id"]
+                    before = numerical_rows(supervisor.store)
+                    control = current.get_rc_control(job_id, **tenant())
+                    assert control["state"] == "paused"
+                    assert control["job"]["status"] == "checkpointed"
+                    assert (
+                        current.claim_next(**worker("fresh"), lease_seconds=120) is None
+                    )
+                    assert numerical_rows(supervisor.store) == before
+                    result = {
+                        "control": control,
+                        "claim_held": True,
+                        "state_unchanged": True,
+                        "invocations": current.read_rc_invocation_evidence(
+                            job_id, **tenant()
+                        ),
+                    }
                 elif command == "verify_reads":
                     assert (
                         completed and numerical_rows(supervisor.store) == before_reads

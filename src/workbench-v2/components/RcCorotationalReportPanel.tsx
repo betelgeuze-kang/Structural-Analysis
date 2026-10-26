@@ -3,6 +3,7 @@ import type { RcCorotationalReportReview, RcCorotationalStateChoice } from '../m
 import type { RcCorotationalReportControl, RcCorotationalReportNode, RcCorotationalReportResponse } from '../model/rcCorotationalReportSchema'
 import type { RcResultGeometry } from '../model/rcResultVisualization'
 import { RcDeformedShape, RcHistoryPlot } from './RcResultVisualization'
+import { RcCorotationalDetailPanel } from './RcCorotationalDetailPanel'
 
 const PAGE_SIZE = 20
 export function RcCorotationalControlDescription({ control }: { control: RcCorotationalReportControl }): ReactElement {
@@ -140,12 +141,12 @@ export function RcCorotationalReportPanel({ review, expectedReportId }: { review
         <p>History page: accepted states {page * PAGE_SIZE}–{Math.min(summary.stateCount - 1, (page + 1) * PAGE_SIZE - 1)} of {summary.stateCount}. Preload and accepted subdivisions retain their stored order.</p>
         <RcHistoryPlot label="Accepted control history" xLabel="Control displacement (m)" yLabel="Load factor (dimensionless)" points={choices.map(row => ({ state: row.state_index, x: row.control_displacement_m, y: row.load_factor }))} selectedState={index} onSelectState={inspectState} />
       </> : null}
-      <p data-rc-corotational-member-unavailable>Member end forces, section moment–curvature and fiber stress–strain are unavailable in this saved nodal report.</p>
       <NodalTable nodes={state.nodes} kind="displacements_m_rad" state={state.state_index} selectedNodes={selectedNodes} />
       <NodalTable nodes={state.nodes} kind="external_loads_kn_knm" state={state.state_index} selectedNodes={selectedNodes} />
       <NodalTable nodes={state.nodes} kind="reactions_kn_knm" state={state.state_index} selectedNodes={selectedNodes} />
       <p className="wb2-note">{'observation' in summary.control ? 'This observation combines nodal movements. Use the applied nodal load table for force; a zero reaction at a free DOF is not the lateral load.' : 'A free control DOF has zero support reaction. Use the applied nodal load table for its force; do not interpret that zero reaction as the lateral load.'}</p>
     </>}
+    <RcCorotationalDetailPanel review={review} index={index} selectedMember={selectedMember} onSelectMember={setSelectedMember} onSelectState={inspectState} />
     <div className="wb2-actions"><button type="button" className="wb2-btn" onClick={() => void download()}>Download corotational nodal report</button>
       <label>Reopen corotational report JSON <input type="file" aria-label="Reopen corotational report JSON" accept="application/json,.json" disabled={readingFile} onChange={e => { void reopen(e.target.files?.[0]); e.target.value = '' }} /></label>
       <a data-rc-corotational-project-link href={rcCorotationalReportLink(summary.jobId, summary.reportId)} target="_blank" rel="noopener">Reopen this corotational report</a>
