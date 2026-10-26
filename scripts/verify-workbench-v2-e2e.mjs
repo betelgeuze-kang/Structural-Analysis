@@ -41,6 +41,8 @@ const specs = savedReportMode ? [
   'tests/frontend/workbench-v2-native-frame-contract.spec.ts',
   'tests/frontend/building-member-review.spec.ts',
   'tests/frontend/building-member-review-browser.spec.ts',
+  'tests/frontend/building-load-revision.spec.ts',
+  'tests/frontend/building-load-revision-browser.spec.ts',
   'tests/frontend/workbench-v2-engineering-value-state.spec.ts',
   'tests/frontend/workbench-v2-status-taxonomy.spec.ts',
 ]

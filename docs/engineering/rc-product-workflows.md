@@ -132,6 +132,62 @@ origin and execution are not authenticated. A bad replacement retains the
 previous valid review. This is a saved endpoint-review workflow, not a verified
 execution bundle, complete building modeler, design report or KDS check.
 
+## Implemented building slice: revise stored static loads
+
+After opening a valid stored model, result and member mapping, choose **Prepare
+load revision from admitted files**. This uses the exact admitted files, even if different files have
+since been selected in the import controls. Select an existing linear-static
+pattern and edit its global self-weight multipliers or its global nodal loads.
+The forms allow adding, editing and removing explicit nodal rows. Different load
+rows may act on the same node. Surviving row IDs, indices and source metadata
+remain stable; deleting one row does not renumber the others.
+The native load contract requires load IDs to be unique across nodal and uniform
+rows in all patterns, and rejects a completely zero load pattern. Explicit zero
+components and zero self-weight remain valid when the pattern has another nonzero
+load; they are never replaced by a guessed value.
+
+Self-weight values are dimensionless global X/Y/Z multipliers of standard gravity
+`9.80665 m/s²`. Nodal forces use N and nodal moments use N·m in global axes. These
+are not masses or accelerations. Other patterns, initial-member-local uniform
+loads, linear combinations, geometry, material/section assignments and physical
+member/storey/segment/location IDs are preserved. Editing floor-load distribution,
+member-local loads, combination terms, geometry and restraints is outside this
+slice. Physical member orientation does not rotate or change the load components.
+
+Validate the revision before downloading the revised ModelIR and its lineage
+record. The generated model has authoring provenance pointing to the deterministic
+edit recipe; the exact original files and their original provenance remain in the
+separate revision draft. Validation checks the supported authoring contract and
+bindings, not complete native-runtime acceptance or an analysis result. A later
+explicit run must still pass the native input validator.
+
+Download the reopenable load-revision draft to continue in another browser
+session. The draft embeds its exact parent model, result and mapping. Open it
+directly in the building workspace without separately reselecting those files.
+The draft is limited to 8 MiB; its parent model/result are each limited to 2 MiB
+and its parent mapping to 1 MiB. These are admission limits, not large-model
+qualification. Model, lineage record and edit-recipe downloads remain separate;
+the generated model's source hash refers to the exact exported recipe bytes.
+Opening or validating a draft is not saving it. Invalid replacements
+leave the current draft and admitted target intact; changing the draft disables
+exports of the earlier validated target. Opening a different parent review also
+retains the current authoring draft and its original parent identities. Preparing
+or importing a replacement requires an explicit decision when that draft has
+unsaved edits.
+
+The target is always `NOT_RUN` and `NOT_REVIEWED`; it has no ResultIR. Original
+forces belong to the stored parent model only. The program never attaches the old
+result hash to new model hashes or treats the old member mapping as a result-bound
+mapping for the target. Keep the parent result review separate from target input
+preparation. The exported ModelIR can be selected in the existing configured
+native workstation's explicit run panel; this file-only workspace does not call
+that service or start a run.
+
+The current static ModelIR has no node/storey mass-source field. Density used for
+self-weight is not modal mass-source support. This slice does not add load-to-mass
+conversion, modal analysis, code-generated combinations, KDS design checks or
+physical validation.
+
 ## Next building acceptance slices
 
 Then connect the selected building type's loads/mass, analysis, storey/member

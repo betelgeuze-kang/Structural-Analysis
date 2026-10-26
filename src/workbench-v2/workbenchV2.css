@@ -379,3 +379,10 @@
 [data-building-member-workspace] fieldset select { max-width: 100%; box-sizing: border-box; }
 [data-building-member-workspace] .wb2-table { min-width: 60rem; }
 [data-building-member-workspace] .wb2-num { white-space: nowrap; overflow-wrap: normal; min-width: 4.5rem; }
+.wb2-building-load-revision fieldset { display: block; }
+.wb2-building-load-revision fieldset > label { display: inline-flex; margin: .35rem .75rem .75rem 0; }
+.wb2-building-load-revision .wb2-table input { width: 8.5rem; min-width: 6rem; box-sizing: border-box; }
+.wb2-building-load-revision .wb2-table th:first-child { min-width: 8rem; white-space: nowrap; overflow-wrap: normal; }
+.wb2-building-load-revision .wb2-table th:nth-child(2),
+.wb2-building-load-revision .wb2-table td:nth-child(2) { min-width: 4rem; }
+.wb2-building-load-revision .wb2-table button { white-space: nowrap; overflow-wrap: normal; }

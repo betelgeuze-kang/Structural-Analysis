@@ -10,6 +10,7 @@ import {
 } from '../model/buildingMemberReview'
 import { parseNativeJsonStrict } from '../model/nativeFrameProvider'
 import { registerUnsavedProjectGuard } from '../model/unsavedProjectGuard'
+import { BuildingLoadRevisionPanel } from './BuildingLoadRevisionPanel'
 import '../workbenchV2.css'
 
 const PAGE_SIZE = 50
@@ -20,7 +21,7 @@ export function BuildingMemberReviewPanel(): ReactElement {
   const [model, setModel] = useState<File | null>(null), [result, setResult] = useState<File | null>(null)
   const [draft, setDraft] = useState(''), [busy, setBusy] = useState(false), [message, setMessage] = useState('')
   const [savedDraft, setSavedDraft] = useState('')
-  const [admitted, setAdmitted] = useState<{ review: BuildingMemberReview; mapping: Uint8Array } | null>(null)
+  const [admitted, setAdmitted] = useState<{ review: BuildingMemberReview; mapping: Uint8Array; modelBytes: Uint8Array; resultBytes: Uint8Array } | null>(null)
   const [filter, setFilter] = useState('all'), [page, setPage] = useState(0)
   const [storeyId, setStoreyId] = useState(''), [storeyLabel, setStoreyLabel] = useState(''), [elevation, setElevation] = useState('')
   const [memberId, setMemberId] = useState(''), [memberLabel, setMemberLabel] = useState(''), [memberStorey, setMemberStorey] = useState('')
@@ -69,7 +70,7 @@ export function BuildingMemberReviewPanel(): ReactElement {
       const review = await openBuildingMemberReview(modelBytes, resultBytes, mapping)
       if (own !== generation.current) return
       if (prepare) setDraft(new TextDecoder().decode(mapping))
-      setAdmitted({ review, mapping }); setFilter('all'); setPage(0)
+      setAdmitted({ review, mapping, modelBytes, resultBytes }); setFilter('all'); setPage(0)
       setElementId(review.rows[0]?.element_id ?? '')
       setMessage(prepare
         ? 'Stored model and result admitted. The new mapping is empty: all analysis elements remain UNMAPPED. Add your own storeys and physical members, then open the mapping.'
@@ -230,5 +231,11 @@ export function BuildingMemberReviewPanel(): ReactElement {
       }}>Export admitted member mapping</button>
         <button type="button" className="wb2-btn" onClick={() => save(JSON.stringify(review, null, 2), 'building-member-review.json')}>Export complete member review</button></div>
     </section> : null}
+    <BuildingLoadRevisionPanel
+      modelBytes={admitted?.modelBytes}
+      resultBytes={admitted?.resultBytes}
+      mappingBytes={admitted?.mapping}
+      sourceFingerprint={admitted ? `${admitted.review.source.model_file_hash}:${admitted.review.source.result_file_hash}:${admitted.review.source.mapping_file_hash}` : undefined}
+    />
   </main>
 }
