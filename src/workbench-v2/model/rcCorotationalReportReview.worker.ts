@@ -4,14 +4,17 @@ import { parseRcCorotationalReport, type RcCorotationalReport, type RcCorotation
 import type { RcCorotationalReportSummary } from './rcCorotationalReportReview'
 import { corotationalRcScenarioSummary } from './rcScenarioComparison'
 import { rcResultGeometry } from './rcResultVisualization'
+import { createRcPortableReviewBlob, RC_PORTABLE_REVIEW_REQUEST_MAX_BYTES } from './rcPortableReviewSchema'
 import { parseRcCorotationalDetailReport, corotationalDetailMember, corotationalDetailSection, corotationalDetailFiber,
   corotationalDetailSectionPage, corotationalDetailFiberPage, type RcCorotationalDetailReport, type RcCorotationalDetailSummary } from './rcCorotationalDetailReport'
 
 let report: RcCorotationalReport | null = null
 let bytes: Uint8Array | null = null
+let requestBytes: Uint8Array | null = null
 let expected: RcCorotationalReportExpected | null = null
 let summary: RcCorotationalReportSummary | null = null
 let maximumBytes = 0
+let portableExporting = false
 let detail: RcCorotationalDetailReport | null = null, detailBytes: Uint8Array | null = null
 let detailSummary: RcCorotationalDetailSummary | null = null
 const safe = (error: unknown) => error instanceof Error && /^rc_corotational_report_[a-z_]+$/.test(error.message) ? error.message : 'rc_corotational_report_contract_invalid'
@@ -22,6 +25,8 @@ self.onmessage = async ({ data }) => {
     if (type === 'initialize') {
       if (report || bytes || expected || summary) throw new Error('rc_corotational_report_already_initialized')
       if (!(data.requestBytes instanceof Uint8Array) || !(data.bytes instanceof Uint8Array)) throw new Error('rc_corotational_report_bytes_invalid')
+      if (!data.requestBytes.byteLength || data.requestBytes.byteLength > RC_PORTABLE_REVIEW_REQUEST_MAX_BYTES
+        || data.requestBytes.byteLength !== data.job.request.byte_length) throw new Error('rc_corotational_report_request_size_invalid')
       if (!Number.isSafeInteger(data.maximumBytes) || data.maximumBytes <= 0 || data.maximumBytes > 64 * 1024 * 1024 || data.bytes.byteLength > data.maximumBytes) throw new Error('rc_corotational_report_too_large')
       maximumBytes = data.maximumBytes
       if (await sha256Bytes(data.requestBytes) !== data.job.request.content_hash) throw new Error('rc_corotational_report_request_hash_mismatch')
@@ -29,7 +34,7 @@ self.onmessage = async ({ data }) => {
       validateRcRequestProfile(request)
       if (await sha256Bytes(data.bytes) !== data.contentHash || data.reportId !== `rcc_${data.contentHash.slice(7)}`) throw new Error('rc_corotational_report_raw_hash_mismatch')
       expected = { job: data.job, tenantId: data.tenantId, request }
-      report = await parseRcCorotationalReport(data.bytes, expected); bytes = data.bytes
+      report = await parseRcCorotationalReport(data.bytes, expected); bytes = data.bytes; requestBytes = data.requestBytes
       summary = {
         jobId: report.bindings.job_id, reportId: data.reportId, contentHash: data.contentHash, reportHash: report.report_hash,
         caseId: report.bindings.case_id, sourceRevision: report.bindings.source_revision,
@@ -44,6 +49,21 @@ self.onmessage = async ({ data }) => {
       self.postMessage({ id, value: summary }); return
     }
     if (!report || !bytes || !expected || !summary) unavailable()
+    if (type === 'portableDownload') {
+      if (portableExporting) {
+        self.postMessage({ id, operationError: 'rc_corotational_report_portable_export_busy' })
+        return
+      }
+      portableExporting = true
+      try {
+        if (!requestBytes) unavailable()
+        const value = await createRcPortableReviewBlob({ job: expected.job, tenantId: expected.tenantId,
+          requestBytes, reportBytes: bytes, reportId: summary.reportId, contentHash: summary.contentHash })
+        self.postMessage({ id, value })
+      } catch { self.postMessage({ id, operationError: 'rc_corotational_report_portable_export_unavailable' }) }
+      finally { portableExporting = false }
+      return
+    }
     if (type === 'openDetails' || typeof type === 'string' && type.startsWith('detail')) {
       try {
         if (type === 'openDetails') {
@@ -98,7 +118,7 @@ self.onmessage = async ({ data }) => {
     } else if (type === 'download') self.postMessage({ id, value: new Blob([bytes], { type: 'application/json' }) })
     else throw new Error('rc_corotational_report_operation_invalid')
   } catch (error) {
-    report = null; bytes = null; expected = null; summary = null; maximumBytes = 0
+    report = null; bytes = null; requestBytes = null; expected = null; summary = null; maximumBytes = 0
     detail = null; detailBytes = null; detailSummary = null
     self.postMessage({ id, error: safe(error) })
   }

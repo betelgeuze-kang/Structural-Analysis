@@ -24,6 +24,7 @@ export interface RcCorotationalReportReview {
   state(index: number): Promise<RcCorotationalReportResponse>
   statePage(start: number, count: number): Promise<RcCorotationalStateChoice[]>
   download(): Promise<Blob>
+  portableDownload?(): Promise<Blob>
   comparisonSummary?(): Promise<RcScenarioSummary>
   geometry?(): Promise<RcResultGeometry>
   openDetails?(): Promise<RcCorotationalDetailSummary>
@@ -71,7 +72,7 @@ export async function loadRcCorotationalReportReview(
   const worker = new Worker(new URL('./rcCorotationalReportReview.worker.ts', import.meta.url), { type: 'module' })
   const pending = new Map<number, { type: string; resolve: (value: any) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> }>()
   const listeners = new Set<(message: string) => void>()
-  let sequence = 0, failure: string | null = null, reopening = false
+  let sequence = 0, failure: string | null = null, reopening = false, portableExporting = false
   const abort = () => stop('rc_corotational_report_disposed')
   function stop(message = 'rc_corotational_report_disposed'): void {
     if (failure) return
@@ -117,6 +118,21 @@ export async function loadRcCorotationalReportReview(
         throw error
       }
     }
+    const portableDownload = async (): Promise<Blob> => {
+      if (failure) throw new JobArtifactError(failure)
+      if (portableExporting) throw new JobArtifactError('rc_corotational_report_portable_export_busy')
+      // Acquire before authorization yields; duplicate calls must never queue
+      // another full report encoding in the worker.
+      portableExporting = true
+      try {
+        const blob = await authorized(() => call<Blob>('portableDownload'))
+        // Disposal can happen after the worker answered while the final
+        // authorization check is pending. Never publish its completed Blob.
+        if (failure) throw new JobArtifactError(failure)
+        return blob
+      }
+      finally { portableExporting = false }
+    }
     let detailSummary: RcCorotationalDetailSummary | null = null, openingDetails: Promise<RcCorotationalDetailSummary> | null = null
     const openDetails = (): Promise<RcCorotationalDetailSummary> => authorized(async () => {
       if (detailSummary) return detailSummary
@@ -158,6 +174,7 @@ export async function loadRcCorotationalReportReview(
       state: (index) => authorized(() => call('state', { index })),
       statePage: (start, count) => authorized(() => call('statePage', { start, count })),
       download: () => authorized(() => call('download')),
+      portableDownload,
       comparisonSummary: () => authorized(() => call('comparisonSummary')),
       geometry: () => authorized(() => call('geometry')),
       openDetails,

@@ -366,3 +366,10 @@
   color: var(--wb2-text);
   font-weight: 650;
 }
+.wb2-portable-workspace a { color: #58b7ef; }
+.wb2-portable-workspace { max-width: 1180px; margin: 0 auto; padding: 1.5rem; min-width: 0; color: #d9e5f2; }
+.wb2-portable-workspace h1 { margin: 1.25rem 0 .75rem; }
+.wb2-portable-workspace > p { max-width: 80ch; line-height: 1.55; }
+.wb2-portable-file { display: block; padding: 1rem 0; }
+.wb2-portable-file input { max-width: 100%; }
+.wb2-portable-workspace .wb2-rc-job { margin-top: 1.5rem; overflow-wrap: anywhere; }

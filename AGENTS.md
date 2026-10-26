@@ -9,6 +9,12 @@ Use this repository as a normal local codebase by default.
 - Keep searches narrow. Default `rg` respects `.ignore`; use `--no-ignore` only when intentionally inspecting ignored evidence or runtime state.
 - Preserve the orchestration files and worker wrappers. See `docs/ai/ORCHESTRATION.md` only when the user asks for worker orchestration.
 
+## Product Development Direction
+
+- Follow `docs/engineering/rc-product-workflows.md` for RC product work. Keep the research workflow and selected building workflow separate while sharing data, units, identity, jobs, results and provenance.
+- Choose increments that let a user complete a supported task. Additional engine kernels or internal test counts alone do not complete either product.
+- Keep software verification, physical-model validation and external user acceptance distinct. Preserve unsupported cases, failed outcomes and unknown work; opening stored results must remain separate from explicitly running an analysis.
+
 ## Optional Orchestration
 
 When the user explicitly requests scoped worker delegation:

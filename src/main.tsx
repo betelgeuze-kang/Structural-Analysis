@@ -5,12 +5,18 @@ import { confirmUnsavedProjectNavigation } from './workbench-v2/model/unsavedPro
 import './index.css'
 
 const LegacyApp = lazy(() => import('./App'))
+const PortableRcReview = lazy(async () => ({ default: (await import('./workbench-v2/components/RcPortableReviewPanel')).RcPortableReviewPanel }))
 
-export type ProductSurface = 'workbench-v2' | 'legacy-app'
+export type ProductSurface = 'workbench-v2' | 'legacy-app' | 'rc-portable-review'
 
 export function resolveProductSurface(location: Pick<Location, 'pathname' | 'hash'>): ProductSurface {
   const path = location.pathname.replace(/\/+$/, '')
   const hash = location.hash.replace(/\/+$/, '')
+  if (hash === '#/rc-review') return 'rc-portable-review'
+  // Explicit in-app navigation also works when opened from a direct path.
+  if (hash === '#/workbench-v2') return 'workbench-v2'
+  if (hash === '#/legacy') return 'legacy-app'
+  if (path.endsWith('/rc-review')) return 'rc-portable-review'
   const legacyRoute = path.endsWith('/legacy') || hash === '#/legacy'
   return legacyRoute ? 'legacy-app' : 'workbench-v2'
 }
@@ -73,6 +79,8 @@ function RootRouter(): ReactElement {
       window.removeEventListener('popstate', updateSurface)
     }
   }, [])
+
+  if (surface === 'rc-portable-review') return <Suspense fallback={<p role="status">Opening saved RC review workspace…</p>}><PortableRcReview /></Suspense>
 
   const jobStatusUrl = resolveSameOriginJobUrl(
     import.meta.env.VITE_JOB_STATUS_URL

@@ -56,6 +56,7 @@ export function WorkbenchShell({
               </button>
             ))}
           </div> : null}
+          <a className="wb2-legacy-link" href="#/rc-review">Open a portable RC review</a>
           <a className="wb2-legacy-link" href="#/legacy" data-wb2-legacy-link>
             Legacy desk
           </a>

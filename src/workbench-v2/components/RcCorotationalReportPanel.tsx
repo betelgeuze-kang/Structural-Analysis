@@ -23,7 +23,7 @@ export function RcCorotationalControlDescription({ control }: { control: RcCorot
     <p className="wb2-note">The saved value combines these movements, including any support motion and rotation. Rotation factors define a linear observation, not a finite-rotation drift angle.</p>
   </div>
 }
-function NodalTable({ nodes, kind, state, selectedNodes }: { nodes: RcCorotationalReportNode[]; kind: 'displacements_m_rad' | 'external_loads_kn_knm' | 'reactions_kn_knm'; state: number; selectedNodes: string[] }): ReactElement {
+export function NodalTable({ nodes, kind, state, selectedNodes }: { nodes: RcCorotationalReportNode[]; kind: 'displacements_m_rad' | 'external_loads_kn_knm' | 'reactions_kn_knm'; state: number; selectedNodes: string[] }): ReactElement {
   const displacement = kind === 'displacements_m_rad'
   const label = displacement ? 'Node displacements' : kind === 'external_loads_kn_knm' ? 'Applied nodal loads' : 'Support reactions (free DOF values are zero)'
   const columns = displacement ? ['UX (m)', 'UY (m)', 'RZ (rad)'] : ['FX (kN)', 'FY (kN)', 'MZ (kN*m)']
@@ -54,6 +54,7 @@ export function RcCorotationalReportPanel({ review, expectedReportId }: { review
   const [failure, setFailure] = useState<string | null>(null)
   const [fileMessage, setFileMessage] = useState('')
   const [readingFile, setReadingFile] = useState(false)
+  const [exportingPortable, setExportingPortable] = useState(false)
   const generation = useRef(0), urls = useRef(new Set<string>())
   const linkMismatch = expectedReportId !== undefined && expectedReportId !== summary.reportId
   useEffect(() => review.onFailure(() => setFailure('The saved nodal report is no longer available. Reopen the project with the current account.')), [review])
@@ -84,7 +85,7 @@ export function RcCorotationalReportPanel({ review, expectedReportId }: { review
     } catch { setFileMessage('The exact saved report could not be downloaded.') }
   }
   async function reopen(file?: File): Promise<void> {
-    if (!file || readingFile) return
+    if (!file || readingFile || exportingPortable) return
     const ownGeneration = ++generation.current; setFileMessage('')
     if (!file.size || file.size > review.maximumBytes) { setFileMessage('The selected report exceeds the configured review size limit.'); return }
     setReadingFile(true)
@@ -93,6 +94,20 @@ export function RcCorotationalReportPanel({ review, expectedReportId }: { review
       if (generation.current === ownGeneration) setFileMessage('Reopened exact report bytes match this authenticated saved report.')
     } catch { if (generation.current === ownGeneration) setFileMessage('This file does not match the exact authenticated saved report. The saved review is retained.') }
     finally { if (generation.current === ownGeneration) setReadingFile(false) }
+  }
+  async function exportPortable(): Promise<void> {
+    if (!review.portableDownload || exportingPortable || readingFile) return
+    const ownGeneration = generation.current
+    setExportingPortable(true); setFileMessage('')
+    try {
+      const blob = await review.portableDownload()
+      if (generation.current !== ownGeneration) return
+      const url = URL.createObjectURL(blob), anchor = document.createElement('a')
+      urls.current.add(url); anchor.href = url; anchor.download = `${summary.reportId}-portable-rc-review.json`
+      document.body.append(anchor); anchor.click(); anchor.remove()
+      window.setTimeout(() => { URL.revokeObjectURL(url); urls.current.delete(url) }, 0)
+    } catch { if (generation.current === ownGeneration) setFileMessage('The portable review could not be exported. Reopen the saved job with the current account and try again.') }
+    finally { if (generation.current === ownGeneration) setExportingPortable(false) }
   }
   function inspectState(next: number): void {
     if (!Number.isSafeInteger(next) || next < 0 || next >= summary.stateCount || next === index) return
@@ -148,9 +163,11 @@ export function RcCorotationalReportPanel({ review, expectedReportId }: { review
     </>}
     <RcCorotationalDetailPanel review={review} index={index} selectedMember={selectedMember} onSelectMember={setSelectedMember} onSelectState={inspectState} />
     <div className="wb2-actions"><button type="button" className="wb2-btn" onClick={() => void download()}>Download corotational nodal report</button>
-      <label>Reopen corotational report JSON <input type="file" aria-label="Reopen corotational report JSON" accept="application/json,.json" disabled={readingFile} onChange={e => { void reopen(e.target.files?.[0]); e.target.value = '' }} /></label>
+      {review.portableDownload ? <button type="button" className="wb2-btn" disabled={exportingPortable || readingFile} onClick={() => void exportPortable()}>Export portable RC review</button> : null}
+      <label>Reopen corotational report JSON <input type="file" aria-label="Reopen corotational report JSON" accept="application/json,.json" disabled={readingFile || exportingPortable} onChange={e => { void reopen(e.target.files?.[0]); e.target.value = '' }} /></label>
       <a data-rc-corotational-project-link href={rcCorotationalReportLink(summary.jobId, summary.reportId)} target="_blank" rel="noopener">Reopen this corotational report</a>
     </div>
+    {review.portableDownload ? <p className="wb2-note">The portable file includes this job record, original input and nodal report for viewing on another computer. Share only with intended recipients. It contains no account credential and does not authorize a new run.</p> : null}
     {fileMessage ? <p role="status" data-rc-corotational-file-status>{fileMessage}</p> : null}
   </section>
 }
