@@ -1551,6 +1551,177 @@ def test_privileged_archive_rejects_control_or_format_member_names(name: str) ->
         )
 
 
+def _product_archive(rows, *, compression=zipfile.ZIP_DEFLATED, mode=stat.S_IFREG):
+    archive = io.BytesIO()
+    with zipfile.ZipFile(archive, "w", compression) as zipped:
+        for name, raw in rows:
+            entry = zipfile.ZipInfo(name)
+            entry.compress_type = compression
+            entry.external_attr = (mode | 0o644) << 16
+            zipped.writestr(entry, raw)
+    return archive.getvalue()
+
+
+def _read_product_archive(raw, **options):
+    return _inline_archive_namespace()["safe_archive"](
+        raw,
+        "product_state",
+        **({
+            "archive_limit": 1_000_000,
+            "entries": 5,
+            "member": 100_000,
+            "total_limit": 100_000,
+        } | options),
+    )
+
+
+def test_privileged_product_archive_preserves_exact_public_source_schema_bytes() -> None:
+    source_path = (
+        "src/structural_analysis/schemas/"
+        "stateful_corotational_fiber_frame2d_checkpoint_v1.schema.json"
+    )
+    raw = (ROOT / source_path).read_bytes()
+    # A JSONschema constraint is source data, not an attestation/run identifier.
+    assert json.loads(raw)["properties"]["epoch"]["maximum"] == 2**64 - 1
+    name = "source-snapshot/" + source_path
+    archive = _product_archive([(name, raw)])
+    with pytest.raises(SystemExit, match="unsafe_json_integer:product_state:"):
+        _read_product_archive(archive)
+    assert _read_product_archive(archive, validate_json_members=False) == {name: raw}
+
+
+@pytest.mark.parametrize(
+    "raw,error",
+    [
+        (b'{"run_id":9007199254740992}', "unsafe_json_integer"),
+        (b'{"run_id":1,"run_id":2}', "duplicate_json_key"),
+        (b'{"value":NaN}', "nonfinite_json_number"),
+        (b'{"value":1e9999}', "nonfinite_json_number"),
+    ],
+)
+def test_privileged_opaque_archive_does_not_validate_consumed_receipts(
+    raw: bytes, error: str,
+) -> None:
+    archive = _product_archive([("receipt.json", raw)])
+    with pytest.raises(SystemExit, match=error):
+        _read_product_archive(archive)
+    stored = _read_product_archive(archive, validate_json_members=False)
+    assert stored == {"receipt.json": raw}
+    # Byte admission never substitutes for the strict parser at receipt use.
+    with pytest.raises(SystemExit, match=error):
+        _inline_archive_namespace()["strict_json"](stored["receipt.json"], "consumed")
+
+
+@pytest.mark.parametrize("policy", [None, 0, 1, "opaque"])
+def test_privileged_archive_json_policy_requires_an_explicit_boolean(policy) -> None:
+    with pytest.raises(SystemExit, match="archive_json_policy_invalid"):
+        _read_product_archive(_product_archive([("receipt.json", b"{}")]),
+                              validate_json_members=policy)
+
+
+@pytest.mark.parametrize("validate_json_members", [True, False])
+@pytest.mark.parametrize(
+    "case,error",
+    [
+        ("traversal", "archive_member_path_invalid"),
+        ("duplicate_alias", "archive_duplicate_member"),
+        ("symlink", "archive_nonregular_member"),
+        ("compression", "archive_compression_invalid"),
+        ("ratio", "archive_compression_ratio_invalid"),
+        ("member_limit", "archive_member_size_invalid"),
+        ("total_limit", "archive_total_size_invalid"),
+        ("entry_limit", "archive_entry_count_invalid"),
+        ("archive_limit", "archive_size_invalid"),
+        ("encrypted", "archive_encrypted_member"),
+    ],
+)
+def test_privileged_opaque_archive_preserves_container_security(
+    validate_json_members: bool, case: str, error: str,
+) -> None:
+    rows = [("receipt.json", b"{}")]
+    options = {"validate_json_members": validate_json_members}
+    compression = zipfile.ZIP_DEFLATED
+    mode = stat.S_IFREG
+    if case == "traversal":
+        rows = [("../receipt.json", b"{}")]
+    elif case == "duplicate_alias":
+        rows = [("Receipt.json", b"{}"), ("receipt.json", b"{}")]
+    elif case == "symlink":
+        mode = stat.S_IFLNK
+    elif case == "compression":
+        compression = zipfile.ZIP_BZIP2
+    elif case == "ratio":
+        rows = [("source.txt", b"x" * 50_000)]
+    elif case == "member_limit":
+        options["member"] = 1
+    elif case == "total_limit":
+        rows = [("one.json", b"{}"), ("two.json", b"{}")]
+        options["total_limit"] = 3
+    elif case == "entry_limit":
+        options["entries"] = 0
+    elif case == "archive_limit":
+        options["archive_limit"] = 22
+    archive = _product_archive(rows, compression=compression, mode=mode)
+    if case == "encrypted":
+        archive = bytearray(archive)
+        central = archive.index(b"PK\x01\x02")
+        archive[central + 8:central + 10] = (1).to_bytes(2, "little")
+        archive = bytes(archive)
+    with pytest.raises(SystemExit, match=error):
+        _read_product_archive(archive, **options)
+
+
+def test_privileged_only_full_product_archive_copies_opt_into_opaque_bytes() -> None:
+    tree = _inline_tree()
+    opted_in = {}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign) or not isinstance(node.value, ast.Call):
+            continue
+        call = node.value
+        if not isinstance(call.func, ast.Name) or call.func.id != "safe_archive":
+            continue
+        policy = [kw.value for kw in call.keywords if kw.arg == "validate_json_members"]
+        if policy:
+            assert len(policy) == 1 and isinstance(policy[0], ast.Constant)
+            assert policy[0].value is False
+            assert len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+            assert isinstance(call.args[1], ast.Constant)
+            assert node.targets[0].id not in opted_in
+            opted_in[node.targets[0].id] = call.args[1].value
+    assert opted_in == {
+        "product_files": "product_state",
+        "product_candidate_files": "product_state_candidate",
+        "product_signed_files": "product_state_signed",
+    }
+    archive = next(node for node in tree.body
+                   if isinstance(node, ast.FunctionDef) and node.name == "safe_archive")
+    defaults = dict(zip((arg.arg for arg in archive.args.kwonlyargs),
+                        archive.args.kw_defaults, strict=True))
+    assert isinstance(defaults["validate_json_members"], ast.Constant)
+    assert defaults["validate_json_members"].value is True
+
+
+def test_privileged_consumed_json_still_uses_the_safe_integer_parser() -> None:
+    tree = _inline_tree()
+    strict = next(node for node in tree.body
+                  if isinstance(node, ast.FunctionDef) and node.name == "strict_json")
+    json_loads = [node for node in ast.walk(tree)
+                  if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                  and isinstance(node.func.value, ast.Name)
+                  and node.func.value.id == "json" and node.func.attr == "loads"]
+    assert len(json_loads) == 1 and json_loads[0] in list(ast.walk(strict))
+    labels = {node.args[1].value for node in ast.walk(tree)
+              if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+              and node.func.id == "strict_json" and len(node.args) >= 2
+              and isinstance(node.args[1], ast.Constant)}
+    assert {
+        "product_state_seal", "product_state_candidate_artifact_api",
+        "product_state_document", "product_state_provenance",
+        "product_state_overlay_privileged_verification",
+        "product_state_final_verification", "product_state_provenance_final_verification",
+    } <= labels
+
+
 def _inline_product_binding_namespace() -> dict[str, object]:
     tree = _inline_tree()
     wanted = {

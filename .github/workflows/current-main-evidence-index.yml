@@ -488,7 +488,9 @@ jobs:
           def safe_archive(
               raw: bytes, label: str, *, archive_limit: int,
               entries: int, member: int, total_limit: int,
+              validate_json_members: bool = True,
           ):
+              require(type(validate_json_members) is bool, "archive_json_policy_invalid:" + label)
               require(22 <= len(raw) <= archive_limit, "archive_size_invalid:" + label)
               files = {}
               aliases = set()
@@ -534,7 +536,7 @@ jobs:
                           require(total <= total_limit, "archive_total_size_invalid:" + label)
                           value = zipped.read(info)
                           require(len(value) == info.file_size, "archive_member_size_changed:" + label)
-                          if name.endswith(".json"):
+                          if validate_json_members and name.endswith(".json"):
                               strict_json(value, label + ":" + name)
                           files[name] = value
                           aliases.add(alias)
@@ -1854,6 +1856,10 @@ jobs:
               product_archive, "product_state", archive_limit=MAX_PRODUCT_TOTAL,
               entries=MAX_PRODUCT_ENTRIES, member=MAX_PRODUCT_MEMBER,
               total_limit=MAX_PRODUCT_TOTAL,
+              # Full bundles include opaque source snapshots (including uint64
+              # JSONschema bounds). Every consumed receipt is parsed strictly
+              # below; all member bytes remain sealed and authenticated.
+              validate_json_members=False,
           )
           del product_archive
           product_path = "artifacts/manifests/product_state.current.v1.json"
@@ -1965,6 +1971,7 @@ jobs:
               product_candidate_archive, "product_state_candidate",
               archive_limit=MAX_PRODUCT_TOTAL, entries=MAX_PRODUCT_ENTRIES,
               member=MAX_PRODUCT_MEMBER, total_limit=MAX_PRODUCT_TOTAL,
+              validate_json_members=False,
           )
           del product_candidate_archive
           product_seal_digest = sha256(product_files[product_seal_path])
@@ -2025,6 +2032,7 @@ jobs:
               product_signed_archive, "product_state_signed",
               archive_limit=MAX_PRODUCT_TOTAL, entries=MAX_PRODUCT_ENTRIES,
               member=MAX_PRODUCT_MEMBER, total_limit=MAX_PRODUCT_TOTAL,
+              validate_json_members=False,
           )
           del product_signed_archive
           product_signed_added_paths = {
